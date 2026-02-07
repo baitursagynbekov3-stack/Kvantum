@@ -1,0 +1,221 @@
+const express = require('express');
+const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'kvantum-secret-key-change-in-production';
+
+// In-memory storage (replace with database in production)
+const users = [];
+const bookings = [];
+const payments = [];
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Auth middleware
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Access denied' });
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Invalid token' });
+    req.user = user;
+    next();
+  });
+}
+
+// Register
+app.post('/api/register', async (req, res) => {
+  try {
+    const { name, email, password, phone } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    if (users.find(u => u.email === email)) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = {
+      id: users.length + 1,
+      name,
+      email,
+      password: hashedPassword,
+      phone: phone || '',
+      createdAt: new Date()
+    };
+    users.push(user);
+
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      message: 'Registration successful',
+      token,
+      user: { id: user.id, name: user.name, email: user.email }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Login
+app.post('/api/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = users.find(u => u.email === email);
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      message: 'Login successful',
+      token,
+      user: { id: user.id, name: user.name, email: user.email }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get user profile
+app.get('/api/profile', authenticateToken, (req, res) => {
+  const user = users.find(u => u.id === req.user.id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json({ id: user.id, name: user.name, email: user.email, phone: user.phone });
+});
+
+// Book consultation
+app.post('/api/book-consultation', (req, res) => {
+  try {
+    const { name, email, phone, service, message } = req.body;
+
+    if (!name || !email || !phone) {
+      return res.status(400).json({ error: 'Name, email and phone are required' });
+    }
+
+    const booking = {
+      id: bookings.length + 1,
+      name,
+      email,
+      phone,
+      service: service || 'consultation',
+      message: message || '',
+      status: 'pending',
+      createdAt: new Date()
+    };
+    bookings.push(booking);
+
+    res.json({
+      message: 'Consultation booked successfully! We will contact you via WhatsApp/Telegram.',
+      booking: { id: booking.id, status: booking.status }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Process payment (demo)
+app.post('/api/payment', authenticateToken, (req, res) => {
+  try {
+    const { productId, productName, amount, currency } = req.body;
+
+    const payment = {
+      id: 'PAY-' + Date.now(),
+      userId: req.user.id,
+      productId,
+      productName,
+      amount,
+      currency: currency || 'KGS',
+      status: 'completed',
+      createdAt: new Date()
+    };
+    payments.push(payment);
+
+    res.json({
+      message: 'Payment processed successfully!',
+      payment: {
+        id: payment.id,
+        status: payment.status,
+        amount: payment.amount,
+        currency: payment.currency
+      },
+      notification: 'Confirmation sent via WhatsApp/Telegram'
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Payment processing error' });
+  }
+});
+
+// AI Chatbot endpoint
+app.post('/api/chat', (req, res) => {
+  const { message } = req.body;
+  const lowerMsg = (message || '').toLowerCase();
+
+  let reply = '';
+
+  if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('привет') || lowerMsg.includes('здравствуйте')) {
+    reply = 'Welcome to KVANTUM! I am your AI assistant. How can I help you today? You can ask about our programs, pricing, or book a free consultation.';
+  } else if (lowerMsg.includes('price') || lowerMsg.includes('cost') || lowerMsg.includes('цена') || lowerMsg.includes('стоимость') || lowerMsg.includes('сколько')) {
+    reply = 'Our programs:\n\n1. Brain Charge (entry level) - 1,000 KGS/RUB\n2. Resources Club - 5,000 KGS/month\n3. Intensive "Mom & Dad - My 2 Wings" - $300 / 26,300 KGS\n4. REBOOT course - $1,000\n5. Mentorship - contact our managers for pricing\n\nWould you like to book a free consultation to find the best program for you?';
+  } else if (lowerMsg.includes('brain') || lowerMsg.includes('зарядка') || lowerMsg.includes('мозг')) {
+    reply = 'Brain Charge is our entry-level program:\n- 21 days\n- 15 minutes per day\n- Starts at 6:00 AM (Kyrgyzstan time)\n- Price: 1,000 KGS/RUB\n\nIt is the simplest way to start your transformation journey!';
+  } else if (lowerMsg.includes('resource') || lowerMsg.includes('club') || lowerMsg.includes('клуб') || lowerMsg.includes('ресурс')) {
+    reply = 'Resources Club helps strengthen your inner state:\n- 4 weeks\n- 2 sessions with Altynai\n- 2 sessions with a curator\n- Focus: confidence, self-worth, inner freedom\n- Price: 5,000 KGS/month\n\nWant to join?';
+  } else if (lowerMsg.includes('intensive') || lowerMsg.includes('интенсив') || lowerMsg.includes('papa') || lowerMsg.includes('mama') || lowerMsg.includes('папа') || lowerMsg.includes('мама')) {
+    reply = 'The Intensive "Mom & Dad - My 2 Wings" works with ancestral roots:\n- 1 month, 10 lessons, 20 practices\n- 3 Zoom sessions\n- Topics: separation, breaking free from inherited patterns, restoring hierarchy\n- Price: $300 / 26,300 KGS';
+  } else if (lowerMsg.includes('reboot') || lowerMsg.includes('перезагрузка')) {
+    reply = 'REBOOT - Conscious Reality Management:\n- 8 weeks, 24 sessions\n- 20 lessons, 20 practices\n- 1 personal session with Altynai + 2 curator sessions\n- Topics: values, state management, relationships, finances\n- Price: $1,000';
+  } else if (lowerMsg.includes('mentor') || lowerMsg.includes('наставничество')) {
+    reply = 'Mentorship (University of Self-Knowledge) is our premium program:\n- Field reading, emotions & subconscious blocks\n- Quantum field work\n- 30 NLP practices\n- Constellation fundamentals\n- Live practice with curators\n\nContact our managers for pricing!';
+  } else if (lowerMsg.includes('consult') || lowerMsg.includes('консультац') || lowerMsg.includes('записаться') || lowerMsg.includes('book')) {
+    reply = 'To book a free consultation, click the "Book Consultation" button on our website, or message us on WhatsApp/Telegram. Entry to individual work is only after a free consultation. We look forward to working with you!';
+  } else if (lowerMsg.includes('altynai') || lowerMsg.includes('алтынай') || lowerMsg.includes('founder') || lowerMsg.includes('основатель')) {
+    reply = 'Altynai Eshinbekova is the founder of KVANTUM:\n- Specialist in subconscious and quantum field work\n- NLP Master\n- Master of deep analysis sessions\n\nShe works deeply, ecologically, and delivers real results. She personally accompanies clients to their goals.';
+  } else if (lowerMsg.includes('whatsapp') || lowerMsg.includes('telegram') || lowerMsg.includes('contact') || lowerMsg.includes('связ') || lowerMsg.includes('контакт')) {
+    reply = 'You can reach us via:\n- WhatsApp: Click the WhatsApp button on our website\n- Telegram: Click the Telegram button\n- Or fill out the contact form and we will reach out to you!\n\nWe are happy to help you start your transformation journey.';
+  } else {
+    reply = 'Thank you for your message! I can help you with:\n\n- Program information and pricing\n- Booking a free consultation\n- Learning about our founder Altynai\n- Understanding how we work\n\nJust ask me anything, or click "Book Consultation" to get started!';
+  }
+
+  res.json({ reply });
+});
+
+// Send notification (demo - generates links)
+app.post('/api/notify', (req, res) => {
+  const { type, phone, message } = req.body;
+
+  if (type === 'whatsapp') {
+    const whatsappUrl = `https://wa.me/${(phone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message || 'Thank you for your purchase at KVANTUM!')}`;
+    res.json({ message: 'WhatsApp notification ready', url: whatsappUrl });
+  } else if (type === 'telegram') {
+    res.json({ message: 'Telegram notification sent', note: 'In production, integrate with Telegram Bot API' });
+  } else {
+    res.json({ message: 'Notification sent' });
+  }
+});
+
+// Serve main page for all other routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`KVANTUM server running at http://localhost:${PORT}`);
+});

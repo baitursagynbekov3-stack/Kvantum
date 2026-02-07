@@ -1,0 +1,802 @@
+// ===== State =====
+let currentUser = null;
+let authToken = null;
+let currentPayment = null;
+let currentLang = localStorage.getItem('kvantum_lang') || 'en';
+
+// ===== Translations =====
+const translations = {
+  ru: {
+    'nav.about': 'О нас',
+    'nav.services': 'Услуги',
+    'nav.programs': 'Программы',
+    'nav.testimonials': 'Отзывы',
+    'nav.contact': 'Контакты',
+    'nav.login': 'Войти',
+    'nav.consult': 'Начать',
+    'hero.badge': 'Работа с подсознанием и квантовым полем',
+    'hero.title': 'Трансформируйте<br><span class="text-gradient">Внутреннюю Реальность</span><br>Постройте Жизнь Мечты',
+    'hero.description': 'КВАНТУМ от Алтынай Эшинбековой — специалист по работе с подсознанием и квантовым полем. Мастер НЛП. Трансформируйте мысли, чувства и состояние — трансформируйте жизнь, отношения и финансы.',
+    'hero.cta': 'Записаться на консультацию',
+    'hero.programs': 'Смотреть программы',
+    'stats.clients': 'Клиентов трансформировано',
+    'stats.satisfaction': 'Удовлетворённость клиентов',
+    'stats.years': 'Лет опыта',
+    'stats.growth': 'Средний рост',
+    'about.label': 'Об основателе',
+    'about.title': 'Алтынай Эшинбекова — <span class="text-gradient">Ваш проводник к трансформации</span>',
+    'about.text': 'Я работаю глубоко, экологично и с реальным результатом. Я лично сопровождаю каждого клиента к его цели. Мой подход сочетает работу с подсознанием, выравнивание энергетического поля и развитие состояния лидера.',
+    'about.cred1.title': 'Специалист по подсознанию и квантовому полю',
+    'about.cred2.title': 'Мастер НЛП',
+    'about.cred3.title': 'Мастер глубинных разборов',
+    'about.quote': '«Вы в нужном месте и в нужное время.»',
+    'work.label': 'Что мы делаем',
+    'work.title': 'Как мы <span class="text-gradient">работаем</span>',
+    'work.subtitle': 'Работаем индивидуально и в группе — глубоко, экологично, с реальным результатом',
+    'work.card1.title': 'Подсознание',
+    'work.card1.desc': 'Глубокая работа с паттернами подсознания, убеждениями и ментальными блоками',
+    'work.card2.title': 'Энергетическое поле',
+    'work.card2.desc': 'Выравнивание и усиление вашего энергетического поля для привлечения желаемого',
+    'work.card3.title': 'Состояние лидера',
+    'work.card3.desc': 'Развитие внутреннего состояния лидера для роста бизнеса и личного мастерства',
+    'work.card4.title': 'Сопровождаем до результата',
+    'work.card4.desc': 'Личное сопровождение до достижения ваших целей — мы не просто учим, мы идём с вами',
+    'services.title': 'Индивидуальная работа',
+    'services.s1.title': 'Консультации',
+    'services.s1.desc': 'Индивидуальные сессии для диагностики текущего состояния и определения пути вперёд',
+    'services.s2.title': 'Трансформационные сессии',
+    'services.s2.desc': 'Глубокая трансформационная работа с мыслями, чувствами и внутренними состояниями',
+    'services.s3.title': 'Сопровождение к цели',
+    'services.s3.desc': 'Индивидуальная поддержка на пути к вашим личным или бизнес-целям',
+    'services.book': 'Записаться',
+    'programs.label': 'Наши программы',
+    'programs.title': 'Выберите путь к <span class="text-gradient">трансформации</span>',
+    'programs.subtitle': 'От начального уровня до элитного наставничества — найдите свою программу',
+    'programs.bc.badge': 'Точка входа',
+    'programs.bc.name': 'Зарядка мозга',
+    'programs.bc.tagline': 'Перепрограммирование реальности',
+    'programs.bc.currency': 'сом / рублей',
+    'programs.bc.f1': 'Программа 21 день',
+    'programs.bc.f2': '15 минут в день',
+    'programs.bc.f3': 'Сессии в 6:00 утра (КР)',
+    'programs.bc.f4': 'Работа с мыслями и чувствами',
+    'programs.bc.f5': 'Трансформация состояния',
+    'programs.bc.f6': 'Изменения в жизни, отношениях и финансах',
+    'programs.bc.btn': 'Начать',
+    'programs.rc.name': 'Клуб «Ресурсы»',
+    'programs.rc.tagline': 'Усиление состояния',
+    'programs.rc.currency': 'сом / месяц',
+    'programs.rc.f1': 'Программа 4 недели',
+    'programs.rc.f2': '2 встречи с Алтынай',
+    'programs.rc.f3': '2 встречи с куратором',
+    'programs.rc.f4': 'Защищённость и уверенность',
+    'programs.rc.f5': 'Ценность и любовь к себе',
+    'programs.rc.f6': 'Свобода и внутренняя опора',
+    'programs.rc.btn': 'Вступить в клуб',
+    'programs.int.badge': 'Популярная',
+    'programs.int.name': 'Интенсив «Папа, Мама»',
+    'programs.int.tagline': 'Проработка корней',
+    'programs.int.f1': '1 месяц, 10 уроков',
+    'programs.int.f2': '20 практических упражнений',
+    'programs.int.f3': '3 Zoom встречи',
+    'programs.int.f4': 'Сепарация и независимость',
+    'programs.int.f5': 'Выход из чужих сценариев',
+    'programs.int.f6': 'Восстановление иерархии',
+    'programs.int.f7': 'Снятие детских блоков',
+    'programs.int.btn': 'Записаться',
+    'programs.rb.badge': 'Премиум',
+    'programs.rb.tagline': 'Осознанное управление реальностью',
+    'programs.rb.f1': '8 недель, 24 встречи',
+    'programs.rb.f2': '20 уроков и 20 практик',
+    'programs.rb.f3': '1 встреча с Алтынай',
+    'programs.rb.f4': '2 встречи с кураторами',
+    'programs.rb.f5': 'Ценности и личные принципы',
+    'programs.rb.f6': 'Управление состоянием',
+    'programs.rb.f7': 'Отношения без зависимости',
+    'programs.rb.f8': 'Финансы под вашим контролем',
+    'programs.rb.btn': 'Трансформироваться',
+    'programs.ms.badge': 'Элитная',
+    'programs.ms.name': 'Наставничество',
+    'programs.ms.tagline': 'Университет в самопознании',
+    'programs.ms.price': 'Уточните',
+    'programs.ms.currency': 'у менеджеров',
+    'programs.ms.f1': 'Считывание поля',
+    'programs.ms.f2': 'Эмоции и блоки подсознания',
+    'programs.ms.f3': 'Работа с квантовым полем',
+    'programs.ms.f4': '30 практик НЛП',
+    'programs.ms.f5': 'Основы расстановок',
+    'programs.ms.f6': 'Живая практика с кураторами',
+    'programs.ms.f7': 'Полная передача знаний',
+    'programs.ms.btn': 'Узнать подробнее',
+    'testimonials.label': 'Отзывы',
+    'testimonials.title': 'Что говорят наши <span class="text-gradient">клиенты</span>',
+    'testimonials.t1.text': '«Всего за 21 день Зарядки мозга мой взгляд на жизнь полностью изменился. Мой доход вырос в 2 раза в следующем месяце.»',
+    'testimonials.t1.role': 'Предприниматель',
+    'testimonials.t2.text': '«Программа ПЕРЕЗАГРУЗКА полностью изменила то, как я справляюсь с отношениями и финансами. Я наконец чувствую контроль над своей жизнью.»',
+    'testimonials.t2.role': 'Владелец бизнеса',
+    'testimonials.t3.text': '«Работа с Алтынай через программу наставничества дала мне инструменты, которые я использую каждый день. Мой бизнес вырос в 3 раза за 6 месяцев.»',
+    'testimonials.t3.role': 'Консультант',
+    'cta.title': 'Готовы трансформировать реальность?',
+    'cta.desc': 'Запишитесь на бесплатную консультацию и найдите свой путь к трансформации.',
+    'cta.btn': 'Бесплатная консультация',
+    'contact.label': 'Контакты',
+    'contact.title': 'Свяжитесь <span class="text-gradient">с нами</span>',
+    'contact.subtitle': 'Готовы начать трансформацию? Запишитесь на бесплатную консультацию.',
+    'contact.form.name': 'Ваше имя',
+    'contact.form.name_ph': 'Введите ваше имя',
+    'contact.form.phone': 'Телефон (WhatsApp)',
+    'contact.form.interest': 'Интересует',
+    'contact.form.opt1': 'Бесплатная консультация',
+    'contact.form.opt2': 'Зарядка мозга',
+    'contact.form.opt3': 'Клуб «Ресурсы»',
+    'contact.form.opt4': 'Интенсив «Папа, Мама»',
+    'contact.form.opt6': 'Наставничество',
+    'contact.form.message': 'Сообщение (необязательно)',
+    'contact.form.message_ph': 'Расскажите о ваших целях...',
+    'contact.form.submit': 'Отправить заявку',
+    'contact.connect': 'Свяжитесь с нами',
+    'contact.entry.title': 'Условия входа',
+    'contact.entry.text': 'Вход в индивидуальную работу после <strong>бесплатной консультации</strong>. Беру не всех — мы обеспечиваем правильный подбор для обеих сторон.',
+    'footer.desc': 'Переход в реальность мечты. Трансформируйте жизнь через работу с подсознанием, НЛП и мастерство квантового поля.',
+    'footer.quick': 'Быстрые ссылки',
+    'footer.intensive': 'Интенсив',
+    'footer.copy': '© 2025 КВАНТУМ Алтынай Эшинбекова. Все права защищены.',
+    'bonuses.b2.name': 'Клуб «Ресурсы»',
+    'modal.login': 'Войти',
+    'modal.register': 'Регистрация',
+    'modal.welcome': 'С возвращением',
+    'modal.password': 'Пароль',
+    'modal.pass_ph': 'Введите пароль',
+    'modal.no_account': 'Нет аккаунта? <a href="#" onclick="switchTab(\'register\')">Зарегистрируйтесь</a>',
+    'modal.create': 'Создать аккаунт',
+    'modal.fullname': 'Полное имя',
+    'modal.fullname_ph': 'Ваше полное имя',
+    'modal.create_pass_ph': 'Придумайте пароль',
+    'modal.has_account': 'Уже есть аккаунт? <a href="#" onclick="switchTab(\'login\')">Войдите</a>',
+    'modal.continue': 'Продолжить',
+    'consult.title': 'Записаться на бесплатную консультацию',
+    'consult.desc': 'Заполните данные, и мы свяжемся с вами через WhatsApp или Telegram.',
+    'consult.phone': 'Телефон (WhatsApp/Telegram)',
+    'consult.opt1': 'Общая консультация',
+    'consult.preferred': 'Предпочтительный способ связи',
+    'consult.submit': 'Записаться на консультацию',
+    'payment.title': 'Завершить оплату',
+    'payment.card': 'Номер карты',
+    'payment.expiry': 'Срок',
+    'payment.name': 'Имя на карте',
+    'payment.confirm_via': 'Отправить подтверждение через:',
+    'payment.both': 'Оба',
+    'payment.pay': 'Оплатить',
+    'payment.secure': '🔒 Безопасная оплата — Демо режим',
+    'chat.name': 'Ассистент КВАНТУМ',
+    'chat.online': 'В сети',
+    'chat.welcome': 'Добро пожаловать в КВАНТУМ! Я ваш AI-ассистент. Я могу помочь с:<br><br>• Информация о программах и ценах<br>• Запись на бесплатную консультацию<br>• Узнать об услугах<br><br>Чем могу помочь?',
+    'chat.qr1': 'Цены',
+    'chat.qr2': 'Зарядка мозга',
+    'chat.qr3': 'Записаться',
+    'chat.placeholder': 'Введите сообщение...',
+    'user.greeting': 'Привет, <strong id="userName">Пользователь</strong>',
+    'user.profile': 'Мой профиль',
+    'user.purchases': 'Мои покупки',
+    'user.logout': 'Выйти',
+  }
+};
+
+// ===== i18n Engine =====
+function applyTranslations(lang) {
+  if (lang === 'en') {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      if (el._originalText !== undefined) el.textContent = el._originalText;
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      if (el._originalHTML !== undefined) el.innerHTML = el._originalHTML;
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      if (el._originalPlaceholder !== undefined) el.placeholder = el._originalPlaceholder;
+    });
+    document.documentElement.lang = 'en';
+    return;
+  }
+
+  const dict = translations[lang];
+  if (!dict) return;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) {
+      if (el._originalText === undefined) el._originalText = el.textContent;
+      el.textContent = dict[key];
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (dict[key]) {
+      if (el._originalHTML === undefined) el._originalHTML = el.innerHTML;
+      el.innerHTML = dict[key];
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (dict[key]) {
+      if (el._originalPlaceholder === undefined) el._originalPlaceholder = el.placeholder;
+      el.placeholder = dict[key];
+    }
+  });
+
+  document.documentElement.lang = lang;
+}
+
+function storeOriginals() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el._originalText = el.textContent;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el._originalHTML = el.innerHTML;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el._originalPlaceholder = el.placeholder;
+  });
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === 'en' ? 'ru' : 'en';
+  localStorage.setItem('kvantum_lang', currentLang);
+  applyTranslations(currentLang);
+  updateLangButton();
+}
+
+function updateLangButton() {
+  const flag = document.getElementById('langFlag');
+  if (flag) flag.textContent = currentLang === 'en' ? 'RU' : 'EN';
+}
+
+// ===== Init =====
+document.addEventListener('DOMContentLoaded', () => {
+  storeOriginals();
+  initNavbar();
+  initScrollAnimations();
+  initCounterAnimations();
+  checkAuth();
+  updateLangButton();
+  if (currentLang !== 'en') applyTranslations(currentLang);
+
+  // Trigger hero animations immediately
+  setTimeout(() => {
+    document.querySelectorAll('.hero .anim-fade-up').forEach(el => {
+      el.classList.add('anim-visible');
+    });
+  }, 100);
+});
+
+// ===== Navbar =====
+function initNavbar() {
+  let lastScroll = 0;
+  window.addEventListener('scroll', () => {
+    const navbar = document.getElementById('navbar');
+    const scrollY = window.scrollY;
+
+    if (scrollY > 50) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+    lastScroll = scrollY;
+  });
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        const navHeight = document.getElementById('navbar').offsetHeight;
+        const targetPos = target.getBoundingClientRect().top + window.scrollY - navHeight;
+        window.scrollTo({ top: targetPos, behavior: 'smooth' });
+
+        // Close mobile menu
+        document.getElementById('navLinks').classList.remove('active');
+      }
+    });
+  });
+}
+
+function toggleMobileMenu() {
+  document.getElementById('navLinks').classList.toggle('active');
+}
+
+// ===== Scroll Animations =====
+function initScrollAnimations() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('anim-visible');
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  document.querySelectorAll('.anim-fade-up, .anim-fade-right, .anim-fade-left').forEach(el => {
+    // Skip hero elements (handled separately)
+    if (!el.closest('.hero') && !el.closest('.scroll-indicator')) {
+      observer.observe(el);
+    }
+  });
+}
+
+// ===== Counter Animations =====
+function initCounterAnimations() {
+  const counters = document.querySelectorAll('[data-count]');
+  let animated = false;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !animated) {
+        animated = true;
+        counters.forEach(counter => {
+          const target = parseInt(counter.getAttribute('data-count'));
+          animateCounter(counter, target);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  if (counters.length > 0) {
+    observer.observe(counters[0].closest('.stats-strip'));
+  }
+}
+
+function animateCounter(el, target) {
+  const duration = 2000;
+  const start = performance.now();
+  const startVal = 0;
+
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.floor(startVal + (target - startVal) * eased);
+
+    el.textContent = current.toLocaleString();
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      el.textContent = target.toLocaleString();
+    }
+  }
+
+  requestAnimationFrame(update);
+}
+
+// ===== Auth =====
+function checkAuth() {
+  const token = localStorage.getItem('kvantum_token');
+  const user = localStorage.getItem('kvantum_user');
+  if (token && user) {
+    authToken = token;
+    currentUser = JSON.parse(user);
+    updateUIForLoggedIn();
+  }
+}
+
+function updateUIForLoggedIn() {
+  const loginBtn = document.getElementById('loginBtn');
+  const userMenu = document.getElementById('userMenu');
+  const userName = document.getElementById('userName');
+  const userInitials = document.getElementById('userInitials');
+
+  if (currentUser) {
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (userMenu) userMenu.style.display = 'block';
+    if (userName) userName.textContent = currentUser.name;
+    if (userInitials) userInitials.textContent = currentUser.name.charAt(0).toUpperCase();
+  } else {
+    if (loginBtn) loginBtn.style.display = '';
+    if (userMenu) userMenu.style.display = 'none';
+  }
+}
+
+function toggleUserMenu() {
+  const dropdown = document.getElementById('userDropdown');
+  dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    email: form.email.value,
+    password: form.password.value
+  };
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      authToken = result.token;
+      currentUser = result.user;
+      localStorage.setItem('kvantum_token', authToken);
+      localStorage.setItem('kvantum_user', JSON.stringify(currentUser));
+      updateUIForLoggedIn();
+      closeModal('loginModal');
+      showToast('Welcome back, ' + currentUser.name + '!', 'success');
+      form.reset();
+    } else {
+      showToast(result.error || 'Login failed', 'error');
+    }
+  } catch (err) {
+    showToast('Connection error. Please try again.', 'error');
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    name: form.name.value,
+    email: form.email.value,
+    phone: form.phone.value,
+    password: form.password.value
+  };
+
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      authToken = result.token;
+      currentUser = result.user;
+      localStorage.setItem('kvantum_token', authToken);
+      localStorage.setItem('kvantum_user', JSON.stringify(currentUser));
+      updateUIForLoggedIn();
+      closeModal('loginModal');
+      showToast('Account created! Welcome, ' + currentUser.name + '!', 'success');
+      form.reset();
+    } else {
+      showToast(result.error || 'Registration failed', 'error');
+    }
+  } catch (err) {
+    showToast('Connection error. Please try again.', 'error');
+  }
+}
+
+function handleLogout() {
+  authToken = null;
+  currentUser = null;
+  localStorage.removeItem('kvantum_token');
+  localStorage.removeItem('kvantum_user');
+  updateUIForLoggedIn();
+  document.getElementById('userDropdown').style.display = 'none';
+  showToast('You have been logged out.', 'info');
+}
+
+function showProfile() {
+  showToast('Profile page coming soon!', 'info');
+  document.getElementById('userDropdown').style.display = 'none';
+}
+
+function showPurchases() {
+  showToast('Purchases page coming soon!', 'info');
+  document.getElementById('userDropdown').style.display = 'none';
+}
+
+// ===== Modals =====
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function switchTab(tab) {
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const tabs = document.querySelectorAll('.tab-btn');
+
+  if (tab === 'login') {
+    loginForm.style.display = 'block';
+    registerForm.style.display = 'none';
+    tabs[0].classList.add('active');
+    tabs[1].classList.remove('active');
+  } else {
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'block';
+    tabs[0].classList.remove('active');
+    tabs[1].classList.add('active');
+  }
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+});
+
+// ===== Consultation Booking =====
+async function handleConsultation(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    name: form.name.value,
+    email: form.email.value,
+    phone: form.phone.value,
+    service: form.service.value,
+    message: ''
+  };
+
+  try {
+    const res = await fetch('/api/book-consultation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      closeModal('consultModal');
+      showSuccessModal(
+        'Consultation Booked!',
+        'Thank you, ' + data.name + '! We will contact you via ' +
+        (form.contact_method.value === 'whatsapp' ? 'WhatsApp' : 'Telegram') +
+        ' to schedule your free consultation.'
+      );
+      form.reset();
+    } else {
+      showToast(result.error || 'Booking failed', 'error');
+    }
+  } catch (err) {
+    showToast('Connection error. Please try again.', 'error');
+  }
+}
+
+async function handleContact(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    name: form.name.value,
+    email: form.email.value,
+    phone: form.phone.value,
+    service: form.service.value,
+    message: form.message.value
+  };
+
+  try {
+    const res = await fetch('/api/book-consultation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      showSuccessModal(
+        'Request Sent!',
+        'Thank you, ' + data.name + '! We will contact you shortly via WhatsApp or Telegram.'
+      );
+      form.reset();
+    } else {
+      showToast(result.error || 'Submission failed', 'error');
+    }
+  } catch (err) {
+    showToast('Connection error. Please try again.', 'error');
+  }
+}
+
+// ===== Payment =====
+function handlePurchase(productId, productName, amount, currency) {
+  if (!currentUser) {
+    showToast('Please login or register first to make a purchase.', 'info');
+    openModal('loginModal');
+    return;
+  }
+
+  currentPayment = { productId, productName, amount, currency };
+
+  const summary = document.getElementById('paymentSummary');
+  summary.innerHTML = `
+    <h3>${productName}</h3>
+    <div class="payment-amount">${currency === 'USD' ? '$' : ''}${amount.toLocaleString()} ${currency !== 'USD' ? currency : ''}</div>
+  `;
+
+  const payBtn = document.getElementById('payBtn');
+  payBtn.textContent = `Pay ${currency === 'USD' ? '$' : ''}${amount.toLocaleString()} ${currency !== 'USD' ? currency : ''}`;
+
+  openModal('paymentModal');
+}
+
+async function handlePayment(e) {
+  e.preventDefault();
+  if (!currentPayment || !authToken) return;
+
+  const form = e.target;
+  const notifyMethod = form.notify.value;
+  const payBtn = document.getElementById('payBtn');
+
+  payBtn.innerHTML = '<span class="loading"><span class="spinner"></span> Processing...</span>';
+  payBtn.disabled = true;
+
+  try {
+    const res = await fetch('/api/payment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + authToken
+      },
+      body: JSON.stringify(currentPayment)
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      closeModal('paymentModal');
+
+      await fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: notifyMethod === 'both' ? 'whatsapp' : notifyMethod,
+          phone: '',
+          message: `Payment confirmed for ${currentPayment.productName}! Amount: ${currentPayment.amount} ${currentPayment.currency}. Order: ${result.payment.id}`
+        })
+      });
+
+      showSuccessModal(
+        'Payment Successful!',
+        `Thank you for purchasing ${currentPayment.productName}! Your order ID is ${result.payment.id}. A confirmation has been sent via ${notifyMethod === 'both' ? 'WhatsApp and Telegram' : notifyMethod}.`
+      );
+      form.reset();
+      currentPayment = null;
+    } else {
+      showToast(result.error || 'Payment failed', 'error');
+    }
+  } catch (err) {
+    showToast('Payment processing error. Please try again.', 'error');
+  } finally {
+    payBtn.textContent = 'Pay Now';
+    payBtn.disabled = false;
+  }
+}
+
+// ===== Chatbot =====
+function toggleChatbot() {
+  const window_ = document.getElementById('chatbotWindow');
+  const icon = document.querySelector('.chatbot-icon');
+  const closeIcon = document.querySelector('.chatbot-close');
+
+  window_.classList.toggle('active');
+
+  if (window_.classList.contains('active')) {
+    icon.style.display = 'none';
+    closeIcon.style.display = 'block';
+  } else {
+    icon.style.display = 'block';
+    closeIcon.style.display = 'none';
+  }
+}
+
+async function sendChatMessage(e) {
+  e.preventDefault();
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  if (!message) return;
+
+  addChatMessage(message, 'user');
+  input.value = '';
+
+  const typingId = showTyping();
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+    const result = await res.json();
+
+    removeTyping(typingId);
+    addChatMessage(result.reply, 'bot');
+  } catch (err) {
+    removeTyping(typingId);
+    addChatMessage('Sorry, I am having trouble connecting. Please try again.', 'bot');
+  }
+}
+
+function sendQuickReply(message) {
+  document.getElementById('chatInput').value = message;
+  sendChatMessage(new Event('submit'));
+}
+
+function addChatMessage(text, sender) {
+  const messages = document.getElementById('chatbotMessages');
+  const div = document.createElement('div');
+  div.className = `chat-message ${sender}`;
+  div.innerHTML = `<div class="message-bubble">${escapeHtml(text)}</div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function showTyping() {
+  const messages = document.getElementById('chatbotMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-message bot typing-indicator';
+  div.id = 'typing-' + Date.now();
+  div.innerHTML = '<div class="message-bubble"><span class="loading"><span class="spinner"></span> Typing...</span></div>';
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div.id;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML.replace(/\n/g, '<br>');
+}
+
+// ===== Social Links =====
+function openWhatsApp() {
+  window.open('https://wa.me/?text=' + encodeURIComponent('Hello! I am interested in KVANTUM programs.'), '_blank');
+}
+
+function openTelegram() {
+  window.open('https://t.me/', '_blank');
+}
+
+// ===== Helpers =====
+function showSuccessModal(title, message) {
+  document.getElementById('successTitle').textContent = title;
+  document.getElementById('successMessage').textContent = message;
+  openModal('successModal');
+}
+
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${message}</span>`;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = 'toastIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) reverse';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
+// Card number formatting
+document.addEventListener('input', (e) => {
+  if (e.target.name === 'cardNumber') {
+    let v = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    let matches = v.match(/\d{4,16}/g);
+    let match = matches && matches[0] || '';
+    let parts = [];
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+    e.target.value = parts.length ? parts.join(' ') : v;
+  }
+  if (e.target.name === 'expiry') {
+    let v = e.target.value.replace(/[^0-9]/g, '');
+    if (v.length >= 2) v = v.slice(0, 2) + '/' + v.slice(2);
+    e.target.value = v.slice(0, 5);
+  }
+});

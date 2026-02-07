@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KVANTUM - Transition to Dream Reality | Altynai Eshinbekova</title>
+  <meta name="description" content="KVANTUM by Altynai Eshinbekova. Subconscious work, NLP, quantum field mastery. Transform your life, relationships, and finances.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-container">
+      <a href="#hero" class="logo">
+        <span class="logo-icon">Q</span>
+        <span class="logo-text">KVANTUM</span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#about" data-i18n="nav.about">About</a></li>
+        <li><a href="#services" data-i18n="nav.services">Services</a></li>
+        <li><a href="#programs" data-i18n="nav.programs">Programs</a></li>
+        <li><a href="#testimonials" data-i18n="nav.testimonials">Testimonials</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="btn-lang" id="langToggle" onclick="toggleLanguage()" title="Switch language">
+          <span class="lang-flag" id="langFlag">RU</span>
+        </button>
+        <button class="btn btn-outline btn-sm" id="loginBtn" onclick="openModal('loginModal')" data-i18n="nav.login">Login</button>
+        <button class="btn btn-primary btn-sm nav-cta" onclick="openModal('consultModal')" data-i18n="nav.consult">Get Started</button>
+        <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <div class="hero-gradient-orb hero-orb-1"></div>
+      <div class="hero-gradient-orb hero-orb-2"></div>
+      <div class="hero-grid-pattern"></div>
+    </div>
+    <div class="container hero-content">
+      <div class="hero-badge anim-fade-up" data-i18n="hero.badge">Subconscious &amp; Quantum Field Work</div>
+      <h1 class="hero-title anim-fade-up anim-delay-1">
+        <span data-i18n-html="hero.title">Transform Your<br><span class="text-gradient">Inner Reality</span><br>Build Your Dream Life</span>
+      </h1>
+      <p class="hero-description anim-fade-up anim-delay-2" data-i18n="hero.description">
+        KVANTUM by Altynai Eshinbekova &mdash; specialist in subconscious and quantum field work. NLP Master. Transform your thoughts, feelings, and state to transform your life, relationships, and finances.
+      </p>
+      <div class="hero-buttons anim-fade-up anim-delay-3">
+        <button class="btn btn-primary btn-lg" onclick="openModal('consultModal')" data-i18n="hero.cta">Book Free Consultation</button>
+        <a href="#programs" class="btn btn-ghost btn-lg" data-i18n="hero.programs">Explore Programs</a>
+      </div>
+    </div>
+    <div class="scroll-indicator anim-fade-up anim-delay-4">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- Stats Strip -->
+  <section class="stats-strip">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item anim-fade-up">
+          <span class="stat-number" data-count="500">0</span><span class="stat-plus">+</span>
+          <span class="stat-label" data-i18n="stats.clients">Clients Transformed</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item anim-fade-up anim-delay-1">
+          <span class="stat-number" data-count="99">0</span><span class="stat-plus">%</span>
+          <span class="stat-label" data-i18n="stats.satisfaction">Client Satisfaction</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item anim-fade-up anim-delay-2">
+          <span class="stat-number" data-count="5">0</span><span class="stat-plus">+</span>
+          <span class="stat-label" data-i18n="stats.years">Years of Experience</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item anim-fade-up anim-delay-3">
+          <span class="stat-number" data-count="3">0</span><span class="stat-plus">x</span>
+          <span class="stat-label" data-i18n="stats.growth">Average Growth</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section about" id="about">
+    <div class="container">
+      <div class="about-layout">
+        <div class="about-left anim-fade-right">
+          <div class="about-image-wrapper">
+            <div class="about-avatar">
+              <div class="about-avatar-inner">AE</div>
+            </div>
+            <div class="about-image-accent"></div>
+          </div>
+        </div>
+        <div class="about-right anim-fade-left">
+          <div class="section-label" data-i18n="about.label">About the Founder</div>
+          <h2 class="section-title" data-i18n-html="about.title">Altynai Eshinbekova &mdash; <span class="text-gradient">Guiding Your Transformation</span></h2>
+          <p class="about-text" data-i18n="about.text">I work deeply, ecologically, and deliver real results. I personally accompany each client to their goal. My approach combines subconscious work, energy field alignment, and leader state development.</p>
+          <div class="about-credentials">
+            <div class="credential">
+              <div class="credential-check">&#10003;</div>
+              <span data-i18n="about.cred1.title">Subconscious &amp; Quantum Field Specialist</span>
+            </div>
+            <div class="credential">
+              <div class="credential-check">&#10003;</div>
+              <span data-i18n="about.cred2.title">NLP Master</span>
+            </div>
+            <div class="credential">
+              <div class="credential-check">&#10003;</div>
+              <span data-i18n="about.cred3.title">Master of Deep Analysis Sessions</span>
+            </div>
+          </div>
+          <blockquote class="about-quote" data-i18n="about.quote">"You are in the right place at the right time."</blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="section services" id="services">
+    <div class="container">
+      <div class="section-header anim-fade-up">
+        <div class="section-label" data-i18n="work.label">What We Do</div>
+        <h2 class="section-title" data-i18n-html="work.title">How We <span class="text-gradient">Work</span></h2>
+        <p class="section-subtitle" data-i18n="work.subtitle">Work individually or in groups &mdash; deeply, ecologically, with real results</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card anim-fade-up">
+          <div class="service-number">01</div>
+          <h3 data-i18n="work.card1.title">Subconscious</h3>
+          <p data-i18n="work.card1.desc">Deep work with subconscious patterns, beliefs, and mental blocks that hold you back</p>
+          <div class="service-arrow">&rarr;</div>
+        </div>
+        <div class="service-card anim-fade-up anim-delay-1">
+          <div class="service-number">02</div>
+          <h3 data-i18n="work.card2.title">Energy Field</h3>
+          <p data-i18n="work.card2.desc">Alignment and strengthening of your energy field for attracting desired outcomes</p>
+          <div class="service-arrow">&rarr;</div>
+        </div>
+        <div class="service-card anim-fade-up anim-delay-2">
+          <div class="service-number">03</div>
+          <h3 data-i18n="work.card3.title">Leader State</h3>
+          <p data-i18n="work.card3.desc">Developing the internal state of a leader for business growth and personal mastery</p>
+          <div class="service-arrow">&rarr;</div>
+        </div>
+        <div class="service-card anim-fade-up anim-delay-3">
+          <div class="service-number">04</div>
+          <h3 data-i18n="work.card4.title">Guided to Results</h3>
+          <p data-i18n="work.card4.desc">Personal accompaniment until you achieve your goals &mdash; we don't just teach, we walk with you</p>
+          <div class="service-arrow">&rarr;</div>
+        </div>
+      </div>
+
+      <!-- Individual Services -->
+      <div class="individual-services">
+        <div class="section-header anim-fade-up">
+          <h3 class="subsection-title" data-i18n="services.title">Individual Services</h3>
+        </div>
+        <div class="individual-grid">
+          <div class="individual-card anim-fade-up">
+            <div class="individual-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <h4 data-i18n="services.s1.title">Consultations</h4>
+            <p data-i18n="services.s1.desc">One-on-one sessions to diagnose your current state and define your path forward</p>
+            <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Book Now</button>
+          </div>
+          <div class="individual-card anim-fade-up anim-delay-1">
+            <div class="individual-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <h4 data-i18n="services.s2.title">Transformation Sessions</h4>
+            <p data-i18n="services.s2.desc">Deep transformational work with thoughts, feelings, and internal states</p>
+            <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Book Now</button>
+          </div>
+          <div class="individual-card anim-fade-up anim-delay-2">
+            <div class="individual-card-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h4 data-i18n="services.s3.title">Goal Accompaniment</h4>
+            <p data-i18n="services.s3.desc">Individual support and guidance as you work towards your personal or business goals</p>
+            <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Book Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Programs / Pricing -->
+  <section class="section programs" id="programs">
+    <div class="container">
+      <div class="section-header anim-fade-up">
+        <div class="section-label" data-i18n="programs.label">Our Programs</div>
+        <h2 class="section-title" data-i18n-html="programs.title">Choose Your Path to <span class="text-gradient">Transformation</span></h2>
+        <p class="section-subtitle" data-i18n="programs.subtitle">From entry-level to elite mentorship &mdash; find the right program for you</p>
+      </div>
+      <div class="pricing-grid">
+        <!-- Brain Charge -->
+        <div class="pricing-card anim-fade-up" data-tier="entry">
+          <div class="pricing-tier" data-i18n="programs.bc.badge">Entry Level</div>
+          <h3 class="pricing-name" data-i18n="programs.bc.name">Brain Charge</h3>
+          <p class="pricing-tagline" data-i18n="programs.bc.tagline">Reality Reprogramming</p>
+          <div class="pricing-price">
+            <span class="price-amount">1,000</span>
+            <span class="price-currency" data-i18n="programs.bc.currency">KGS / RUB</span>
+          </div>
+          <ul class="pricing-features">
+            <li data-i18n="programs.bc.f1">21 days program</li>
+            <li data-i18n="programs.bc.f2">15 minutes per day</li>
+            <li data-i18n="programs.bc.f3">6:00 AM sessions (KG time)</li>
+            <li data-i18n="programs.bc.f4">Work with thoughts &amp; feelings</li>
+            <li data-i18n="programs.bc.f5">State transformation</li>
+            <li data-i18n="programs.bc.f6">Life, relationships &amp; finances shift</li>
+          </ul>
+          <button class="btn btn-primary btn-block" onclick="handlePurchase('brain-charge', 'Brain Charge', 1000, 'KGS')" data-i18n="programs.bc.btn">Get Started</button>
+        </div>
+
+        <!-- Resources Club -->
+        <div class="pricing-card anim-fade-up anim-delay-1">
+          <h3 class="pricing-name" data-i18n="programs.rc.name">Club "Resources"</h3>
+          <p class="pricing-tagline" data-i18n="programs.rc.tagline">State Enhancement</p>
+          <div class="pricing-price">
+            <span class="price-amount">5,000</span>
+            <span class="price-currency" data-i18n="programs.rc.currency">KGS / month</span>
+          </div>
+          <ul class="pricing-features">
+            <li data-i18n="programs.rc.f1">4 weeks program</li>
+            <li data-i18n="programs.rc.f2">2 sessions with Altynai</li>
+            <li data-i18n="programs.rc.f3">2 sessions with curator</li>
+            <li data-i18n="programs.rc.f4">Build confidence &amp; security</li>
+            <li data-i18n="programs.rc.f5">Self-worth &amp; self-love</li>
+            <li data-i18n="programs.rc.f6">Freedom &amp; inner foundation</li>
+          </ul>
+          <button class="btn btn-primary btn-block" onclick="handlePurchase('resources-club', 'Club Resources', 5000, 'KGS')" data-i18n="programs.rc.btn">Join the Club</button>
+        </div>
+
+        <!-- Intensive -->
+        <div class="pricing-card popular anim-fade-up anim-delay-2">
+          <div class="pricing-popular-badge" data-i18n="programs.int.badge">Popular</div>
+          <h3 class="pricing-name" data-i18n="programs.int.name">Intensive "Mom &amp; Dad"</h3>
+          <p class="pricing-tagline" data-i18n="programs.int.tagline">Deep Root Work</p>
+          <div class="pricing-price">
+            <span class="price-amount">$300</span>
+            <span class="price-currency">/ 26,300 KGS</span>
+          </div>
+          <ul class="pricing-features">
+            <li data-i18n="programs.int.f1">1 month, 10 lessons</li>
+            <li data-i18n="programs.int.f2">20 practical exercises</li>
+            <li data-i18n="programs.int.f3">3 Zoom sessions</li>
+            <li data-i18n="programs.int.f4">Separation &amp; independence</li>
+            <li data-i18n="programs.int.f5">Break inherited patterns</li>
+            <li data-i18n="programs.int.f6">Restore family hierarchy</li>
+            <li data-i18n="programs.int.f7">Release childhood blocks</li>
+          </ul>
+          <button class="btn btn-primary btn-block" onclick="handlePurchase('intensive', 'Intensive Mom & Dad', 300, 'USD')" data-i18n="programs.int.btn">Enroll Now</button>
+        </div>
+
+        <!-- Reboot -->
+        <div class="pricing-card premium anim-fade-up anim-delay-3">
+          <div class="pricing-tier" data-i18n="programs.rb.badge">Premium</div>
+          <h3 class="pricing-name">REBOOT</h3>
+          <p class="pricing-tagline" data-i18n="programs.rb.tagline">Conscious Reality Management</p>
+          <div class="pricing-price">
+            <span class="price-amount">$1,000</span>
+            <span class="price-currency">USD</span>
+          </div>
+          <ul class="pricing-features">
+            <li data-i18n="programs.rb.f1">8 weeks, 24 sessions</li>
+            <li data-i18n="programs.rb.f2">20 lessons &amp; 20 practices</li>
+            <li data-i18n="programs.rb.f3">1 session with Altynai</li>
+            <li data-i18n="programs.rb.f4">2 curator sessions</li>
+            <li data-i18n="programs.rb.f5">Values &amp; personal principles</li>
+            <li data-i18n="programs.rb.f6">State management mastery</li>
+            <li data-i18n="programs.rb.f7">Relationships without dependency</li>
+            <li data-i18n="programs.rb.f8">Financial control</li>
+          </ul>
+          <button class="btn btn-primary btn-block" onclick="handlePurchase('reboot', 'REBOOT', 1000, 'USD')" data-i18n="programs.rb.btn">Transform Now</button>
+        </div>
+
+        <!-- Mentorship -->
+        <div class="pricing-card mentorship anim-fade-up anim-delay-4">
+          <div class="pricing-tier" data-i18n="programs.ms.badge">Elite</div>
+          <h3 class="pricing-name" data-i18n="programs.ms.name">Mentorship</h3>
+          <p class="pricing-tagline" data-i18n="programs.ms.tagline">University of Self-Knowledge</p>
+          <div class="pricing-price">
+            <span class="price-amount" data-i18n="programs.ms.price">Contact Us</span>
+            <span class="price-currency" data-i18n="programs.ms.currency">for pricing</span>
+          </div>
+          <ul class="pricing-features">
+            <li data-i18n="programs.ms.f1">Field reading skills</li>
+            <li data-i18n="programs.ms.f2">Emotions &amp; subconscious blocks</li>
+            <li data-i18n="programs.ms.f3">Quantum field mastery</li>
+            <li data-i18n="programs.ms.f4">30 NLP practices</li>
+            <li data-i18n="programs.ms.f5">Constellation fundamentals</li>
+            <li data-i18n="programs.ms.f6">Live practice with curators</li>
+            <li data-i18n="programs.ms.f7">Full knowledge transfer</li>
+          </ul>
+          <button class="btn btn-primary btn-block" onclick="openModal('consultModal')" data-i18n="programs.ms.btn">Inquire Now</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section testimonials" id="testimonials">
+    <div class="container">
+      <div class="section-header anim-fade-up">
+        <div class="section-label" data-i18n="testimonials.label">Testimonials</div>
+        <h2 class="section-title" data-i18n-html="testimonials.title">What Our Clients <span class="text-gradient">Say</span></h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card anim-fade-up">
+          <div class="testimonial-quote">&ldquo;</div>
+          <p data-i18n="testimonials.t1.text">"After just 21 days of Brain Charge, my entire perspective on life shifted. My income grew 2x in the following month."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">A</div>
+            <div class="author-info">
+              <strong>Aisuluu K.</strong>
+              <span data-i18n="testimonials.t1.role">Entrepreneur</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card anim-fade-up anim-delay-1">
+          <div class="testimonial-quote">&ldquo;</div>
+          <p data-i18n="testimonials.t2.text">"The REBOOT program completely transformed how I handle relationships and finances. I finally feel in control of my life."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">M</div>
+            <div class="author-info">
+              <strong>Marat B.</strong>
+              <span data-i18n="testimonials.t2.role">Business Owner</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card anim-fade-up anim-delay-2">
+          <div class="testimonial-quote">&ldquo;</div>
+          <p data-i18n="testimonials.t3.text">"Working with Altynai through the mentorship program gave me tools I use every day. My business grew 3x in 6 months."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">N</div>
+            <div class="author-info">
+              <strong>Nuriza T.</strong>
+              <span data-i18n="testimonials.t3.role">Consultant</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="cta-banner">
+    <div class="container">
+      <div class="cta-content anim-fade-up">
+        <h2 data-i18n="cta.title">Ready to Transform Your Reality?</h2>
+        <p data-i18n="cta.desc">Book a free consultation and discover the right path for your transformation journey.</p>
+        <button class="btn btn-white btn-lg" onclick="openModal('consultModal')" data-i18n="cta.btn">Book Free Consultation</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section contact" id="contact">
+    <div class="container">
+      <div class="section-header anim-fade-up">
+        <div class="section-label" data-i18n="contact.label">Contact</div>
+        <h2 class="section-title" data-i18n-html="contact.title">Get in <span class="text-gradient">Touch</span></h2>
+        <p class="section-subtitle" data-i18n="contact.subtitle">Ready to start your transformation? Book a free consultation today.</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-form-wrapper anim-fade-right">
+          <form id="contactForm" onsubmit="handleContact(event)">
+            <div class="form-group">
+              <label data-i18n="contact.form.name">Your Name</label>
+              <input type="text" name="name" data-i18n-placeholder="contact.form.name_ph" placeholder="Enter your name" required>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" name="email" placeholder="your@email.com" required>
+            </div>
+            <div class="form-group">
+              <label data-i18n="contact.form.phone">Phone (WhatsApp)</label>
+              <input type="tel" name="phone" placeholder="+996 XXX XXX XXX" required>
+            </div>
+            <div class="form-group">
+              <label data-i18n="contact.form.interest">Interested In</label>
+              <select name="service">
+                <option value="consultation" data-i18n="contact.form.opt1">Free Consultation</option>
+                <option value="brain-charge" data-i18n="contact.form.opt2">Brain Charge</option>
+                <option value="resources-club" data-i18n="contact.form.opt3">Club "Resources"</option>
+                <option value="intensive" data-i18n="contact.form.opt4">Intensive "Mom &amp; Dad"</option>
+                <option value="reboot">REBOOT</option>
+                <option value="mentorship" data-i18n="contact.form.opt6">Mentorship</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label data-i18n="contact.form.message">Message (optional)</label>
+              <textarea name="message" data-i18n-placeholder="contact.form.message_ph" placeholder="Tell us about your goals..." rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-lg" data-i18n="contact.form.submit">Send Request</button>
+          </form>
+        </div>
+        <div class="contact-info anim-fade-left">
+          <h3 data-i18n="contact.connect">Connect With Us</h3>
+          <div class="social-links">
+            <a href="#" class="social-link whatsapp" onclick="openWhatsApp()">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              <span>WhatsApp</span>
+            </a>
+            <a href="#" class="social-link telegram" onclick="openTelegram()">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+              <span>Telegram</span>
+            </a>
+            <a href="#" class="social-link instagram">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 1 0 0-12.324zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405a1.441 1.441 0 1 1-2.882 0 1.441 1.441 0 0 1 2.882 0z"/></svg>
+              <span>Instagram</span>
+            </a>
+            <a href="#" class="social-link youtube">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              <span>YouTube</span>
+            </a>
+          </div>
+          <div class="contact-note">
+            <h4 data-i18n="contact.entry.title">Entry Conditions</h4>
+            <p data-i18n-html="contact.entry.text">Entry to individual work is after a <strong>free consultation</strong>. Not everyone is accepted &mdash; we ensure the right fit for both sides.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">
+            <span class="logo-icon">Q</span>
+            <span class="logo-text">KVANTUM</span>
+          </div>
+          <p data-i18n="footer.desc">Transition to Dream Reality. Transform your life through subconscious work, NLP, and quantum field mastery.</p>
+        </div>
+        <div class="footer-links">
+          <h4 data-i18n="footer.quick">Quick Links</h4>
+          <a href="#about" data-i18n="nav.about">About</a>
+          <a href="#services" data-i18n="nav.services">Services</a>
+          <a href="#programs" data-i18n="nav.programs">Programs</a>
+          <a href="#contact" data-i18n="nav.contact">Contact</a>
+        </div>
+        <div class="footer-links">
+          <h4 data-i18n="nav.programs">Programs</h4>
+          <a href="#programs" data-i18n="programs.bc.name">Brain Charge</a>
+          <a href="#programs" data-i18n="bonuses.b2.name">Club "Resources"</a>
+          <a href="#programs" data-i18n="footer.intensive">Intensive</a>
+          <a href="#programs">REBOOT</a>
+          <a href="#programs" data-i18n="programs.ms.name">Mentorship</a>
+        </div>
+        <div class="footer-links">
+          <h4 data-i18n="contact.connect">Connect</h4>
+          <a href="#" onclick="openWhatsApp()">WhatsApp</a>
+          <a href="#" onclick="openTelegram()">Telegram</a>
+          <a href="#">Instagram</a>
+          <a href="#">YouTube</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p data-i18n="footer.copy">&copy; 2025 KVANTUM by Altynai Eshinbekova. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+      <div class="modal-tabs">
+        <button class="tab-btn active" onclick="switchTab('login')" data-i18n="modal.login">Login</button>
+        <button class="tab-btn" onclick="switchTab('register')" data-i18n="modal.register">Register</button>
+      </div>
+      <form id="loginForm" class="modal-form" onsubmit="handleLogin(event)">
+        <h2 data-i18n="modal.welcome">Welcome Back</h2>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="modal.password">Password</label>
+          <input type="password" name="password" data-i18n-placeholder="modal.pass_ph" placeholder="Enter password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.login">Login</button>
+        <p class="form-note" data-i18n-html="modal.no_account">Don't have an account? <a href="#" onclick="switchTab('register')">Register here</a></p>
+      </form>
+      <form id="registerForm" class="modal-form" style="display:none" onsubmit="handleRegister(event)">
+        <h2 data-i18n="modal.create">Create Account</h2>
+        <div class="form-group">
+          <label data-i18n="modal.fullname">Full Name</label>
+          <input type="text" name="name" data-i18n-placeholder="modal.fullname_ph" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="contact.form.phone">Phone (WhatsApp)</label>
+          <input type="tel" name="phone" placeholder="+996 XXX XXX XXX">
+        </div>
+        <div class="form-group">
+          <label data-i18n="modal.password">Password</label>
+          <input type="password" name="password" data-i18n-placeholder="modal.create_pass_ph" placeholder="Create a password" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.register">Register</button>
+        <p class="form-note" data-i18n-html="modal.has_account">Already have an account? <a href="#" onclick="switchTab('login')">Login here</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Consultation Modal -->
+  <div class="modal-overlay" id="consultModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('consultModal')">&times;</button>
+      <form id="consultForm" class="modal-form" onsubmit="handleConsultation(event)">
+        <h2 data-i18n="consult.title">Book Free Consultation</h2>
+        <p class="modal-description" data-i18n="consult.desc">Fill in your details and we'll contact you via WhatsApp or Telegram to schedule your free consultation.</p>
+        <div class="form-group">
+          <label data-i18n="modal.fullname">Full Name</label>
+          <input type="text" name="name" data-i18n-placeholder="modal.fullname_ph" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="consult.phone">Phone (WhatsApp/Telegram)</label>
+          <input type="tel" name="phone" placeholder="+996 XXX XXX XXX" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="contact.form.interest">Interested In</label>
+          <select name="service">
+            <option value="consultation" data-i18n="consult.opt1">General Consultation</option>
+            <option value="brain-charge" data-i18n="contact.form.opt2">Brain Charge</option>
+            <option value="resources-club" data-i18n="contact.form.opt3">Club "Resources"</option>
+            <option value="intensive" data-i18n="contact.form.opt4">Intensive "Mom &amp; Dad"</option>
+            <option value="reboot">REBOOT</option>
+            <option value="mentorship" data-i18n="contact.form.opt6">Mentorship</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label data-i18n="consult.preferred">Preferred Contact</label>
+          <div class="radio-group">
+            <label><input type="radio" name="contact_method" value="whatsapp" checked> WhatsApp</label>
+            <label><input type="radio" name="contact_method" value="telegram"> Telegram</label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" data-i18n="consult.submit">Book Consultation</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+      <form id="paymentForm" class="modal-form" onsubmit="handlePayment(event)">
+        <h2 data-i18n="payment.title">Complete Payment</h2>
+        <div class="payment-summary" id="paymentSummary"></div>
+        <div class="form-group">
+          <label data-i18n="payment.card">Card Number</label>
+          <input type="text" name="cardNumber" placeholder="4242 4242 4242 4242" maxlength="19" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label data-i18n="payment.expiry">Expiry</label>
+            <input type="text" name="expiry" placeholder="MM/YY" maxlength="5" required>
+          </div>
+          <div class="form-group">
+            <label>CVC</label>
+            <input type="text" name="cvc" placeholder="123" maxlength="4" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label data-i18n="payment.name">Name on Card</label>
+          <input type="text" name="cardName" placeholder="ALTYNAI ESHINBEKOVA" required>
+        </div>
+        <div class="notification-select">
+          <label data-i18n="payment.confirm_via">Send confirmation via:</label>
+          <div class="radio-group">
+            <label><input type="radio" name="notify" value="whatsapp" checked> WhatsApp</label>
+            <label><input type="radio" name="notify" value="telegram"> Telegram</label>
+            <label><input type="radio" name="notify" value="both" data-i18n="payment.both"> Both</label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="payBtn" data-i18n="payment.pay">Pay Now</button>
+        <p class="payment-secure" data-i18n="payment.secure">&#128274; Secure payment &mdash; Demo mode</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal modal-success">
+      <div class="success-icon">&#10003;</div>
+      <h2 id="successTitle">Success!</h2>
+      <p id="successMessage">Your request has been processed successfully.</p>
+      <button class="btn btn-primary" onclick="closeModal('successModal')" data-i18n="modal.continue">Continue</button>
+    </div>
+  </div>
+
+  <!-- AI Chatbot Widget -->
+  <div class="chatbot-widget" id="chatbot">
+    <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()">
+      <span class="chatbot-icon">&#128172;</span>
+      <span class="chatbot-close" style="display:none">&times;</span>
+    </button>
+    <div class="chatbot-window" id="chatbotWindow">
+      <div class="chatbot-header">
+        <div class="chatbot-header-info">
+          <div class="chatbot-avatar">AI</div>
+          <div>
+            <strong data-i18n="chat.name">KVANTUM Assistant</strong>
+            <span class="chatbot-status" data-i18n="chat.online">Online</span>
+          </div>
+        </div>
+        <button class="chatbot-minimize" onclick="toggleChatbot()">&minus;</button>
+      </div>
+      <div class="chatbot-messages" id="chatbotMessages">
+        <div class="chat-message bot">
+          <div class="message-bubble" data-i18n-html="chat.welcome">
+            Welcome to KVANTUM! I'm your AI assistant. I can help you with:
+            <br><br>
+            &#8226; Program information &amp; pricing<br>
+            &#8226; Booking a free consultation<br>
+            &#8226; Learning about our services<br>
+            <br>
+            How can I help you today?
+          </div>
+        </div>
+      </div>
+      <div class="chatbot-quick-replies">
+        <button onclick="sendQuickReply('What are the prices?')" data-i18n="chat.qr1">Prices</button>
+        <button onclick="sendQuickReply('Tell me about Brain Charge')" data-i18n="chat.qr2">Brain Charge</button>
+        <button onclick="sendQuickReply('I want to book a consultation')" data-i18n="chat.qr3">Book Consultation</button>
+      </div>
+      <form class="chatbot-input" onsubmit="sendChatMessage(event)">
+        <input type="text" id="chatInput" data-i18n-placeholder="chat.placeholder" placeholder="Type your message..." autocomplete="off">
+        <button type="submit">&#10148;</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- User Menu (shown when logged in) -->
+  <div class="user-menu" id="userMenu" style="display:none">
+    <button class="user-menu-toggle" onclick="toggleUserMenu()">
+      <span id="userInitials">U</span>
+    </button>
+    <div class="user-dropdown" id="userDropdown" style="display:none">
+      <p class="user-greeting" data-i18n-html="user.greeting">Hello, <strong id="userName">User</strong></p>
+      <a href="#" onclick="showProfile()" data-i18n="user.profile">My Profile</a>
+      <a href="#" onclick="showPurchases()" data-i18n="user.purchases">My Purchases</a>
+      <a href="#" onclick="handleLogout()" data-i18n="user.logout">Logout</a>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
