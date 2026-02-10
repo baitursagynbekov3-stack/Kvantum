@@ -213,6 +213,7 @@ input:focus, select:focus, textarea:focus {
 .nav-links a:hover { color: var(--white); }
 .navbar.scrolled .nav-links a:hover { color: var(--primary); }
 .nav-actions { display: flex; align-items: center; gap: 12px; }
+.mobile-nav-buttons { display: none; }
 .nav-cta {
   background: rgba(255,255,255,0.15);
   color: var(--white);
@@ -1337,8 +1338,24 @@ select {
     padding: 10px 0;
     font-size: 0.9rem;
   }
+  .mobile-nav-buttons {
+    display: flex !important;
+    gap: 12px;
+    padding-top: 16px;
+    margin-top: 8px;
+    border-top: 1px solid #f0f0f0;
+  }
+  .mobile-nav-buttons .btn {
+    flex: 1;
+    text-align: center;
+  }
+  .mobile-nav-buttons .btn-outline {
+    color: var(--dark);
+    border-color: #e2e2e2;
+  }
   .hamburger { display: flex; }
-  .nav-actions .btn { display: none; }
+  .nav-actions .btn.btn-outline { display: none; }
+  .nav-actions .btn.nav-cta { display: none; }
   .hero { padding: 120px 0 80px; }
   .hero-title { font-size: 2.2rem; }
   .hero-description { font-size: 1rem; }

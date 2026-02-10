@@ -251,3 +251,6 @@ app.listen(PORT, () => {
     console.log('CORS enabled for all origins (ALLOWED_ORIGINS is empty)');
   }
 });
+
+// Export for Vercel serverless
+module.exports = app;
