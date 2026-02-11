@@ -588,17 +588,20 @@ function checkAuth() {
 
 function updateUIForLoggedIn() {
   const loginBtn = document.getElementById('loginBtn');
+  const navCtaBtn = document.querySelector('.nav-cta');
   const userMenu = document.getElementById('userMenu');
   const userName = document.getElementById('userName');
   const userInitials = document.getElementById('userInitials');
 
   if (currentUser) {
     if (loginBtn) loginBtn.style.display = 'none';
+    if (navCtaBtn) navCtaBtn.style.display = 'none';
     if (userMenu) userMenu.style.display = 'block';
     if (userName) userName.textContent = currentUser.name;
     if (userInitials) userInitials.textContent = currentUser.name.charAt(0).toUpperCase();
   } else {
     if (loginBtn) loginBtn.style.display = '';
+    if (navCtaBtn) navCtaBtn.style.display = '';
     if (userMenu) userMenu.style.display = 'none';
   }
 }

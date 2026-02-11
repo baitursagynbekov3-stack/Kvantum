@@ -34,6 +34,17 @@
         </button>
         <button class="btn btn-outline btn-sm" id="loginBtn" onclick="openModal('loginModal')" data-i18n="nav.login">Login</button>
         <button class="btn btn-primary btn-sm nav-cta" onclick="openModal('consultModal')" data-i18n="nav.consult">Get Started</button>
+        <div class="user-menu" id="userMenu" style="display:none">
+          <button class="user-menu-toggle" onclick="toggleUserMenu()">
+            <span id="userInitials">U</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown" style="display:none">
+            <p class="user-greeting" data-i18n-html="user.greeting">Hello, <strong id="userName">User</strong></p>
+            <a href="#" onclick="showProfile()" data-i18n="user.profile">My Profile</a>
+            <a href="#" onclick="showPurchases()" data-i18n="user.purchases">My Purchases</a>
+            <a href="#" onclick="handleLogout()" data-i18n="user.logout">Logout</a>
+          </div>
+        </div>
         <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
           <span></span><span></span><span></span>
         </button>
@@ -656,19 +667,6 @@
         <input type="text" id="chatInput" data-i18n-placeholder="chat.placeholder" placeholder="Type your message..." autocomplete="off">
         <button type="submit">&#10148;</button>
       </form>
-    </div>
-  </div>
-
-  <!-- User Menu (shown when logged in) -->
-  <div class="user-menu" id="userMenu" style="display:none">
-    <button class="user-menu-toggle" onclick="toggleUserMenu()">
-      <span id="userInitials">U</span>
-    </button>
-    <div class="user-dropdown" id="userDropdown" style="display:none">
-      <p class="user-greeting" data-i18n-html="user.greeting">Hello, <strong id="userName">User</strong></p>
-      <a href="#" onclick="showProfile()" data-i18n="user.profile">My Profile</a>
-      <a href="#" onclick="showPurchases()" data-i18n="user.purchases">My Purchases</a>
-      <a href="#" onclick="handleLogout()" data-i18n="user.logout">Logout</a>
     </div>
   </div>
 
