@@ -3,6 +3,12 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = global.prisma || new PrismaClient();
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma;
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,11 +29,6 @@ const corsOptions = {
   }
 };
 
-// In-memory storage (replace with database in production)
-const users = [];
-const bookings = [];
-const payments = [];
-
 // Middleware
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
@@ -37,13 +38,18 @@ if (SERVE_STATIC) {
   app.use(express.static(path.join(__dirname, 'public')));
 }
 
-app.get('/api/health', (req, res) => {
-  res.json({ ok: true });
+app.get('/api/health', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ ok: true, database: 'up' });
+  } catch (err) {
+    res.status(500).json({ ok: false, database: 'down' });
+  }
 });
 
 // Auth middleware
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Access denied' });
 
@@ -64,20 +70,20 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    if (users.find(u => u.email === normalizedEmail)) {
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = {
-      id: users.length + 1,
-      name,
-      email: normalizedEmail,
-      password: hashedPassword,
-      phone: phone || '',
-      createdAt: new Date()
-    };
-    users.push(user);
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email: normalizedEmail,
+        password: hashedPassword,
+        phone: phone || ''
+      }
+    });
 
     const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
 
@@ -87,6 +93,9 @@ app.post('/api/register', async (req, res) => {
       user: { id: user.id, name: user.name, email: user.email }
     });
   } catch (err) {
+    if (err && err.code === 'P2002') {
+      return res.status(400).json({ error: 'User already exists' });
+    }
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -97,7 +106,7 @@ app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     const normalizedEmail = (email || '').trim().toLowerCase();
 
-    const user = users.find(u => u.email === normalizedEmail);
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (!user) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
@@ -120,14 +129,22 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Get user profile
-app.get('/api/profile', authenticateToken, (req, res) => {
-  const user = users.find(u => u.id === req.user.id);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  res.json({ id: user.id, name: user.name, email: user.email, phone: user.phone });
+app.get('/api/profile', authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, name: true, email: true, phone: true }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Book consultation
-app.post('/api/book-consultation', (req, res) => {
+app.post('/api/book-consultation', async (req, res) => {
   try {
     const { name, email, phone, service, message } = req.body;
 
@@ -135,17 +152,16 @@ app.post('/api/book-consultation', (req, res) => {
       return res.status(400).json({ error: 'Name, email and phone are required' });
     }
 
-    const booking = {
-      id: bookings.length + 1,
-      name,
-      email,
-      phone,
-      service: service || 'consultation',
-      message: message || '',
-      status: 'pending',
-      createdAt: new Date()
-    };
-    bookings.push(booking);
+    const booking = await prisma.booking.create({
+      data: {
+        name,
+        email,
+        phone,
+        service: service || 'consultation',
+        message: message || '',
+        status: 'pending'
+      }
+    });
 
     res.json({
       message: 'Consultation booked successfully! We will contact you via WhatsApp/Telegram.',
@@ -157,21 +173,26 @@ app.post('/api/book-consultation', (req, res) => {
 });
 
 // Process payment (demo)
-app.post('/api/payment', authenticateToken, (req, res) => {
+app.post('/api/payment', authenticateToken, async (req, res) => {
   try {
     const { productId, productName, amount, currency } = req.body;
+    const normalizedAmount = Number(amount);
 
-    const payment = {
-      id: 'PAY-' + Date.now(),
-      userId: req.user.id,
-      productId,
-      productName,
-      amount,
-      currency: currency || 'KGS',
-      status: 'completed',
-      createdAt: new Date()
-    };
-    payments.push(payment);
+    if (!Number.isFinite(normalizedAmount)) {
+      return res.status(400).json({ error: 'Invalid payment amount' });
+    }
+
+    const payment = await prisma.payment.create({
+      data: {
+        id: 'PAY-' + Date.now(),
+        userId: req.user.id,
+        productId: productId || null,
+        productName: productName || null,
+        amount: normalizedAmount,
+        currency: currency || 'KGS',
+        status: 'completed'
+      }
+    });
 
     res.json({
       message: 'Payment processed successfully!',
@@ -184,6 +205,9 @@ app.post('/api/payment', authenticateToken, (req, res) => {
       notification: 'Confirmation sent via WhatsApp/Telegram'
     });
   } catch (err) {
+    if (err && err.code === 'P2003') {
+      return res.status(404).json({ error: 'User not found' });
+    }
     res.status(500).json({ error: 'Payment processing error' });
   }
 });
@@ -243,14 +267,34 @@ if (SERVE_STATIC) {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`KVANTUM server running at http://localhost:${PORT}`);
-  if (ALLOWED_ORIGINS.length) {
-    console.log(`CORS enabled for: ${ALLOWED_ORIGINS.join(', ')}`);
-  } else {
-    console.log('CORS enabled for all origins (ALLOWED_ORIGINS is empty)');
-  }
-});
+let server;
+if (require.main === module) {
+  server = app.listen(PORT, () => {
+    console.log(`KVANTUM server running at http://localhost:${PORT}`);
+    if (ALLOWED_ORIGINS.length) {
+      console.log(`CORS enabled for: ${ALLOWED_ORIGINS.join(', ')}`);
+    } else {
+      console.log('CORS enabled for all origins (ALLOWED_ORIGINS is empty)');
+    }
+  });
+
+  const shutdown = async (signal) => {
+    console.log(`Received ${signal}, shutting down gracefully...`);
+    if (server) {
+      server.close(async () => {
+        await prisma.$disconnect();
+        process.exit(0);
+      });
+      return;
+    }
+
+    await prisma.$disconnect();
+    process.exit(0);
+  };
+
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+}
 
 // Export for Vercel serverless
 module.exports = app;

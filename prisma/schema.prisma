@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  phone     String    @default("")
+  createdAt DateTime  @default(now())
+  payments  Payment[]
+}
+
+model Booking {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String
+  service   String   @default("consultation")
+  message   String   @default("")
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id          String   @id
+  userId      Int
+  productId   String?
+  productName String?
+  amount      Float
+  currency    String   @default("KGS")
+  status      String   @default("completed")
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
