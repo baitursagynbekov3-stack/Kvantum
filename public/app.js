@@ -117,6 +117,35 @@ function demoApi(path, options) {
     });
   }
 
+  if (path === '/api/reset-password') {
+    const email = (body.email || '').trim().toLowerCase();
+    const phone = String(body.phone || '').replace(/\D/g, '');
+    const newPassword = body.newPassword || '';
+
+    if (!email || !phone || !newPassword) {
+      return createApiResponse(400, { error: 'Email, phone and new password are required' });
+    }
+
+    if (String(newPassword).length < 6) {
+      return createApiResponse(400, { error: 'Password must be at least 6 characters' });
+    }
+
+    const users = getStorageArray(usersKey);
+    const index = users.findIndex((u) => {
+      const userPhone = String(u.phone || '').replace(/\D/g, '');
+      return u.email === email && userPhone && userPhone === phone;
+    });
+
+    if (index === -1) {
+      return createApiResponse(400, { error: 'Invalid email or phone' });
+    }
+
+    users[index].password = String(newPassword);
+    setStorageArray(usersKey, users);
+
+    return createApiResponse(200, { message: 'Password reset successful (demo mode)' });
+  }
+
   if (path === '/api/book-consultation') {
     const name = (body.name || '').trim();
     const email = (body.email || '').trim();
@@ -174,6 +203,45 @@ function demoApi(path, options) {
         currency: payment.currency
       },
       notification: 'Demo mode notification sent'
+    });
+  }
+
+  if (path.startsWith('/api/admin/overview')) {
+    const auth = readHeader(options && options.headers, 'Authorization');
+    if (!auth || !auth.startsWith('Bearer demo-')) {
+      return createApiResponse(401, { error: 'Access denied' });
+    }
+
+    const users = getStorageArray(usersKey)
+      .map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || '',
+        createdAt: user.createdAt || new Date().toISOString()
+      }))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const bookings = getStorageArray(bookingsKey)
+      .slice()
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const payments = getStorageArray(paymentsKey)
+      .map((payment) => ({
+        ...payment,
+        user: null
+      }))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return createApiResponse(200, {
+      totals: {
+        users: users.length,
+        bookings: bookings.length,
+        payments: payments.length
+      },
+      users: users.slice(0, 25),
+      bookings: bookings.slice(0, 25),
+      payments: payments.slice(0, 25)
     });
   }
 
@@ -349,6 +417,17 @@ const translations = {
     'modal.welcome': 'С возвращением',
     'modal.password': 'Пароль',
     'modal.pass_ph': 'Введите пароль',
+    'modal.forgot': 'Забыли пароль?',
+    'reset.title': 'Восстановление пароля',
+    'reset.desc': 'Введите email и телефон из регистрации. Мы установим новый пароль.',
+    'reset.email': 'Email',
+    'reset.phone': 'Телефон из регистрации',
+    'reset.new_password': 'Новый пароль',
+    'reset.new_password_ph': 'Минимум 6 символов',
+    'reset.confirm_password': 'Повторите новый пароль',
+    'reset.confirm_password_ph': 'Повторите пароль',
+    'reset.submit': 'Сбросить пароль',
+    'reset.back_login': 'Назад ко входу',
     'modal.no_account': 'Нет аккаунта? <a href="#" onclick="switchTab(\'register\')">Зарегистрируйтесь</a>',
     'modal.create': 'Создать аккаунт',
     'modal.fullname': 'Полное имя',
@@ -380,7 +459,11 @@ const translations = {
     'user.greeting': 'Привет, <strong id="userName">Пользователь</strong>',
     'user.profile': 'Мой профиль',
     'user.purchases': 'Мои покупки',
+    'user.admin': 'Админ панель',
     'user.logout': 'Выйти',
+    'admin.title': 'Админ панель',
+    'admin.desc': 'Последние регистрации, заявки и оплаты.',
+    'admin.loading': 'Загрузка данных...',
   }
 };
 
@@ -679,6 +762,50 @@ async function handleRegister(e) {
   }
 }
 
+function openResetModal() {
+  closeModal('loginModal');
+  openModal('resetModal');
+}
+
+async function handlePasswordReset(e) {
+  e.preventDefault();
+  const form = e.target;
+  const newPassword = form.newPassword.value;
+  const confirmPassword = form.confirmPassword.value;
+
+  if (newPassword !== confirmPassword) {
+    showToast(currentLang === 'ru' ? 'Пароли не совпадают.' : 'Passwords do not match.', 'error');
+    return;
+  }
+
+  const data = {
+    email: form.email.value,
+    phone: form.phone.value,
+    newPassword
+  };
+
+  try {
+    const res = await apiFetch('/api/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      showToast(currentLang === 'ru' ? 'Пароль обновлен. Теперь войдите.' : 'Password updated. Please login.', 'success');
+      closeModal('resetModal');
+      openModal('loginModal');
+      switchTab('login');
+      form.reset();
+    } else {
+      showToast(result.error || (currentLang === 'ru' ? 'Ошибка сброса пароля' : 'Password reset failed'), 'error');
+    }
+  } catch (err) {
+    showToast(currentLang === 'ru' ? 'Ошибка соединения. Попробуйте снова.' : 'Connection error. Please try again.', 'error');
+  }
+}
+
 function handleLogout() {
   authToken = null;
   currentUser = null;
@@ -697,6 +824,193 @@ function showProfile() {
 function showPurchases() {
   showToast('Purchases page coming soon!', 'info');
   document.getElementById('userDropdown').style.display = 'none';
+}
+
+function formatAdminDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleString(currentLang === 'ru' ? 'ru-RU' : 'en-US');
+}
+
+function buildAdminRows(items, mapRow, colSpan, emptyText) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return `<tr><td colspan="${colSpan}" class="admin-empty-row">${escapeHtml(emptyText)}</td></tr>`;
+  }
+  return items.map(mapRow).join('');
+}
+
+function renderAdminOverview(data) {
+  const panelBody = document.getElementById('adminPanelBody');
+  if (!panelBody) return;
+
+  const totals = data && data.totals ? data.totals : {};
+  const users = Array.isArray(data && data.users) ? data.users : [];
+  const bookings = Array.isArray(data && data.bookings) ? data.bookings : [];
+  const payments = Array.isArray(data && data.payments) ? data.payments : [];
+
+  const labels = currentLang === 'ru'
+    ? {
+      users: 'Пользователи',
+      bookings: 'Заявки',
+      payments: 'Оплаты',
+      usersTitle: 'Последние регистрации',
+      bookingsTitle: 'Последние заявки',
+      paymentsTitle: 'Последние оплаты',
+      userName: 'Имя',
+      userEmail: 'Email',
+      userPhone: 'Телефон',
+      createdAt: 'Дата',
+      bookingService: 'Услуга',
+      bookingStatus: 'Статус',
+      paymentProduct: 'Продукт',
+      paymentAmount: 'Сумма',
+      paymentClient: 'Клиент',
+      emptyUsers: 'Регистраций пока нет',
+      emptyBookings: 'Заявок пока нет',
+      emptyPayments: 'Оплат пока нет'
+    }
+    : {
+      users: 'Users',
+      bookings: 'Bookings',
+      payments: 'Payments',
+      usersTitle: 'Latest Registrations',
+      bookingsTitle: 'Latest Requests',
+      paymentsTitle: 'Latest Payments',
+      userName: 'Name',
+      userEmail: 'Email',
+      userPhone: 'Phone',
+      createdAt: 'Created',
+      bookingService: 'Service',
+      bookingStatus: 'Status',
+      paymentProduct: 'Product',
+      paymentAmount: 'Amount',
+      paymentClient: 'Client',
+      emptyUsers: 'No registrations yet',
+      emptyBookings: 'No requests yet',
+      emptyPayments: 'No payments yet'
+    };
+
+  panelBody.innerHTML = `
+    <div class="admin-stats-grid">
+      <div class="admin-stat-card"><span class="admin-stat-label">${labels.users}</span><strong>${Number(totals.users || 0).toLocaleString()}</strong></div>
+      <div class="admin-stat-card"><span class="admin-stat-label">${labels.bookings}</span><strong>${Number(totals.bookings || 0).toLocaleString()}</strong></div>
+      <div class="admin-stat-card"><span class="admin-stat-label">${labels.payments}</span><strong>${Number(totals.payments || 0).toLocaleString()}</strong></div>
+    </div>
+
+    <section class="admin-section">
+      <h3>${labels.usersTitle}</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>${labels.userName}</th>
+              <th>${labels.userEmail}</th>
+              <th>${labels.userPhone}</th>
+              <th>${labels.createdAt}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${buildAdminRows(
+              users,
+              (user) => `<tr><td>${escapeHtml(user.name || '-')}</td><td>${escapeHtml(user.email || '-')}</td><td>${escapeHtml(user.phone || '-')}</td><td>${escapeHtml(formatAdminDate(user.createdAt))}</td></tr>`,
+              4,
+              labels.emptyUsers
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <h3>${labels.bookingsTitle}</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>${labels.userName}</th>
+              <th>${labels.userEmail}</th>
+              <th>${labels.bookingService}</th>
+              <th>${labels.bookingStatus}</th>
+              <th>${labels.createdAt}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${buildAdminRows(
+              bookings,
+              (booking) => `<tr><td>${escapeHtml(booking.name || '-')}</td><td>${escapeHtml(booking.email || '-')}</td><td>${escapeHtml(booking.service || '-')}</td><td>${escapeHtml(booking.status || '-')}</td><td>${escapeHtml(formatAdminDate(booking.createdAt))}</td></tr>`,
+              5,
+              labels.emptyBookings
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <h3>${labels.paymentsTitle}</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>${labels.paymentProduct}</th>
+              <th>${labels.paymentAmount}</th>
+              <th>${labels.paymentClient}</th>
+              <th>${labels.createdAt}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${buildAdminRows(
+              payments,
+              (payment) => {
+                const amount = Number(payment.amount);
+                const amountLabel = Number.isFinite(amount) ? amount.toLocaleString() : (payment.amount || '-');
+                const userLabel = payment.user && payment.user.email ? payment.user.email : '-';
+                return `<tr><td>${escapeHtml(payment.id || '-')}</td><td>${escapeHtml(payment.productName || payment.productId || '-')}</td><td>${escapeHtml(String(amountLabel))} ${escapeHtml(payment.currency || '')}</td><td>${escapeHtml(userLabel)}</td><td>${escapeHtml(formatAdminDate(payment.createdAt))}</td></tr>`;
+              },
+              5,
+              labels.emptyPayments
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
+async function openAdminDashboard() {
+  const dropdown = document.getElementById('userDropdown');
+  if (dropdown) dropdown.style.display = 'none';
+
+  if (!authToken) {
+    showToast(currentLang === 'ru' ? 'Сначала войдите в аккаунт.' : 'Please login first.', 'info');
+    return;
+  }
+
+  const panelBody = document.getElementById('adminPanelBody');
+  if (!panelBody) return;
+
+  panelBody.innerHTML = `<p class="admin-empty">${currentLang === 'ru' ? 'Загрузка данных...' : 'Loading data...'}</p>`;
+  openModal('adminModal');
+
+  try {
+    const res = await apiFetch('/api/admin/overview?limit=25', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + authToken
+      }
+    });
+    const result = await res.json();
+
+    if (!res.ok) {
+      panelBody.innerHTML = `<p class="admin-empty">${escapeHtml(result.error || (currentLang === 'ru' ? 'Нет доступа' : 'Access denied'))}</p>`;
+      return;
+    }
+
+    renderAdminOverview(result);
+  } catch (err) {
+    panelBody.innerHTML = `<p class="admin-empty">${currentLang === 'ru' ? 'Ошибка соединения. Попробуйте снова.' : 'Connection error. Please try again.'}</p>`;
+  }
 }
 
 // ===== Modals =====

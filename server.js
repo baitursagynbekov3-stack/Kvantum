@@ -18,6 +18,10 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'baitursagynbekov3@gmail.com')
+  .split(',')
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean);
 
 const corsOptions = {
   origin(origin, callback) {
@@ -57,6 +61,27 @@ function authenticateToken(req, res, next) {
     if (err) return res.status(403).json({ error: 'Invalid token' });
     req.user = user;
     next();
+  });
+}
+
+function isAdminEmail(email) {
+  const normalizedEmail = (email || '').trim().toLowerCase();
+  if (!normalizedEmail) return false;
+  return ADMIN_EMAILS.includes(normalizedEmail);
+}
+
+function authenticateAdmin(req, res, next) {
+  return authenticateToken(req, res, () => {
+    if (ADMIN_EMAILS.length === 0) {
+      if (process.env.NODE_ENV !== 'production') return next();
+      return res.status(503).json({ error: 'Admin access is not configured' });
+    }
+
+    if (!isAdminEmail(req.user && req.user.email)) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    return next();
   });
 }
 
@@ -123,6 +148,43 @@ app.post('/api/login', async (req, res) => {
       token,
       user: { id: user.id, name: user.name, email: user.email }
     });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Reset password (email + phone verification)
+app.post('/api/reset-password', async (req, res) => {
+  try {
+    const { email, phone, newPassword } = req.body;
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    const normalizedPhone = String(phone || '').replace(/\D/g, '');
+
+    if (!normalizedEmail || !normalizedPhone || !newPassword) {
+      return res.status(400).json({ error: 'Email, phone and new password are required' });
+    }
+
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid email or phone' });
+    }
+
+    const storedPhone = String(user.phone || '').replace(/\D/g, '');
+    if (!storedPhone || storedPhone !== normalizedPhone) {
+      return res.status(400).json({ error: 'Invalid email or phone' });
+    }
+
+    const hashedPassword = await bcrypt.hash(String(newPassword), 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword }
+    });
+
+    res.json({ message: 'Password reset successful' });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -209,6 +271,86 @@ app.post('/api/payment', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     res.status(500).json({ error: 'Payment processing error' });
+  }
+});
+
+
+// Admin dashboard data
+app.get('/api/admin/overview', authenticateAdmin, async (req, res) => {
+  try {
+    const limitRaw = parseInt(req.query.limit, 10);
+    const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 200) : 25;
+
+    const [
+      totalUsers,
+      totalBookings,
+      totalPayments,
+      users,
+      bookings,
+      payments
+    ] = await prisma.$transaction([
+      prisma.user.count(),
+      prisma.booking.count(),
+      prisma.payment.count(),
+      prisma.user.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          createdAt: true
+        }
+      }),
+      prisma.booking.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          service: true,
+          status: true,
+          createdAt: true
+        }
+      }),
+      prisma.payment.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: {
+          id: true,
+          userId: true,
+          productId: true,
+          productName: true,
+          amount: true,
+          currency: true,
+          status: true,
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          }
+        }
+      })
+    ]);
+
+    res.json({
+      totals: {
+        users: totalUsers,
+        bookings: totalBookings,
+        payments: totalPayments
+      },
+      users,
+      bookings,
+      payments
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

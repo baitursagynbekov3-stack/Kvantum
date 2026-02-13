@@ -12,6 +12,7 @@ This project uses a static frontend on GitHub Pages and an Express API backend.
    - `DATABASE_URL`: PostgreSQL connection string
    - `JWT_SECRET`: long random string
    - `ALLOWED_ORIGINS`: `https://baitursagynbekov3-stack.github.io`
+   - `ADMIN_EMAILS`: comma-separated admin emails (example: `baitursagynbekov3@gmail.com`)
    - `SERVE_STATIC`: `false`
 
 ## 2. Connect frontend to backend

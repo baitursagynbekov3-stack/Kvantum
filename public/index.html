@@ -42,6 +42,7 @@
             <p class="user-greeting" data-i18n-html="user.greeting">Hello, <strong id="userName">User</strong></p>
             <a href="#" onclick="showProfile()" data-i18n="user.profile">My Profile</a>
             <a href="#" onclick="showPurchases()" data-i18n="user.purchases">My Purchases</a>
+            <a href="#" onclick="openAdminDashboard()" data-i18n="user.admin">Admin Dashboard</a>
             <a href="#" onclick="handleLogout()" data-i18n="user.logout">Logout</a>
           </div>
         </div>
@@ -511,6 +512,7 @@
           <input type="password" name="password" data-i18n-placeholder="modal.pass_ph" placeholder="Enter password" required>
         </div>
         <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.login">Login</button>
+        <p class="form-note"><a href="#" onclick="openResetModal(); return false;" data-i18n="modal.forgot">Forgot password?</a></p>
         <p class="form-note" data-i18n-html="modal.no_account">Don't have an account? <a href="#" onclick="switchTab('register')">Register here</a></p>
       </form>
       <form id="registerForm" class="modal-form" style="display:none" onsubmit="handleRegister(event)">
@@ -533,6 +535,35 @@
         </div>
         <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.register">Register</button>
         <p class="form-note" data-i18n-html="modal.has_account">Already have an account? <a href="#" onclick="switchTab('login')">Login here</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal -->
+  <div class="modal-overlay" id="resetModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal('resetModal')">&times;</button>
+      <form id="resetForm" class="modal-form" onsubmit="handlePasswordReset(event)">
+        <h2 data-i18n="reset.title">Password Recovery</h2>
+        <p class="modal-description" data-i18n="reset.desc">Enter your registration email and phone. We will set a new password.</p>
+        <div class="form-group">
+          <label data-i18n="reset.email">Email</label>
+          <input type="email" name="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="reset.phone">Phone from registration</label>
+          <input type="tel" name="phone" placeholder="+996 XXX XXX XXX" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="reset.new_password">New password</label>
+          <input type="password" name="newPassword" data-i18n-placeholder="reset.new_password_ph" placeholder="Minimum 6 characters" minlength="6" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="reset.confirm_password">Confirm new password</label>
+          <input type="password" name="confirmPassword" data-i18n-placeholder="reset.confirm_password_ph" placeholder="Repeat password" minlength="6" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="reset.submit">Reset Password</button>
+        <p class="form-note"><a href="#" onclick="closeModal('resetModal'); openModal('loginModal'); switchTab('login'); return false;" data-i18n="reset.back_login">Back to login</a></p>
       </form>
     </div>
   </div>
@@ -625,6 +656,18 @@
       <h2 id="successTitle">Success!</h2>
       <p id="successMessage">Your request has been processed successfully.</p>
       <button class="btn btn-primary" onclick="closeModal('successModal')" data-i18n="modal.continue">Continue</button>
+    </div>
+  </div>
+
+  <!-- Admin Modal -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal admin-modal">
+      <button class="modal-close" onclick="closeModal('adminModal')">&times;</button>
+      <h2 data-i18n="admin.title">Admin Dashboard</h2>
+      <p class="modal-description" data-i18n="admin.desc">Latest registrations, consultations, and payments.</p>
+      <div id="adminPanelBody" class="admin-panel-body">
+        <p class="admin-empty" data-i18n="admin.loading">Loading data...</p>
+      </div>
     </div>
   </div>
 
