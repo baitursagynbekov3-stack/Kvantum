@@ -876,15 +876,6 @@ input:focus, select:focus, textarea:focus {
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
-.form-inline-action {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  align-items: center;
-}
-.form-inline-action .btn {
-  white-space: nowrap;
-}
 .radio-group {
   display: flex;
   gap: 20px;
@@ -1457,9 +1448,6 @@ select {
   .admin-note-input {
     width: 100%;
     min-width: 0;
-  }
-  .form-inline-action {
-    grid-template-columns: 1fr;
   }
   .section-title { font-size: 1.8rem; }
   .nav-links { display: none; }

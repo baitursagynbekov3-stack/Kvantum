@@ -13,11 +13,6 @@ This project uses a static frontend on GitHub Pages and an Express API backend.
    - `JWT_SECRET`: long random string
    - `ALLOWED_ORIGINS`: `https://baitursagynbekov3-stack.github.io`
    - `ADMIN_EMAILS`: comma-separated admin emails (example: `baitursagynbekov3@gmail.com`)
-   - `SMS_VERIFICATION_REQUIRED`: `true`
-   - `VERIFICATION_CODE_TTL_MINUTES`: `10`
-   - `TWILIO_ACCOUNT_SID`: Twilio Account SID
-   - `TWILIO_AUTH_TOKEN`: Twilio Auth Token
-   - `TWILIO_FROM_NUMBER`: Twilio sender (E.164, e.g. `+12025550123`)
    - `SERVE_STATIC`: `false`
 
 ## 2. Connect frontend to backend

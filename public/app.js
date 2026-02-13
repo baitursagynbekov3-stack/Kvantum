@@ -3,7 +3,6 @@ let currentUser = null;
 let authToken = null;
 let currentPayment = null;
 let currentLang = localStorage.getItem('kvantum_lang') || 'en';
-let registerVerificationToken = '';
 let adminOverviewData = null;
 let adminFilters = {
   search: '',
@@ -33,17 +32,13 @@ function normalizePhone(value) {
     phone = '+' + phone.slice(2);
   }
 
-  if (phone.startsWith('+')) {
-    const digits = phone.slice(1).replace(/\D/g, '');
-    if (digits.length < 8 || digits.length > 15) return '';
-    return '+' + digits;
+  if (!phone.startsWith('+')) {
+    return '';
   }
 
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length === 10) return '+1' + digits;
-  if (digits.length === 11 && digits.startsWith('1')) return '+' + digits;
-
-  return '';
+  const digits = phone.slice(1).replace(/\D/g, '');
+  if (digits.length < 8 || digits.length > 15) return '';
+  return '+' + digits;
 }
 
 function parseJsonBody(options) {
@@ -97,55 +92,15 @@ function demoApi(path, options) {
     return createApiResponse(200, { ok: true, demo: true });
   }
 
-  if (path === '/api/register/send-code') {
-    const email = (body.email || '').trim().toLowerCase();
-    const phone = normalizePhone(body.phone);
-    const verificationsKey = 'kvantum_demo_register_codes';
-
-    if (!email || !phone) {
-      return createApiResponse(400, { error: 'Valid email and phone are required' });
-    }
-
-    if (!isValidEmail(email)) {
-      return createApiResponse(400, { error: 'Invalid email format' });
-    }
-
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    const verificationToken = 'demo-verify-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
-    const expiresAt = Date.now() + 10 * 60 * 1000;
-
-    const verifications = getStorageArray(verificationsKey)
-      .filter((item) => Number(item.expiresAt) > Date.now())
-      .filter((item) => !(item.email === email && item.phone === phone));
-
-    verifications.push({
-      email,
-      phone,
-      code,
-      verificationToken,
-      expiresAt
-    });
-
-    setStorageArray(verificationsKey, verifications);
-
-    return createApiResponse(200, {
-      message: 'Verification code sent (demo mode)',
-      verificationToken,
-      debugCode: code
-    });
-  }
 
   if (path === '/api/register') {
     const name = (body.name || '').trim();
     const email = (body.email || '').trim().toLowerCase();
     const password = body.password || '';
     const phone = normalizePhone(body.phone);
-    const verificationCode = String(body.verificationCode || '').trim();
-    const verificationToken = String(body.verificationToken || '').trim();
-    const verificationsKey = 'kvantum_demo_register_codes';
 
     if (!name || !email || !password || !phone) {
-      return createApiResponse(400, { error: 'Name, valid email, password and valid phone are required' });
+      return createApiResponse(400, { error: 'Name, valid email, password and phone with country code are required' });
     }
 
     if (!isValidEmail(email)) {
@@ -156,20 +111,9 @@ function demoApi(path, options) {
       return createApiResponse(400, { error: 'Password must be at least 6 characters' });
     }
 
-    if (!verificationCode || !verificationToken) {
-      return createApiResponse(400, { error: 'SMS verification code is required' });
-    }
-
     const users = getStorageArray(usersKey);
     if (users.some((u) => u.email === email)) {
       return createApiResponse(400, { error: 'User already exists' });
-    }
-
-    const verifications = getStorageArray(verificationsKey).filter((item) => Number(item.expiresAt) > Date.now());
-    const codeIndex = verifications.findIndex((item) => item.email === email && item.phone === phone && item.verificationToken === verificationToken && String(item.code) === verificationCode);
-
-    if (codeIndex === -1) {
-      return createApiResponse(400, { error: 'Invalid verification code' });
     }
 
     const user = {
@@ -183,9 +127,6 @@ function demoApi(path, options) {
 
     users.push(user);
     setStorageArray(usersKey, users);
-
-    verifications.splice(codeIndex, 1);
-    setStorageArray(verificationsKey, verifications);
 
     const token = 'demo-' + btoa(email + ':' + Date.now());
     return createApiResponse(200, {
@@ -244,11 +185,15 @@ function demoApi(path, options) {
 
   if (path === '/api/book-consultation') {
     const name = (body.name || '').trim();
-    const email = (body.email || '').trim();
-    const phone = (body.phone || '').trim();
+    const email = (body.email || '').trim().toLowerCase();
+    const phone = normalizePhone(body.phone);
 
     if (!name || !email || !phone) {
-      return createApiResponse(400, { error: 'Name, email and phone are required' });
+      return createApiResponse(400, { error: 'Name, valid email and phone with country code are required' });
+    }
+
+    if (!isValidEmail(email)) {
+      return createApiResponse(400, { error: 'Invalid email format' });
     }
 
     const bookings = getStorageArray(bookingsKey);
@@ -560,9 +505,6 @@ const translations = {
     'modal.password': 'Пароль',
     'modal.pass_ph': 'Введите пароль',
     'modal.phone_ph': '+1 555 123 4567',
-    'modal.sms_code': 'Код из SMS',
-    'modal.sms_code_ph': '6 цифр',
-    'modal.send_code': 'Отправить код',
     'modal.forgot': 'Забыли пароль?',
     'reset.title': 'Восстановление пароля',
     'reset.desc': 'Введите email и телефон из регистрации. Мы установим новый пароль.',
@@ -693,17 +635,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateLangButton();
   if (currentLang !== 'en') applyTranslations(currentLang);
 
-  const registerForm = document.getElementById('registerForm');
-  if (registerForm) {
-    ['email', 'phone'].forEach((fieldName) => {
-      const field = registerForm.elements[fieldName];
-      if (field) {
-        field.addEventListener('input', () => {
-          registerVerificationToken = '';
-        });
-      }
-    });
-  }
 
   // Trigger hero animations immediately
   setTimeout(() => {
@@ -885,71 +816,12 @@ async function handleLogin(e) {
   }
 }
 
-async function sendRegistrationCode() {
-  const form = document.getElementById('registerForm');
-  if (!form) return;
-
-  const email = String(form.email.value || '').trim().toLowerCase();
-  const normalizedPhone = normalizePhone(form.phone.value);
-  const sendBtn = document.getElementById('sendSmsCodeBtn');
-
-  if (!isValidEmail(email)) {
-    showToast(currentLang === 'ru' ? 'Введите корректный email.' : 'Please enter a valid email.', 'error');
-    return;
-  }
-
-  if (!normalizedPhone) {
-    showToast(currentLang === 'ru' ? 'Введите корректный телефон в международном формате.' : 'Please enter a valid international phone number.', 'error');
-    return;
-  }
-
-  const defaultBtnText = sendBtn ? sendBtn.textContent : '';
-  if (sendBtn) {
-    sendBtn.disabled = true;
-    sendBtn.textContent = currentLang === 'ru' ? 'Отправка...' : 'Sending...';
-  }
-
-  try {
-    const res = await apiFetch('/api/register/send-code', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, phone: normalizedPhone })
-    });
-    const result = await res.json();
-
-    if (!res.ok) {
-      showToast(result.error || (currentLang === 'ru' ? 'Не удалось отправить код.' : 'Failed to send code.'), 'error');
-      return;
-    }
-
-    registerVerificationToken = String(result.verificationToken || '');
-    form.phone.value = normalizedPhone;
-
-    const codeInput = document.getElementById('registerCodeInput');
-    if (codeInput) codeInput.focus();
-
-    let successMessage = currentLang === 'ru' ? 'Код отправлен по SMS.' : 'Verification code sent via SMS.';
-    if (result.debugCode) {
-      successMessage += ` (${result.debugCode})`;
-    }
-
-    showToast(successMessage, 'success');
-  } catch (err) {
-    showToast(currentLang === 'ru' ? 'Ошибка соединения. Попробуйте снова.' : 'Connection error. Please try again.', 'error');
-  } finally {
-    if (sendBtn) {
-      sendBtn.disabled = false;
-      sendBtn.textContent = defaultBtnText || (currentLang === 'ru' ? 'Отправить код' : 'Send Code');
-    }
-  }
-}
 
 async function handleRegister(e) {
   e.preventDefault();
   const form = e.target;
   const normalizedEmail = String(form.email.value || '').trim().toLowerCase();
   const normalizedPhone = normalizePhone(form.phone.value);
-  const verificationCode = String(form.verificationCode.value || '').trim();
 
   if (!isValidEmail(normalizedEmail)) {
     showToast(currentLang === 'ru' ? 'Введите корректный email.' : 'Please enter a valid email.', 'error');
@@ -957,12 +829,7 @@ async function handleRegister(e) {
   }
 
   if (!normalizedPhone) {
-    showToast(currentLang === 'ru' ? 'Введите корректный телефон в международном формате.' : 'Please enter a valid international phone number.', 'error');
-    return;
-  }
-
-  if (!registerVerificationToken || !verificationCode) {
-    showToast(currentLang === 'ru' ? 'Сначала отправьте и введите SMS-код.' : 'Please request and enter the SMS code first.', 'error');
+    showToast(currentLang === 'ru' ? 'Введите телефон в международном формате, например +1 202 555 0123.' : 'Use international phone format, e.g. +1 202 555 0123.', 'error');
     return;
   }
 
@@ -970,9 +837,7 @@ async function handleRegister(e) {
     name: form.name.value,
     email: normalizedEmail,
     phone: normalizedPhone,
-    password: form.password.value,
-    verificationToken: registerVerificationToken,
-    verificationCode
+    password: form.password.value
   };
 
   try {
@@ -991,7 +856,6 @@ async function handleRegister(e) {
       updateUIForLoggedIn();
       closeModal('loginModal');
       showToast('Account created! Welcome, ' + currentUser.name + '!', 'success');
-      registerVerificationToken = '';
       form.reset();
     } else {
       showToast(result.error || 'Registration failed', 'error');
@@ -1488,7 +1352,6 @@ function switchTab(tab) {
   const registerForm = document.getElementById('registerForm');
   const tabs = document.querySelectorAll('.tab-btn');
 
-  registerVerificationToken = '';
 
   if (tab === 'login') {
     loginForm.style.display = 'block';
