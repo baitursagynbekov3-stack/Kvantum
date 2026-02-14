@@ -3,6 +3,11 @@ let currentUser = null;
 let authToken = null;
 let currentPayment = null;
 let currentLang = localStorage.getItem('kvantum_lang') || 'en';
+let adminOverviewData = null;
+let adminFilters = {
+  search: '',
+  bookingStatus: 'all'
+};
 
 // Use external API in static hosting (GitHub Pages) via public/config.js
 const API_BASE_URL = (window.KVANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
@@ -11,6 +16,29 @@ const USE_DEMO_API = window.KVANTUM_USE_DEMO_API === true || (!API_BASE_URL && w
 function buildApiUrl(path) {
   const normalizedPath = path.startsWith('/') ? path : '/' + path;
   return API_BASE_URL ? API_BASE_URL + normalizedPath : normalizedPath;
+}
+
+function isValidEmail(value) {
+  const email = String(value || '').trim().toLowerCase();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+function normalizePhone(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  let phone = raw.replace(/[^\d+]/g, '');
+  if (phone.startsWith('00')) {
+    phone = '+' + phone.slice(2);
+  }
+
+  if (!phone.startsWith('+')) {
+    return '';
+  }
+
+  const digits = phone.slice(1).replace(/\D/g, '');
+  if (digits.length < 8 || digits.length > 15) return '';
+  return '+' + digits;
 }
 
 function parseJsonBody(options) {
@@ -64,14 +92,23 @@ function demoApi(path, options) {
     return createApiResponse(200, { ok: true, demo: true });
   }
 
+
   if (path === '/api/register') {
     const name = (body.name || '').trim();
     const email = (body.email || '').trim().toLowerCase();
     const password = body.password || '';
-    const phone = (body.phone || '').trim();
+    const phone = normalizePhone(body.phone);
 
-    if (!name || !email || !password) {
-      return createApiResponse(400, { error: 'All fields are required' });
+    if (!name || !email || !password || !phone) {
+      return createApiResponse(400, { error: 'Name, valid email, password and phone with country code are required' });
+    }
+
+    if (!isValidEmail(email)) {
+      return createApiResponse(400, { error: 'Invalid email format' });
+    }
+
+    if (String(password).length < 6) {
+      return createApiResponse(400, { error: 'Password must be at least 6 characters' });
     }
 
     const users = getStorageArray(usersKey);
@@ -120,13 +157,46 @@ function demoApi(path, options) {
     });
   }
 
+  if (path === '/api/reset-password') {
+    const email = (body.email || '').trim().toLowerCase();
+    const phone = normalizePhone(body.phone);
+    const newPassword = body.newPassword || '';
+
+    if (!email || !phone || !newPassword) {
+      return createApiResponse(400, { error: 'Email, phone and new password are required' });
+    }
+
+    if (String(newPassword).length < 6) {
+      return createApiResponse(400, { error: 'Password must be at least 6 characters' });
+    }
+
+    const users = getStorageArray(usersKey);
+    const index = users.findIndex((u) => {
+      const userPhone = normalizePhone(u.phone);
+      return u.email === email && userPhone && userPhone === phone;
+    });
+
+    if (index === -1) {
+      return createApiResponse(400, { error: 'Invalid email or phone' });
+    }
+
+    users[index].password = String(newPassword);
+    setStorageArray(usersKey, users);
+
+    return createApiResponse(200, { message: 'Password reset successful (demo mode)' });
+  }
+
   if (path === '/api/book-consultation') {
     const name = (body.name || '').trim();
-    const email = (body.email || '').trim();
-    const phone = (body.phone || '').trim();
+    const email = (body.email || '').trim().toLowerCase();
+    const phone = normalizePhone(body.phone);
 
     if (!name || !email || !phone) {
-      return createApiResponse(400, { error: 'Name, email and phone are required' });
+      return createApiResponse(400, { error: 'Name, valid email and phone with country code are required' });
+    }
+
+    if (!isValidEmail(email)) {
+      return createApiResponse(400, { error: 'Invalid email format' });
     }
 
     const bookings = getStorageArray(bookingsKey);
@@ -177,6 +247,91 @@ function demoApi(path, options) {
         currency: payment.currency
       },
       notification: 'Demo mode notification sent'
+    });
+  }
+
+  if (path.startsWith('/api/admin/overview')) {
+    const auth = readHeader(options && options.headers, 'Authorization');
+    if (!auth || !auth.startsWith('Bearer demo-')) {
+      return createApiResponse(401, { error: 'Access denied' });
+    }
+
+    const users = getStorageArray(usersKey)
+      .map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || '',
+        createdAt: user.createdAt || new Date().toISOString()
+      }))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const bookings = getStorageArray(bookingsKey)
+      .slice()
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const payments = getStorageArray(paymentsKey)
+      .map((payment) => ({
+        ...payment,
+        user: null
+      }))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return createApiResponse(200, {
+      totals: {
+        users: users.length,
+        bookings: bookings.length,
+        payments: payments.length
+      },
+      users: users.slice(0, 200),
+      bookings: bookings.slice(0, 200),
+      payments: payments.slice(0, 200)
+    });
+  }
+
+  if (path.startsWith('/api/admin/bookings/') && String((options && options.method) || 'GET').toUpperCase() === 'PATCH') {
+    const auth = readHeader(options && options.headers, 'Authorization');
+    if (!auth || !auth.startsWith('Bearer demo-')) {
+      return createApiResponse(401, { error: 'Access denied' });
+    }
+
+    const bookingId = Number(path.split('?')[0].split('/').pop());
+    const status = String(body.status || '').trim().toLowerCase();
+    const note = String(body.note || '').trim();
+    const allowedStatuses = ['pending', 'new', 'in_progress', 'done', 'cancelled'];
+
+    if (!Number.isInteger(bookingId) || bookingId <= 0) {
+      return createApiResponse(400, { error: 'Invalid booking id' });
+    }
+
+    if (!allowedStatuses.includes(status)) {
+      return createApiResponse(400, { error: 'Invalid booking status' });
+    }
+
+    const bookings = getStorageArray(bookingsKey);
+    const index = bookings.findIndex((booking) => Number(booking.id) === bookingId);
+
+    if (index === -1) {
+      return createApiResponse(404, { error: 'Booking not found' });
+    }
+
+    const existingMessage = String(bookings[index].message || '');
+    const nextMessage = note
+      ? (existingMessage ? `${existingMessage}
+[ADMIN ${new Date().toISOString()}] ${note}` : `[ADMIN ${new Date().toISOString()}] ${note}`)
+      : existingMessage;
+
+    bookings[index] = {
+      ...bookings[index],
+      status,
+      message: nextMessage
+    };
+
+    setStorageArray(bookingsKey, bookings);
+
+    return createApiResponse(200, {
+      message: 'Booking updated successfully (demo mode)',
+      booking: bookings[index]
     });
   }
 
@@ -434,6 +589,18 @@ const translations = {
     'modal.welcome': 'С возвращением',
     'modal.password': 'Пароль',
     'modal.pass_ph': 'Введите пароль',
+    'modal.phone_ph': '+1 555 123 4567',
+    'modal.forgot': 'Забыли пароль?',
+    'reset.title': 'Восстановление пароля',
+    'reset.desc': 'Введите email и телефон из регистрации. Мы установим новый пароль.',
+    'reset.email': 'Email',
+    'reset.phone': 'Телефон из регистрации',
+    'reset.new_password': 'Новый пароль',
+    'reset.new_password_ph': 'Минимум 6 символов',
+    'reset.confirm_password': 'Повторите новый пароль',
+    'reset.confirm_password_ph': 'Повторите пароль',
+    'reset.submit': 'Сбросить пароль',
+    'reset.back_login': 'Назад ко входу',
     'modal.no_account': 'Нет аккаунта? <a href="#" onclick="switchTab(\'register\')">Зарегистрируйтесь</a>',
     'modal.create': 'Создать аккаунт',
     'modal.fullname': 'Полное имя',
@@ -465,7 +632,11 @@ const translations = {
     'user.greeting': 'Привет, <strong id="userName">Пользователь</strong>',
     'user.profile': 'Мой профиль',
     'user.purchases': 'Мои покупки',
+    'user.admin': 'Админ панель',
     'user.logout': 'Выйти',
+    'admin.title': 'Админ панель',
+    'admin.desc': 'Последние регистрации, заявки и оплаты.',
+    'admin.loading': 'Загрузка данных...',
   }
 };
 
@@ -652,6 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (currentLang !== 'en') applyTranslations(currentLang);
   loadSiteContent();
 
+
   // Trigger hero animations immediately
   setTimeout(() => {
     document.querySelectorAll('.hero .anim-fade-up').forEach(el => {
@@ -776,6 +948,7 @@ function checkAuth() {
 
 function updateUIForLoggedIn() {
   const loginBtn = document.getElementById('loginBtn');
+  const navCtaBtn = document.querySelector('.nav-cta');
   const userMenu = document.getElementById('userMenu');
   const userName = document.getElementById('userName');
   const userInitials = document.getElementById('userInitials');
@@ -783,12 +956,14 @@ function updateUIForLoggedIn() {
 
   if (currentUser) {
     if (loginBtn) loginBtn.style.display = 'none';
+    if (navCtaBtn) navCtaBtn.style.display = 'none';
     if (userMenu) userMenu.style.display = 'block';
     if (userName) userName.textContent = currentUser.name;
     if (userInitials) userInitials.textContent = currentUser.name.charAt(0).toUpperCase();
     if (adminLink) adminLink.style.display = currentUser.role === 'admin' ? 'block' : 'none';
   } else {
     if (loginBtn) loginBtn.style.display = '';
+    if (navCtaBtn) navCtaBtn.style.display = '';
     if (userMenu) userMenu.style.display = 'none';
     if (adminLink) adminLink.style.display = 'none';
   }
@@ -832,13 +1007,27 @@ async function handleLogin(e) {
   }
 }
 
+
 async function handleRegister(e) {
   e.preventDefault();
   const form = e.target;
+  const normalizedEmail = String(form.email.value || '').trim().toLowerCase();
+  const normalizedPhone = normalizePhone(form.phone.value);
+
+  if (!isValidEmail(normalizedEmail)) {
+    showToast(currentLang === 'ru' ? 'Введите корректный email.' : 'Please enter a valid email.', 'error');
+    return;
+  }
+
+  if (!normalizedPhone) {
+    showToast(currentLang === 'ru' ? 'Введите телефон в международном формате, например +1 202 555 0123.' : 'Use international phone format, e.g. +1 202 555 0123.', 'error');
+    return;
+  }
+
   const data = {
     name: form.name.value,
-    email: form.email.value,
-    phone: form.phone.value,
+    email: normalizedEmail,
+    phone: normalizedPhone,
     password: form.password.value
   };
 
@@ -867,6 +1056,56 @@ async function handleRegister(e) {
   }
 }
 
+function openResetModal() {
+  closeModal('loginModal');
+  openModal('resetModal');
+}
+
+async function handlePasswordReset(e) {
+  e.preventDefault();
+  const form = e.target;
+  const newPassword = form.newPassword.value;
+  const confirmPassword = form.confirmPassword.value;
+
+  if (newPassword !== confirmPassword) {
+    showToast(currentLang === 'ru' ? 'Пароли не совпадают.' : 'Passwords do not match.', 'error');
+    return;
+  }
+
+  const normalizedPhone = normalizePhone(form.phone.value);
+  if (!normalizedPhone) {
+    showToast(currentLang === 'ru' ? 'Введите корректный телефон в международном формате.' : 'Please enter a valid international phone number.', 'error');
+    return;
+  }
+
+  const data = {
+    email: form.email.value,
+    phone: normalizedPhone,
+    newPassword
+  };
+
+  try {
+    const res = await apiFetch('/api/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      showToast(currentLang === 'ru' ? 'Пароль обновлен. Теперь войдите.' : 'Password updated. Please login.', 'success');
+      closeModal('resetModal');
+      openModal('loginModal');
+      switchTab('login');
+      form.reset();
+    } else {
+      showToast(result.error || (currentLang === 'ru' ? 'Ошибка сброса пароля' : 'Password reset failed'), 'error');
+    }
+  } catch (err) {
+    showToast(currentLang === 'ru' ? 'Ошибка соединения. Попробуйте снова.' : 'Connection error. Please try again.', 'error');
+  }
+}
+
 function handleLogout() {
   authToken = null;
   currentUser = null;
@@ -887,6 +1126,407 @@ function showPurchases() {
   document.getElementById('userDropdown').style.display = 'none';
 }
 
+function formatAdminDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleString(currentLang === 'ru' ? 'ru-RU' : 'en-US');
+}
+
+function normalizeAdminValue(value) {
+  return String(value || '').toLowerCase().trim();
+}
+
+function getAdminLabels() {
+  if (currentLang === 'ru') {
+    return {
+      users: 'Пользователи',
+      bookings: 'Заявки',
+      payments: 'Оплаты',
+      usersTitle: 'Последние регистрации',
+      bookingsTitle: 'Последние заявки',
+      paymentsTitle: 'Последние оплаты',
+      userName: 'Имя',
+      userEmail: 'Email',
+      userPhone: 'Телефон',
+      createdAt: 'Дата',
+      bookingService: 'Услуга',
+      bookingStatus: 'Статус',
+      bookingManage: 'Управление',
+      paymentProduct: 'Продукт',
+      paymentAmount: 'Сумма',
+      paymentClient: 'Клиент',
+      emptyUsers: 'Регистраций пока нет',
+      emptyBookings: 'Заявок пока нет',
+      emptyPayments: 'Оплат пока нет',
+      searchPlaceholder: 'Поиск: имя, email, телефон, продукт',
+      bookingStatusFilter: 'Фильтр статуса',
+      statusAll: 'Все статусы',
+      notePlaceholder: 'Заметка менеджера (опционально)',
+      save: 'Сохранить',
+      refresh: 'Обновить',
+      clear: 'Сбросить',
+      saved: 'Заявка обновлена',
+      saveError: 'Не удалось обновить заявку',
+      status: {
+        pending: 'Ожидание',
+        new: 'Новая',
+        in_progress: 'В работе',
+        done: 'Готово',
+        cancelled: 'Отменено'
+      }
+    };
+  }
+
+  return {
+    users: 'Users',
+    bookings: 'Bookings',
+    payments: 'Payments',
+    usersTitle: 'Latest Registrations',
+    bookingsTitle: 'Latest Requests',
+    paymentsTitle: 'Latest Payments',
+    userName: 'Name',
+    userEmail: 'Email',
+    userPhone: 'Phone',
+    createdAt: 'Created',
+    bookingService: 'Service',
+    bookingStatus: 'Status',
+    bookingManage: 'Manage',
+    paymentProduct: 'Product',
+    paymentAmount: 'Amount',
+    paymentClient: 'Client',
+    emptyUsers: 'No registrations yet',
+    emptyBookings: 'No requests yet',
+    emptyPayments: 'No payments yet',
+    searchPlaceholder: 'Search: name, email, phone, product',
+    bookingStatusFilter: 'Status filter',
+    statusAll: 'All statuses',
+    notePlaceholder: 'Manager note (optional)',
+    save: 'Save',
+    refresh: 'Refresh',
+    clear: 'Clear',
+    saved: 'Booking updated',
+    saveError: 'Failed to update booking',
+    status: {
+      pending: 'Pending',
+      new: 'New',
+      in_progress: 'In Progress',
+      done: 'Done',
+      cancelled: 'Cancelled'
+    }
+  };
+}
+
+function getBookingStatusLabel(status, labels) {
+  const normalized = normalizeAdminValue(status);
+  return labels.status[normalized] || status || '-';
+}
+
+function buildAdminRows(items, mapRow, colSpan, emptyText) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return `<tr><td colspan="${colSpan}" class="admin-empty-row">${escapeHtml(emptyText)}</td></tr>`;
+  }
+  return items.map(mapRow).join('');
+}
+
+function matchesAdminSearch(query, values) {
+  if (!query) return true;
+  return values.some((value) => normalizeAdminValue(value).includes(query));
+}
+
+function setAdminSearch(value) {
+  adminFilters.search = String(value || '');
+  if (adminOverviewData) renderAdminOverview(adminOverviewData);
+}
+
+function setAdminBookingStatus(value) {
+  adminFilters.bookingStatus = normalizeAdminValue(value) || 'all';
+  if (adminOverviewData) renderAdminOverview(adminOverviewData);
+}
+
+function clearAdminFilters() {
+  adminFilters.search = '';
+  adminFilters.bookingStatus = 'all';
+  if (adminOverviewData) renderAdminOverview(adminOverviewData);
+}
+
+async function saveBookingAdmin(bookingId) {
+  const labels = getAdminLabels();
+
+  if (!authToken) {
+    showToast(currentLang === 'ru' ? 'Сначала войдите в аккаунт.' : 'Please login first.', 'info');
+    return;
+  }
+
+  const statusEl = document.getElementById(`adminBookingStatus-${bookingId}`);
+  const noteEl = document.getElementById(`adminBookingNote-${bookingId}`);
+  if (!statusEl) return;
+
+  const status = normalizeAdminValue(statusEl.value);
+  const note = noteEl ? noteEl.value.trim() : '';
+
+  try {
+    const res = await apiFetch(`/api/admin/bookings/${bookingId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + authToken
+      },
+      body: JSON.stringify({ status, note })
+    });
+
+    const result = await res.json();
+    if (!res.ok) {
+      showToast(result.error || labels.saveError, 'error');
+      return;
+    }
+
+    if (adminOverviewData && Array.isArray(adminOverviewData.bookings) && result.booking) {
+      const index = adminOverviewData.bookings.findIndex((booking) => Number(booking.id) === Number(bookingId));
+      if (index !== -1) {
+        adminOverviewData.bookings[index] = {
+          ...adminOverviewData.bookings[index],
+          ...result.booking
+        };
+      }
+    }
+
+    if (noteEl) noteEl.value = '';
+    renderAdminOverview(adminOverviewData);
+    showToast(labels.saved, 'success');
+  } catch (err) {
+    showToast(labels.saveError, 'error');
+  }
+}
+
+function renderAdminOverview(data) {
+  const panelBody = document.getElementById('adminPanelBody');
+  if (!panelBody) return;
+
+  const labels = getAdminLabels();
+  const totals = data && data.totals ? data.totals : {};
+  const usersRaw = Array.isArray(data && data.users) ? data.users : [];
+  const bookingsRaw = Array.isArray(data && data.bookings) ? data.bookings : [];
+  const paymentsRaw = Array.isArray(data && data.payments) ? data.payments : [];
+
+  const searchQuery = normalizeAdminValue(adminFilters.search);
+  const bookingStatusFilter = normalizeAdminValue(adminFilters.bookingStatus || 'all');
+
+  const users = usersRaw.filter((user) => matchesAdminSearch(searchQuery, [user.name, user.email, user.phone]));
+
+  const bookings = bookingsRaw.filter((booking) => {
+    const statusOk = bookingStatusFilter === 'all' || normalizeAdminValue(booking.status) === bookingStatusFilter;
+    if (!statusOk) return false;
+    return matchesAdminSearch(searchQuery, [booking.name, booking.email, booking.phone, booking.service, booking.status, booking.message]);
+  });
+
+  const payments = paymentsRaw.filter((payment) => matchesAdminSearch(searchQuery, [
+    payment.id,
+    payment.productId,
+    payment.productName,
+    payment.currency,
+    payment.user && payment.user.email,
+    payment.user && payment.user.name
+  ]));
+
+  const statusOptions = ['pending', 'new', 'in_progress', 'done', 'cancelled'];
+
+  panelBody.innerHTML = `
+    <div class="admin-filter-bar">
+      <input
+        type="text"
+        class="admin-filter-input"
+        value="${escapeHtml(adminFilters.search)}"
+        placeholder="${escapeHtml(labels.searchPlaceholder)}"
+        oninput="setAdminSearch(this.value)"
+      >
+      <select class="admin-filter-select" onchange="setAdminBookingStatus(this.value)">
+        <option value="all" ${bookingStatusFilter === 'all' ? 'selected' : ''}>${escapeHtml(labels.statusAll)}</option>
+        ${statusOptions.map((statusKey) => `<option value="${statusKey}" ${bookingStatusFilter === statusKey ? 'selected' : ''}>${escapeHtml(getBookingStatusLabel(statusKey, labels))}</option>`).join('')}
+      </select>
+      <button class="btn btn-outline btn-sm" onclick="refreshAdminOverview()">${escapeHtml(labels.refresh)}</button>
+      <button class="btn btn-outline btn-sm" onclick="clearAdminFilters()">${escapeHtml(labels.clear)}</button>
+    </div>
+
+    <div class="admin-stats-grid">
+      <div class="admin-stat-card"><span class="admin-stat-label">${labels.users}</span><strong>${Number(users.length).toLocaleString()}</strong></div>
+      <div class="admin-stat-card"><span class="admin-stat-label">${labels.bookings}</span><strong>${Number(bookings.length).toLocaleString()}</strong></div>
+      <div class="admin-stat-card"><span class="admin-stat-label">${labels.payments}</span><strong>${Number(payments.length).toLocaleString()}</strong></div>
+    </div>
+
+    <section class="admin-section">
+      <h3>${labels.usersTitle} (${Number(totals.users || usersRaw.length).toLocaleString()})</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>${labels.userName}</th>
+              <th>${labels.userEmail}</th>
+              <th>${labels.userPhone}</th>
+              <th>${labels.createdAt}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${buildAdminRows(
+              users,
+              (user) => `<tr><td>${escapeHtml(user.name || '-')}</td><td>${escapeHtml(user.email || '-')}</td><td>${escapeHtml(user.phone || '-')}</td><td>${escapeHtml(formatAdminDate(user.createdAt))}</td></tr>`,
+              4,
+              labels.emptyUsers
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <h3>${labels.bookingsTitle} (${Number(totals.bookings || bookingsRaw.length).toLocaleString()})</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>${labels.userName}</th>
+              <th>${labels.userEmail}</th>
+              <th>${labels.bookingService}</th>
+              <th>${labels.bookingStatus}</th>
+              <th>${labels.createdAt}</th>
+              <th>${labels.bookingManage}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${buildAdminRows(
+              bookings,
+              (booking) => {
+                const bookingId = Number(booking.id);
+                const statusValue = normalizeAdminValue(booking.status) || 'pending';
+
+                return `<tr>
+                  <td>${escapeHtml(booking.name || '-')}</td>
+                  <td>${escapeHtml(booking.email || '-')}</td>
+                  <td>${escapeHtml(booking.service || '-')}</td>
+                  <td>${escapeHtml(getBookingStatusLabel(booking.status, labels))}</td>
+                  <td>${escapeHtml(formatAdminDate(booking.createdAt))}</td>
+                  <td>
+                    <div class="admin-booking-actions">
+                      <select id="adminBookingStatus-${bookingId}" class="admin-status-select">
+                        ${statusOptions.map((statusKey) => `<option value="${statusKey}" ${statusValue === statusKey ? 'selected' : ''}>${escapeHtml(getBookingStatusLabel(statusKey, labels))}</option>`).join('')}
+                      </select>
+                      <input id="adminBookingNote-${bookingId}" class="admin-note-input" type="text" placeholder="${escapeHtml(labels.notePlaceholder)}">
+                      <button class="btn btn-primary btn-sm" onclick="saveBookingAdmin(${bookingId})">${escapeHtml(labels.save)}</button>
+                    </div>
+                  </td>
+                </tr>`;
+              },
+              6,
+              labels.emptyBookings
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <h3>${labels.paymentsTitle} (${Number(totals.payments || paymentsRaw.length).toLocaleString()})</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>${labels.paymentProduct}</th>
+              <th>${labels.paymentAmount}</th>
+              <th>${labels.paymentClient}</th>
+              <th>${labels.createdAt}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${buildAdminRows(
+              payments,
+              (payment) => {
+                const amount = Number(payment.amount);
+                const amountLabel = Number.isFinite(amount) ? amount.toLocaleString() : (payment.amount || '-');
+                const userLabel = payment.user && payment.user.email ? payment.user.email : '-';
+                return `<tr><td>${escapeHtml(payment.id || '-')}</td><td>${escapeHtml(payment.productName || payment.productId || '-')}</td><td>${escapeHtml(String(amountLabel))} ${escapeHtml(payment.currency || '')}</td><td>${escapeHtml(userLabel)}</td><td>${escapeHtml(formatAdminDate(payment.createdAt))}</td></tr>`;
+              },
+              5,
+              labels.emptyPayments
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
+function ensureAdminModalExists() {
+  let modal = document.getElementById('adminModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.id = 'adminModal';
+    modal.innerHTML = `
+      <div class="modal admin-modal">
+        <button class="modal-close" onclick="closeModal('adminModal')">&times;</button>
+        <h2 data-i18n="admin.title">Admin Dashboard</h2>
+        <p class="modal-description" data-i18n="admin.desc">Latest registrations, consultations, and payments.</p>
+        <div id="adminPanelBody" class="admin-panel-body">
+          <p class="admin-empty">${currentLang === 'ru' ? 'Загрузка данных...' : 'Loading data...'}</p>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  const panelBody = document.getElementById('adminPanelBody');
+  if (!panelBody) return null;
+  return panelBody;
+}
+
+async function refreshAdminOverview() {
+  const panelBody = ensureAdminModalExists();
+  if (!panelBody || !authToken) return;
+
+  panelBody.innerHTML = `<p class="admin-empty">${currentLang === 'ru' ? 'Загрузка данных...' : 'Loading data...'}</p>`;
+
+  try {
+    const res = await apiFetch('/api/admin/overview?limit=200', {
+      method: 'GET',
+      headers: {
+        Authorization: 'Bearer ' + authToken
+      }
+    });
+
+    const result = await res.json();
+    if (!res.ok) {
+      panelBody.innerHTML = `<p class="admin-empty">${escapeHtml(result.error || (currentLang === 'ru' ? 'Нет доступа' : 'Access denied'))}</p>`;
+      return;
+    }
+
+    adminOverviewData = result;
+    renderAdminOverview(result);
+  } catch (err) {
+    panelBody.innerHTML = `<p class="admin-empty">${currentLang === 'ru' ? 'Ошибка соединения. Попробуйте снова.' : 'Connection error. Please try again.'}</p>`;
+  }
+}
+
+async function openAdminDashboard() {
+  const dropdown = document.getElementById('userDropdown');
+  if (dropdown) dropdown.style.display = 'none';
+
+  if (!authToken) {
+    showToast(currentLang === 'ru' ? 'Сначала войдите в аккаунт.' : 'Please login first.', 'info');
+    openModal('loginModal');
+    switchTab('login');
+    return;
+  }
+
+  const panelBody = ensureAdminModalExists();
+  if (!panelBody) {
+    showToast(currentLang === 'ru' ? 'Не удалось открыть дашборд.' : 'Unable to open dashboard.', 'error');
+    return;
+  }
+
+  openModal('adminModal');
+  await refreshAdminOverview();
+}
+
 // ===== Modals =====
 function openModal(id) {
   document.getElementById(id).classList.add('active');
@@ -902,6 +1542,7 @@ function switchTab(tab) {
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
   const tabs = document.querySelectorAll('.tab-btn');
+
 
   if (tab === 'login') {
     loginForm.style.display = 'block';

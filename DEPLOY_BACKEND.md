@@ -1,4 +1,4 @@
-# Backend Deploy (Option 1)
+# Backend Deploy (PostgreSQL + Prisma)
 
 This project uses a static frontend on GitHub Pages and an Express API backend.
 
@@ -7,10 +7,12 @@ This project uses a static frontend on GitHub Pages and an Express API backend.
 1. Create a new Web Service from this repository.
 2. Use:
    - Build command: `npm install`
-   - Start command: `npm start`
+   - Start command: `npm run prisma:deploy && npm start`
 3. Set environment variables:
+   - `DATABASE_URL`: PostgreSQL connection string
    - `JWT_SECRET`: long random string
    - `ALLOWED_ORIGINS`: `https://baitursagynbekov3-stack.github.io`
+   - `ADMIN_EMAILS`: comma-separated admin emails (example: `baitursagynbekov3@gmail.com`)
    - `SERVE_STATIC`: `false`
 
 ## 2. Connect frontend to backend
@@ -20,6 +22,7 @@ This project uses a static frontend on GitHub Pages and an Express API backend.
 
 ```js
 window.KVANTUM_API_BASE_URL = 'https://your-backend-domain.onrender.com';
+window.KVANTUM_USE_DEMO_API = false;
 ```
 
 3. Commit and push to `main`.
@@ -28,9 +31,16 @@ window.KVANTUM_API_BASE_URL = 'https://your-backend-domain.onrender.com';
 
 - Backend health: `https://your-backend-domain.onrender.com/api/health`
 - Frontend: `https://baitursagynbekov3-stack.github.io/Demo-site-Kvantum/`
-- Login/Register should now call the deployed backend.
+- Register/Login should now use PostgreSQL via Prisma.
 
-## Notes
+## 4. Local setup
 
-- Current storage is in-memory (`users`, `bookings`, `payments`). Data resets when backend restarts.
-- For production, migrate to PostgreSQL or another persistent database.
+1. Copy `.env.example` to `.env`
+2. Put a valid local PostgreSQL URL into `DATABASE_URL`
+3. Run:
+
+```bash
+npm install
+npm run prisma:deploy
+npm run dev
+```
