@@ -1,6 +1,6 @@
 // Frontend runtime config.
 // Production API endpoint
-window.QUANTUM_API_BASE_URL = 'https://quantum-api.vercel.app';
+window.QUANTUM_API_BASE_URL = 'https://quantum-self.vercel.app';
 window.QUANTUM_USE_DEMO_API = false;
 
 // Demo admin emails — these accounts get admin access in demo mode.
