@@ -13,6 +13,21 @@ let adminFilters = {
 const API_BASE_URL = (window.QUANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
 const USE_DEMO_API = window.QUANTUM_USE_DEMO_API === true || (!API_BASE_URL && window.location.hostname.endsWith('github.io'));
 
+// Kompot.ai CRM webhook — fire-and-forget, never blocks UI
+function sendToKompotCRM(data) {
+  fetch('https://kompot.ai/api/ws/konton/workflows/webhook/6sl6qjjfac', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: data.name || '',
+      email: data.email || '',
+      phone: data.phone || '',
+      source: data.source || 'website',
+      service: data.service || ''
+    })
+  }).catch(() => {});
+}
+
 function buildApiUrl(path) {
   const normalizedPath = path.startsWith('/') ? path : '/' + path;
   return API_BASE_URL ? API_BASE_URL + normalizedPath : normalizedPath;
@@ -23,13 +38,19 @@ function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
-function normalizePhone(value) {
+function normalizePhone(value, countryCode) {
   const raw = String(value || '').trim();
   if (!raw) return '';
 
   let phone = raw.replace(/[^\d+]/g, '');
   if (phone.startsWith('00')) {
     phone = '+' + phone.slice(2);
+  }
+
+  // If phone doesn't start with '+', prepend the country code
+  if (!phone.startsWith('+')) {
+    const code = String(countryCode || '+996').replace(/[^\d+]/g, '');
+    phone = code + phone;
   }
 
   if (!phone.startsWith('+')) {
@@ -961,12 +982,17 @@ function updateUIForLoggedIn() {
     if (userMenu) userMenu.style.display = 'block';
     if (userName) userName.textContent = currentUser.name;
     if (userInitials) userInitials.textContent = currentUser.name.charAt(0).toUpperCase();
-    if (adminLink) adminLink.style.display = currentUser.role === 'admin' ? 'block' : 'none';
+    const isAdmin = currentUser.role === 'admin';
+    if (adminLink) adminLink.style.display = isAdmin ? 'block' : 'none';
+    const adminDashboardLink = document.getElementById('adminDashboardLink');
+    if (adminDashboardLink) adminDashboardLink.style.display = isAdmin ? 'block' : 'none';
   } else {
     if (loginBtn) loginBtn.style.display = '';
     if (navCtaBtn) navCtaBtn.style.display = '';
     if (userMenu) userMenu.style.display = 'none';
     if (adminLink) adminLink.style.display = 'none';
+    const adminDashboardLink = document.getElementById('adminDashboardLink');
+    if (adminDashboardLink) adminDashboardLink.style.display = 'none';
   }
 }
 
@@ -1013,7 +1039,8 @@ async function handleRegister(e) {
   e.preventDefault();
   const form = e.target;
   const normalizedEmail = String(form.email.value || '').trim().toLowerCase();
-  const normalizedPhone = normalizePhone(form.phone.value);
+  const countryCode = form.countryCode ? form.countryCode.value : '+996';
+  const normalizedPhone = normalizePhone(form.phone.value, countryCode);
 
   if (!isValidEmail(normalizedEmail)) {
     showToast(currentLang === 'ru' ? 'Введите корректный email.' : 'Please enter a valid email.', 'error');
@@ -1021,7 +1048,7 @@ async function handleRegister(e) {
   }
 
   if (!normalizedPhone) {
-    showToast(currentLang === 'ru' ? 'Введите телефон в международном формате, например +1 202 555 0123.' : 'Use international phone format, e.g. +1 202 555 0123.', 'error');
+    showToast(currentLang === 'ru' ? 'Введите корректный номер телефона.' : 'Please enter a valid phone number.', 'error');
     return;
   }
 
@@ -1045,6 +1072,7 @@ async function handleRegister(e) {
       currentUser = result.user;
       localStorage.setItem('quantum_token', authToken);
       localStorage.setItem('quantum_user', JSON.stringify(currentUser));
+      sendToKompotCRM({ name: data.name, email: data.email, phone: data.phone, source: 'registration' });
       updateUIForLoggedIn();
       closeModal('loginModal');
       showToast('Account created! Welcome, ' + currentUser.name + '!', 'success');
@@ -1073,9 +1101,10 @@ async function handlePasswordReset(e) {
     return;
   }
 
-  const normalizedPhone = normalizePhone(form.phone.value);
+  const countryCode = form.countryCode ? form.countryCode.value : '+996';
+  const normalizedPhone = normalizePhone(form.phone.value, countryCode);
   if (!normalizedPhone) {
-    showToast(currentLang === 'ru' ? 'Введите корректный телефон в международном формате.' : 'Please enter a valid international phone number.', 'error');
+    showToast(currentLang === 'ru' ? 'Введите корректный номер телефона.' : 'Please enter a valid phone number.', 'error');
     return;
   }
 
@@ -1518,6 +1547,11 @@ async function openAdminDashboard() {
     return;
   }
 
+  if (!currentUser || currentUser.role !== 'admin') {
+    showToast(currentLang === 'ru' ? 'Доступ только для администраторов.' : 'Admin access only.', 'error');
+    return;
+  }
+
   const panelBody = ensureAdminModalExists();
   if (!panelBody) {
     showToast(currentLang === 'ru' ? 'Не удалось открыть дашборд.' : 'Unable to open dashboard.', 'error');
@@ -1569,10 +1603,12 @@ document.addEventListener('click', (e) => {
 async function handleConsultation(e) {
   e.preventDefault();
   const form = e.target;
+  const countryCode = form.countryCode ? form.countryCode.value : '+996';
+  const phone = normalizePhone(form.phone.value, countryCode);
   const data = {
     name: form.name.value,
     email: form.email.value,
-    phone: form.phone.value,
+    phone: phone,
     service: form.service.value,
     message: ''
   };
@@ -1586,6 +1622,7 @@ async function handleConsultation(e) {
     const result = await res.json();
 
     if (res.ok) {
+      sendToKompotCRM({ name: data.name, email: data.email, phone: data.phone, source: 'consultation', service: data.service });
       closeModal('consultModal');
       showSuccessModal(
         'Consultation Booked!',
@@ -1605,10 +1642,12 @@ async function handleConsultation(e) {
 async function handleContact(e) {
   e.preventDefault();
   const form = e.target;
+  const countryCode = form.countryCode ? form.countryCode.value : '+996';
+  const phone = normalizePhone(form.phone.value, countryCode);
   const data = {
     name: form.name.value,
     email: form.email.value,
-    phone: form.phone.value,
+    phone: phone,
     service: form.service.value,
     message: form.message.value
   };
@@ -1622,6 +1661,7 @@ async function handleContact(e) {
     const result = await res.json();
 
     if (res.ok) {
+      sendToKompotCRM({ name: data.name, email: data.email, phone: data.phone, source: 'contact', service: data.service });
       showSuccessModal(
         'Request Sent!',
         'Thank you, ' + data.name + '! We will contact you shortly via WhatsApp or Telegram.'

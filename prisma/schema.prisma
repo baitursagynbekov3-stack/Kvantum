@@ -37,8 +37,7 @@ model Payment {
   currency    String   @default("KGS")
   status      String   @default("completed")
   createdAt   DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }

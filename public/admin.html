@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QUANTUM Admin Panel</title>
+  <script>
+    try {
+      var u = JSON.parse(localStorage.getItem('quantum_user'));
+      if (!u || u.role !== 'admin') { window.location.href = './index.html'; }
+    } catch(e) { window.location.href = './index.html'; }
+  </script>
   <link rel="stylesheet" href="./style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>

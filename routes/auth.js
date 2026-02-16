@@ -24,6 +24,13 @@ router.post('/register', registerRules, async (req, res, next) => {
       { expiresIn: '7d' }
     );
 
+    // Fire webhook on new account creation
+    fetch('https://kompot.ai/api/ws/konton/workflows/webhook/6sl6qjjjfac', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: user.name, email: user.email, phone: user.phone, createdAt: user.createdAt })
+    }).catch(() => {});
+
     res.json({
       message: 'Registration successful',
       token,

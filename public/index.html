@@ -65,7 +65,7 @@
             <p class="user-greeting" data-i18n-html="user.greeting">Hello, <strong id="userName">User</strong></p>
             <a href="#" onclick="showProfile()" data-i18n="user.profile">My Profile</a>
             <a href="#" onclick="showPurchases()" data-i18n="user.purchases">My Purchases</a>
-            <a href="#" onclick="openAdminDashboard()" data-i18n="user.admin">Admin Dashboard</a>
+            <a href="#" id="adminDashboardLink" onclick="openAdminDashboard()" data-i18n="user.admin" style="display:none">Admin Dashboard</a>
             <a href="./admin.html" id="adminLink" style="display:none">Edit Content</a>
             <a href="#" onclick="handleLogout()" data-i18n="user.logout">Logout</a>
           </div>
@@ -453,7 +453,26 @@
             </div>
             <div class="form-group">
               <label data-i18n="contact.form.phone">Phone (WhatsApp)</label>
-              <input type="tel" name="phone" placeholder="+996 XXX XXX XXX" required>
+              <div class="phone-input-group">
+                <select class="country-code-select" name="countryCode">
+                  <option value="+996">+996 KG</option>
+                  <option value="+1">+1 US</option>
+                  <option value="+7">+7 RU/KZ</option>
+                  <option value="+44">+44 UK</option>
+                  <option value="+49">+49 DE</option>
+                  <option value="+90">+90 TR</option>
+                  <option value="+82">+82 KR</option>
+                  <option value="+86">+86 CN</option>
+                  <option value="+91">+91 IN</option>
+                  <option value="+971">+971 AE</option>
+                  <option value="+81">+81 JP</option>
+                  <option value="+33">+33 FR</option>
+                  <option value="+39">+39 IT</option>
+                  <option value="+34">+34 ES</option>
+                  <option value="+61">+61 AU</option>
+                </select>
+                <input type="tel" name="phone" placeholder="555 123 456" required>
+              </div>
             </div>
             <div class="form-group">
               <label data-i18n="contact.form.interest">Interested In</label>
@@ -551,7 +570,26 @@
         </div>
         <div class="form-group">
           <label data-i18n="contact.form.phone">Phone (WhatsApp)</label>
-          <input type="tel" name="phone" data-i18n-placeholder="modal.phone_ph" placeholder="+1 555 123 4567" required>
+          <div class="phone-input-group">
+            <select class="country-code-select" name="countryCode">
+              <option value="+996">+996 KG</option>
+              <option value="+1">+1 US</option>
+              <option value="+7">+7 RU/KZ</option>
+              <option value="+44">+44 UK</option>
+              <option value="+49">+49 DE</option>
+              <option value="+90">+90 TR</option>
+              <option value="+82">+82 KR</option>
+              <option value="+86">+86 CN</option>
+              <option value="+91">+91 IN</option>
+              <option value="+971">+971 AE</option>
+              <option value="+81">+81 JP</option>
+              <option value="+33">+33 FR</option>
+              <option value="+39">+39 IT</option>
+              <option value="+34">+34 ES</option>
+              <option value="+61">+61 AU</option>
+            </select>
+            <input type="tel" name="phone" placeholder="555 123 456" required>
+          </div>
         </div>
         <div class="form-group">
           <label data-i18n="modal.password">Password</label>
@@ -576,7 +614,26 @@
         </div>
         <div class="form-group">
           <label data-i18n="reset.phone">Phone from registration</label>
-          <input type="tel" name="phone" placeholder="+996 XXX XXX XXX" required>
+          <div class="phone-input-group">
+            <select class="country-code-select" name="countryCode">
+              <option value="+996">+996 KG</option>
+              <option value="+1">+1 US</option>
+              <option value="+7">+7 RU/KZ</option>
+              <option value="+44">+44 UK</option>
+              <option value="+49">+49 DE</option>
+              <option value="+90">+90 TR</option>
+              <option value="+82">+82 KR</option>
+              <option value="+86">+86 CN</option>
+              <option value="+91">+91 IN</option>
+              <option value="+971">+971 AE</option>
+              <option value="+81">+81 JP</option>
+              <option value="+33">+33 FR</option>
+              <option value="+39">+39 IT</option>
+              <option value="+34">+34 ES</option>
+              <option value="+61">+61 AU</option>
+            </select>
+            <input type="tel" name="phone" placeholder="555 123 456" required>
+          </div>
         </div>
         <div class="form-group">
           <label data-i18n="reset.new_password">New password</label>
@@ -609,7 +666,26 @@
         </div>
         <div class="form-group">
           <label data-i18n="consult.phone">Phone (WhatsApp/Telegram)</label>
-          <input type="tel" name="phone" placeholder="+996 XXX XXX XXX" required>
+          <div class="phone-input-group">
+            <select class="country-code-select" name="countryCode">
+              <option value="+996">+996 KG</option>
+              <option value="+1">+1 US</option>
+              <option value="+7">+7 RU/KZ</option>
+              <option value="+44">+44 UK</option>
+              <option value="+49">+49 DE</option>
+              <option value="+90">+90 TR</option>
+              <option value="+82">+82 KR</option>
+              <option value="+86">+86 CN</option>
+              <option value="+91">+91 IN</option>
+              <option value="+971">+971 AE</option>
+              <option value="+81">+81 JP</option>
+              <option value="+33">+33 FR</option>
+              <option value="+39">+39 IT</option>
+              <option value="+34">+34 ES</option>
+              <option value="+61">+61 AU</option>
+            </select>
+            <input type="tel" name="phone" placeholder="555 123 456" required>
+          </div>
         </div>
         <div class="form-group">
           <label data-i18n="contact.form.interest">Interested In</label>
