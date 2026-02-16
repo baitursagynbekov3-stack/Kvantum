@@ -12,6 +12,8 @@ let adminFilters = {
 // Use external API in static hosting (GitHub Pages) via public/config.js
 const API_BASE_URL = (window.QUANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
 const USE_DEMO_API = window.QUANTUM_USE_DEMO_API === true || (!API_BASE_URL && window.location.hostname.endsWith('github.io'));
+const CHAT_SESSION_STORAGE_KEY = 'quantum_chat_session_id';
+let chatSessionIdCache = '';
 
 // Kompot.ai CRM webhook — fire-and-forget, never blocks UI
 function sendToKompotCRM(data) {
@@ -31,6 +33,33 @@ function sendToKompotCRM(data) {
 function buildApiUrl(path) {
   const normalizedPath = path.startsWith('/') ? path : '/' + path;
   return API_BASE_URL ? API_BASE_URL + normalizedPath : normalizedPath;
+}
+
+function generateChatSessionId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID().replace(/-/g, '');
+  }
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+function getChatSessionId() {
+  if (chatSessionIdCache) return chatSessionIdCache;
+
+  try {
+    const existing = localStorage.getItem(CHAT_SESSION_STORAGE_KEY);
+    if (existing && /^[A-Za-z0-9_-]{8,80}$/.test(existing)) {
+      chatSessionIdCache = existing;
+      return chatSessionIdCache;
+    }
+
+    const created = generateChatSessionId().slice(0, 80);
+    localStorage.setItem(CHAT_SESSION_STORAGE_KEY, created);
+    chatSessionIdCache = created;
+    return chatSessionIdCache;
+  } catch (err) {
+    chatSessionIdCache = generateChatSessionId().slice(0, 80);
+    return chatSessionIdCache;
+  }
 }
 
 function isValidEmail(value) {
@@ -1776,17 +1805,31 @@ async function sendChatMessage(e) {
   input.value = '';
 
   const typingId = showTyping();
+  const sessionId = getChatSessionId();
 
   try {
     const res = await apiFetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message })
+      body: JSON.stringify({ message, sessionId })
     });
     const result = await res.json();
 
     removeTyping(typingId);
-    addChatMessage(result.reply, 'bot');
+
+    if (!res.ok) {
+      addChatMessage(result.error || 'Sorry, I am having trouble connecting. Please try again.', 'bot');
+      return;
+    }
+
+    addChatMessage(result.reply || '...', 'bot');
+
+    if (result.booking && result.booking.id) {
+      const toastMessage = currentLang === 'ru'
+        ? `Заявка #${result.booking.id} создана. Мы скоро свяжемся с вами.`
+        : `Booking #${result.booking.id} created. We will contact you shortly.`;
+      showToast(toastMessage, 'success');
+    }
   } catch (err) {
     removeTyping(typingId);
     addChatMessage('Sorry, I am having trouble connecting. Please try again.', 'bot');
