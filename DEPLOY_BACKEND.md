@@ -21,8 +21,8 @@ This project uses a static frontend on GitHub Pages and an Express API backend.
 2. Set API base URL:
 
 ```js
-window.KVANTUM_API_BASE_URL = 'https://your-backend-domain.onrender.com';
-window.KVANTUM_USE_DEMO_API = false;
+window.QUANTUM_API_BASE_URL = 'https://your-backend-domain.onrender.com';
+window.QUANTUM_USE_DEMO_API = false;
 ```
 
 3. Commit and push to `main`.
@@ -30,7 +30,7 @@ window.KVANTUM_USE_DEMO_API = false;
 ## 3. Verify
 
 - Backend health: `https://your-backend-domain.onrender.com/api/health`
-- Frontend: `https://baitursagynbekov3-stack.github.io/Demo-site-Kvantum/`
+- Frontend: `https://baitursagynbekov3-stack.github.io/Demo-site-Quantum/`
 - Register/Login should now use PostgreSQL via Prisma.
 
 ## 4. Local setup

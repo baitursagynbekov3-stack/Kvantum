@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KVANTUM - Transition to Dream Reality | Altynai Eshinbekova</title>
-  <meta name="description" content="KVANTUM by Altynai Eshinbekova. Subconscious work, NLP, quantum field mastery. Transform your life, relationships, and finances.">
+  <title>QUANTUM - Transition to Dream Reality | Altynai Eshinbekova</title>
+  <meta name="description" content="QUANTUM by Altynai Eshinbekova. Subconscious work, NLP, quantum field mastery. Transform your life, relationships, and finances.">
   <link rel="stylesheet" href="./style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
@@ -16,13 +16,13 @@
   </style>
   <script>
     document.addEventListener('DOMContentLoaded',function(){
-      if(localStorage.getItem('kvantum_cookies')==='accepted')return;
+      if(localStorage.getItem('quantum_cookies')==='accepted')return;
       var b=document.createElement('div');
       b.className='cookie-banner';
       b.innerHTML='<span>We use essential cookies for site functionality. No tracking. Got it?</span><button id="cookieAccept">Accept</button>';
       document.body.appendChild(b);
       document.getElementById('cookieAccept').addEventListener('click',function(){
-        localStorage.setItem('kvantum_cookies','accepted');
+        localStorage.setItem('quantum_cookies','accepted');
         b.remove();
       });
     });
@@ -34,7 +34,7 @@
     <div class="container nav-container">
       <a href="#hero" class="logo">
         <span class="logo-icon">Q</span>
-        <span class="logo-text">KVANTUM</span>
+        <span class="logo-text" data-i18n="logo.text">QUANTUM</span>
       </a>
       <ul class="nav-links" id="navLinks">
         <li><a href="#about" data-i18n="nav.about">About</a></li>
@@ -90,7 +90,7 @@
         <span data-i18n-html="hero.title">Transform Your<br><span class="text-gradient">Inner Reality</span><br>Build Your Dream Life</span>
       </h1>
       <p class="hero-description anim-fade-up anim-delay-2" data-i18n="hero.description">
-        KVANTUM by Altynai Eshinbekova &mdash; specialist in subconscious and quantum field work. NLP Master. Transform your thoughts, feelings, and state to transform your life, relationships, and finances.
+        QUANTUM by Altynai Eshinbekova &mdash; specialist in subconscious and quantum field work. NLP Master. Transform your thoughts, feelings, and state to transform your life, relationships, and finances.
       </p>
       <div class="hero-buttons anim-fade-up anim-delay-3">
         <button class="btn btn-primary btn-lg" onclick="openModal('consultModal')" data-i18n="hero.cta">Book Free Consultation</button>
@@ -484,7 +484,7 @@
         <div class="footer-brand">
           <div class="logo">
             <span class="logo-icon">Q</span>
-            <span class="logo-text">KVANTUM</span>
+            <span class="logo-text" data-i18n="logo.text">QUANTUM</span>
           </div>
           <p data-i18n="footer.desc">Transition to Dream Reality. Transform your life through subconscious work, NLP, and quantum field mastery.</p>
         </div>
@@ -512,7 +512,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p data-i18n="footer.copy">&copy; 2025 KVANTUM by Altynai Eshinbekova. All rights reserved.</p>
+        <p data-i18n="footer.copy">&copy; 2025 QUANTUM by Altynai Eshinbekova. All rights reserved.</p>
       </div>
     </div>
   </footer>
@@ -706,7 +706,7 @@
         <div class="chatbot-header-info">
           <div class="chatbot-avatar">AI</div>
           <div>
-            <strong data-i18n="chat.name">KVANTUM Assistant</strong>
+            <strong data-i18n="chat.name">QUANTUM Assistant</strong>
             <span class="chatbot-status" data-i18n="chat.online">Online</span>
           </div>
         </div>
@@ -715,7 +715,7 @@
       <div class="chatbot-messages" id="chatbotMessages">
         <div class="chat-message bot">
           <div class="message-bubble" data-i18n-html="chat.welcome">
-            Welcome to KVANTUM! I'm your AI assistant. I can help you with:
+            Welcome to QUANTUM! I'm your AI assistant. I can help you with:
             <br><br>
             &#8226; Program information &amp; pricing<br>
             &#8226; Booking a free consultation<br>
@@ -739,5 +739,13 @@
 
   <script src="./config.js"></script>
   <script src="./app.js"></script>
+
+  <!-- Kompot.ai Web Chat Widget -->
+  <script
+    src="https://kompot.ai/webchat-widget.js"
+    data-wsid="konton"
+    data-api-url="https://kompot.ai"
+    async
+  ></script>
 </body>
 </html>

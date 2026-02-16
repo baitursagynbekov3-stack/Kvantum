@@ -1,12 +1,12 @@
 // ===== Admin Panel Logic =====
-const API_BASE_URL = (window.KVANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
-const USE_DEMO_API = window.KVANTUM_USE_DEMO_API === true || (!API_BASE_URL && window.location.hostname.endsWith('github.io'));
+const API_BASE_URL = (window.QUANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
+const USE_DEMO_API = window.QUANTUM_USE_DEMO_API === true || (!API_BASE_URL && window.location.hostname.endsWith('github.io'));
 
-let authToken = localStorage.getItem('kvantum_token');
+let authToken = localStorage.getItem('quantum_token');
 let currentUser = null;
 
 try {
-  currentUser = JSON.parse(localStorage.getItem('kvantum_user'));
+  currentUser = JSON.parse(localStorage.getItem('quantum_user'));
 } catch (e) {
   currentUser = null;
 }
@@ -55,16 +55,16 @@ function demoAdminApi(path, options) {
     try {
       const decoded = atob(auth.replace('Bearer demo-', ''));
       const email = decoded.split(':')[0];
-      const users = getStorageArray('kvantum_demo_users');
+      const users = getStorageArray('quantum_demo_users');
       const user = users.find(u => u.email === email);
       return user ? (user.role || 'user') : 'user';
     } catch (e) { return 'user'; }
   }
 
   const keyMap = {
-    testimonials: 'kvantum_demo_testimonials',
-    programs: 'kvantum_demo_programs',
-    services: 'kvantum_demo_services'
+    testimonials: 'quantum_demo_testimonials',
+    programs: 'quantum_demo_programs',
+    services: 'quantum_demo_services'
   };
 
   if (path === '/api/admin/check') {

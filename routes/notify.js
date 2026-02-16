@@ -5,7 +5,7 @@ router.post('/', (req, res) => {
   const { type, phone, message } = req.body;
 
   if (type === 'whatsapp') {
-    const whatsappUrl = `https://wa.me/${(phone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message || 'Thank you for your purchase at KVANTUM!')}`;
+    const whatsappUrl = `https://wa.me/${(phone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message || 'Thank you for your purchase at QUANTUM!')}`;
     res.json({ message: 'WhatsApp notification ready', url: whatsappUrl });
   } else if (type === 'telegram') {
     res.json({ message: 'Telegram notification sent', note: 'In production, integrate with Telegram Bot API' });

@@ -8,7 +8,7 @@ router.post('/', (req, res) => {
   let reply = '';
 
   if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('привет') || lowerMsg.includes('здравствуйте')) {
-    reply = 'Welcome to KVANTUM! I am your AI assistant. How can I help you today? You can ask about our programs, pricing, or book a free consultation.';
+    reply = 'Welcome to QUANTUM! I am your AI assistant. How can I help you today? You can ask about our programs, pricing, or book a free consultation.';
   } else if (lowerMsg.includes('price') || lowerMsg.includes('cost') || lowerMsg.includes('цена') || lowerMsg.includes('стоимость') || lowerMsg.includes('сколько')) {
     reply = 'Our programs:\n\n1. Brain Charge (entry level) - 1,000 KGS/RUB\n2. Resources Club - 5,000 KGS/month\n3. Intensive "Mom & Dad - My 2 Wings" - $300 / 26,300 KGS\n4. REBOOT course - $1,000\n5. Mentorship - contact our managers for pricing\n\nWould you like to book a free consultation to find the best program for you?';
   } else if (lowerMsg.includes('brain') || lowerMsg.includes('зарядка') || lowerMsg.includes('мозг')) {
@@ -24,7 +24,7 @@ router.post('/', (req, res) => {
   } else if (lowerMsg.includes('consult') || lowerMsg.includes('консультац') || lowerMsg.includes('записаться') || lowerMsg.includes('book')) {
     reply = 'To book a free consultation, click the "Book Consultation" button on our website, or message us on WhatsApp/Telegram. Entry to individual work is only after a free consultation. We look forward to working with you!';
   } else if (lowerMsg.includes('altynai') || lowerMsg.includes('алтынай') || lowerMsg.includes('founder') || lowerMsg.includes('основатель')) {
-    reply = 'Altynai Eshinbekova is the founder of KVANTUM:\n- Specialist in subconscious and quantum field work\n- NLP Master\n- Master of deep analysis sessions\n\nShe works deeply, ecologically, and delivers real results. She personally accompanies clients to their goals.';
+    reply = 'Altynai Eshinbekova is the founder of QUANTUM:\n- Specialist in subconscious and quantum field work\n- NLP Master\n- Master of deep analysis sessions\n\nShe works deeply, ecologically, and delivers real results. She personally accompanies clients to their goals.';
   } else if (lowerMsg.includes('whatsapp') || lowerMsg.includes('telegram') || lowerMsg.includes('contact') || lowerMsg.includes('связ') || lowerMsg.includes('контакт')) {
     reply = 'You can reach us via:\n- WhatsApp: Click the WhatsApp button on our website\n- Telegram: Click the Telegram button\n- Or fill out the contact form and we will reach out to you!\n\nWe are happy to help you start your transformation journey.';
   } else {

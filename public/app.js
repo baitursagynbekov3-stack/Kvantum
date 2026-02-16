@@ -2,7 +2,7 @@
 let currentUser = null;
 let authToken = null;
 let currentPayment = null;
-let currentLang = localStorage.getItem('kvantum_lang') || 'en';
+let currentLang = localStorage.getItem('quantum_lang') || 'en';
 let adminOverviewData = null;
 let adminFilters = {
   search: '',
@@ -10,8 +10,8 @@ let adminFilters = {
 };
 
 // Use external API in static hosting (GitHub Pages) via public/config.js
-const API_BASE_URL = (window.KVANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
-const USE_DEMO_API = window.KVANTUM_USE_DEMO_API === true || (!API_BASE_URL && window.location.hostname.endsWith('github.io'));
+const API_BASE_URL = (window.QUANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
+const USE_DEMO_API = window.QUANTUM_USE_DEMO_API === true || (!API_BASE_URL && window.location.hostname.endsWith('github.io'));
 
 function buildApiUrl(path) {
   const normalizedPath = path.startsWith('/') ? path : '/' + path;
@@ -84,9 +84,9 @@ function createApiResponse(status, data) {
 
 function demoApi(path, options) {
   const body = parseJsonBody(options);
-  const usersKey = 'kvantum_demo_users';
-  const bookingsKey = 'kvantum_demo_bookings';
-  const paymentsKey = 'kvantum_demo_payments';
+  const usersKey = 'quantum_demo_users';
+  const bookingsKey = 'quantum_demo_bookings';
+  const paymentsKey = 'quantum_demo_payments';
 
   if (path === '/api/health') {
     return createApiResponse(200, { ok: true, demo: true });
@@ -116,7 +116,7 @@ function demoApi(path, options) {
       return createApiResponse(400, { error: 'User already exists' });
     }
 
-    const demoAdmins = (window.KVANTUM_DEMO_ADMIN_EMAILS || []).map(e => e.toLowerCase());
+    const demoAdmins = (window.QUANTUM_DEMO_ADMIN_EMAILS || []).map(e => e.toLowerCase());
     const role = demoAdmins.includes(email) ? 'admin' : 'user';
     const user = {
       id: Date.now(),
@@ -348,9 +348,9 @@ function demoApi(path, options) {
   }
 
   // ===== Demo content endpoints =====
-  const testimonialsKey = 'kvantum_demo_testimonials';
-  const programsKey = 'kvantum_demo_programs';
-  const servicesDataKey = 'kvantum_demo_services';
+  const testimonialsKey = 'quantum_demo_testimonials';
+  const programsKey = 'quantum_demo_programs';
+  const servicesDataKey = 'quantum_demo_services';
 
   if (path === '/api/content/testimonials') {
     return createApiResponse(200, getStorageArray(testimonialsKey));
@@ -449,6 +449,7 @@ function apiFetch(path, options) {
 // ===== Translations =====
 const translations = {
   ru: {
+    'logo.text': 'КВАНТУМ',
     'nav.about': 'О нас',
     'nav.services': 'Услуги',
     'nav.programs': 'Программы',
@@ -700,7 +701,7 @@ function storeOriginals() {
 
 function toggleLanguage() {
   currentLang = currentLang === 'en' ? 'ru' : 'en';
-  localStorage.setItem('kvantum_lang', currentLang);
+  localStorage.setItem('quantum_lang', currentLang);
   applyTranslations(currentLang);
   updateLangButton();
   if (cachedTestimonials) renderTestimonials(cachedTestimonials);
@@ -802,11 +803,11 @@ function renderPrograms(items) {
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
   const isDark = document.body.classList.contains('dark-mode');
-  localStorage.setItem('kvantum_dark', isDark ? 'true' : 'false');
+  localStorage.setItem('quantum_dark', isDark ? 'true' : 'false');
 }
 
 function initDarkMode() {
-  if (localStorage.getItem('kvantum_dark') === 'true') {
+  if (localStorage.getItem('quantum_dark') === 'true') {
     document.body.classList.add('dark-mode');
   }
 }
@@ -937,8 +938,8 @@ function animateCounter(el, target) {
 
 // ===== Auth =====
 function checkAuth() {
-  const token = localStorage.getItem('kvantum_token');
-  const user = localStorage.getItem('kvantum_user');
+  const token = localStorage.getItem('quantum_token');
+  const user = localStorage.getItem('quantum_user');
   if (token && user) {
     authToken = token;
     currentUser = JSON.parse(user);
@@ -993,8 +994,8 @@ async function handleLogin(e) {
     if (res.ok) {
       authToken = result.token;
       currentUser = result.user;
-      localStorage.setItem('kvantum_token', authToken);
-      localStorage.setItem('kvantum_user', JSON.stringify(currentUser));
+      localStorage.setItem('quantum_token', authToken);
+      localStorage.setItem('quantum_user', JSON.stringify(currentUser));
       updateUIForLoggedIn();
       closeModal('loginModal');
       showToast('Welcome back, ' + currentUser.name + '!', 'success');
@@ -1042,8 +1043,8 @@ async function handleRegister(e) {
     if (res.ok) {
       authToken = result.token;
       currentUser = result.user;
-      localStorage.setItem('kvantum_token', authToken);
-      localStorage.setItem('kvantum_user', JSON.stringify(currentUser));
+      localStorage.setItem('quantum_token', authToken);
+      localStorage.setItem('quantum_user', JSON.stringify(currentUser));
       updateUIForLoggedIn();
       closeModal('loginModal');
       showToast('Account created! Welcome, ' + currentUser.name + '!', 'success');
@@ -1109,8 +1110,8 @@ async function handlePasswordReset(e) {
 function handleLogout() {
   authToken = null;
   currentUser = null;
-  localStorage.removeItem('kvantum_token');
-  localStorage.removeItem('kvantum_user');
+  localStorage.removeItem('quantum_token');
+  localStorage.removeItem('quantum_user');
   updateUIForLoggedIn();
   document.getElementById('userDropdown').style.display = 'none';
   showToast('You have been logged out.', 'info');
@@ -1790,7 +1791,7 @@ function escapeHtml(text) {
 
 // ===== Social Links =====
 function openWhatsApp() {
-  window.open('https://wa.me/?text=' + encodeURIComponent('Hello! I am interested in KVANTUM programs.'), '_blank');
+  window.open('https://wa.me/?text=' + encodeURIComponent('Hello! I am interested in QUANTUM programs.'), '_blank');
 }
 
 function openTelegram() {

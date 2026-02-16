@@ -1,7 +1,7 @@
 {
-  "name": "kvantum-saas",
+  "name": "quantum-saas",
   "version": "1.0.0",
-  "description": "KVANTUM - Transition to Dream Reality by Altynai Eshinbekova",
+  "description": "QUANTUM - Transition to Dream Reality by Altynai Eshinbekova",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
