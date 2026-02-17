@@ -473,119 +473,55 @@
       <h2 id="programModalTitle">Add Program</h2>
       <form id="programForm" onsubmit="saveProgram(event)">
         <input type="hidden" id="pId">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Name (EN)</label>
-            <input type="text" id="pName" required placeholder="e.g. Brain Charge">
-          </div>
-          <div class="form-group">
-            <label>Name (RU)</label>
-            <input type="text" id="pNameRu" placeholder="e.g. Зарядка мозга">
-          </div>
+        <div class="form-group">
+          <label>Program Name</label>
+          <input type="text" id="pName" required placeholder="e.g. Brain Charge">
+        </div>
+        <div class="form-group">
+          <label>Название (RU)</label>
+          <input type="text" id="pNameRu" placeholder="e.g. Зарядка мозга">
+        </div>
+        <div class="form-group">
+          <label>Short Description</label>
+          <input type="text" id="pTagline" placeholder="e.g. Reality Reprogramming">
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Tier</label>
-            <select id="pTier">
-              <option value="entry">Entry</option>
-              <option value="standard" selected>Standard</option>
-              <option value="popular">Popular</option>
-              <option value="premium">Premium</option>
-              <option value="elite">Elite</option>
-            </select>
+            <label>Price</label>
+            <input type="number" id="pPriceNumeric" value="0" min="0" placeholder="1000">
           </div>
           <div class="form-group">
-            <label>CSS Class</label>
-            <select id="pCssClass">
-              <option value="">Default</option>
-              <option value="popular">Popular (highlighted)</option>
-              <option value="premium">Premium</option>
-              <option value="mentorship">Mentorship</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tier Label (EN)</label>
-            <input type="text" id="pTierLabel" placeholder="e.g. Entry Level">
-          </div>
-          <div class="form-group">
-            <label>Tier Label (RU)</label>
-            <input type="text" id="pTierLabelRu" placeholder="e.g. Точка входа">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tagline (EN)</label>
-            <input type="text" id="pTagline" placeholder="e.g. Reality Reprogramming">
-          </div>
-          <div class="form-group">
-            <label>Tagline (RU)</label>
-            <input type="text" id="pTaglineRu" placeholder="Russian tagline">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Price Display</label>
-            <input type="text" id="pPriceAmount" placeholder="e.g. 1,000 or $300">
-          </div>
-          <div class="form-group">
-            <label>Price Currency Label</label>
-            <input type="text" id="pPriceCurrency" placeholder="e.g. KGS / RUB">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Numeric Price (for payment)</label>
-            <input type="number" id="pPriceNumeric" value="0" min="0">
-          </div>
-          <div class="form-group">
-            <label>Purchase Currency</label>
+            <label>Currency</label>
             <select id="pPurchaseCurrency">
               <option value="KGS">KGS</option>
               <option value="USD">USD</option>
               <option value="RUB">RUB</option>
-              <option value="">None (Contact)</option>
             </select>
           </div>
         </div>
         <div class="form-group">
-          <label>Features (EN) - one per line</label>
-          <textarea id="pFeatures" rows="5" placeholder="21 days program&#10;15 minutes per day&#10;..."></textarea>
+          <label>Features (one per line)</label>
+          <textarea id="pFeatures" rows="4" placeholder="21 days program&#10;15 minutes per day&#10;..."></textarea>
         </div>
         <div class="form-group">
-          <label>Features (RU) - one per line</label>
-          <textarea id="pFeaturesRu" rows="5" placeholder="Программа 21 день&#10;15 минут в день&#10;..."></textarea>
+          <label>Особенности RU (one per line)</label>
+          <textarea id="pFeaturesRu" rows="4" placeholder="Программа 21 день&#10;15 минут в день&#10;..."></textarea>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Button Text (EN)</label>
-            <input type="text" id="pBtnText" placeholder="Get Started">
-          </div>
-          <div class="form-group">
-            <label>Button Text (RU)</label>
-            <input type="text" id="pBtnTextRu" placeholder="Начать">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Action Type</label>
+            <label>When clicked</label>
             <select id="pActionType">
-              <option value="purchase">Purchase (opens payment)</option>
-              <option value="consult">Consult (opens booking)</option>
+              <option value="purchase">Buy Now</option>
+              <option value="consult">Contact Us</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Popular?</label>
+            <label>Highlight?</label>
             <select id="pPopular">
               <option value="false">No</option>
-              <option value="true">Yes (shows badge)</option>
+              <option value="true">Yes (featured)</option>
             </select>
           </div>
-        </div>
-        <div class="form-group">
-          <label>Order</label>
-          <input type="number" id="pOrder" value="0" min="0">
         </div>
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" onclick="closeAdminModal('programModal')">Cancel</button>

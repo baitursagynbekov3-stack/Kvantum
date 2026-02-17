@@ -1,6 +1,6 @@
 // ===== Admin Panel Logic =====
 const API_BASE_URL = (window.QUANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
-const USE_DEMO_API = window.QUANTUM_USE_DEMO_API === true || (!API_BASE_URL && window.location.hostname.endsWith('github.io'));
+const USE_DEMO_API = window.QUANTUM_USE_DEMO_API === true;
 
 let authToken = localStorage.getItem('quantum_token');
 let currentUser = null;
@@ -512,12 +512,15 @@ function renderProgramCards() {
     return;
   }
   el.innerHTML = programs.map(p => {
+    const price = p.priceNumeric || 0;
+    const cur = p.purchaseCurrency || 'KGS';
+    const priceText = price > 0 ? (cur === 'USD' ? '$' + price.toLocaleString() : price.toLocaleString() + ' ' + cur) : 'Contact for price';
     const features = (p.features || []).slice(0, 3);
     return `<div class="admin-card">
-      <div class="card-badge">${esc(p.tier || 'standard')} | Order: ${p.order || 0}</div>
+      ${p.popular ? '<div class="card-badge">Featured</div>' : ''}
       <h3>${esc(p.name)}</h3>
       <p>${esc(p.tagline || '')}</p>
-      <div class="card-meta">${esc(p.priceAmount || '0')} ${esc(p.priceCurrency || '')}</div>
+      <div class="card-meta">${priceText} · ${p.actionType === 'purchase' ? 'Buy Now' : 'Contact Us'}</div>
       ${features.length ? `<div class="features-preview">${features.map(f => `<span>${esc(f)}</span>`).join('')}${(p.features || []).length > 3 ? `<span>+${(p.features || []).length - 3} more</span>` : ''}</div>` : ''}
       <div class="card-actions">
         <button class="btn btn-secondary btn-sm" onclick="editProgram('${p._id}')">Edit</button>
@@ -532,23 +535,13 @@ function openProgramForm(item) {
   document.getElementById('pId').value = item ? item._id : '';
   document.getElementById('pName').value = item ? item.name : '';
   document.getElementById('pNameRu').value = item ? item.name_ru || '' : '';
-  document.getElementById('pTier').value = item ? item.tier || 'standard' : 'standard';
-  document.getElementById('pCssClass').value = item ? item.cssClass || '' : '';
-  document.getElementById('pTierLabel').value = item ? item.tierLabel || '' : '';
-  document.getElementById('pTierLabelRu').value = item ? item.tierLabel_ru || '' : '';
   document.getElementById('pTagline').value = item ? item.tagline || '' : '';
-  document.getElementById('pTaglineRu').value = item ? item.tagline_ru || '' : '';
-  document.getElementById('pPriceAmount').value = item ? item.priceAmount || '' : '';
-  document.getElementById('pPriceCurrency').value = item ? item.priceCurrency || '' : '';
   document.getElementById('pPriceNumeric').value = item ? item.priceNumeric || 0 : 0;
   document.getElementById('pPurchaseCurrency').value = item ? item.purchaseCurrency || 'KGS' : 'KGS';
   document.getElementById('pFeatures').value = item ? (item.features || []).join('\n') : '';
   document.getElementById('pFeaturesRu').value = item ? (item.features_ru || []).join('\n') : '';
-  document.getElementById('pBtnText').value = item ? item.buttonText || '' : 'Get Started';
-  document.getElementById('pBtnTextRu').value = item ? item.buttonText_ru || '' : '';
   document.getElementById('pActionType').value = item ? item.actionType || 'purchase' : 'purchase';
   document.getElementById('pPopular').value = item ? String(item.popular || false) : 'false';
-  document.getElementById('pOrder').value = item ? item.order || 0 : programs.length + 1;
   openAdminModal('programModal');
 }
 
@@ -560,26 +553,35 @@ function editProgram(id) {
 async function saveProgram(e) {
   e.preventDefault();
   const id = document.getElementById('pId').value;
+  const price = parseFloat(document.getElementById('pPriceNumeric').value) || 0;
+  const currency = document.getElementById('pPurchaseCurrency').value;
+  const popular = document.getElementById('pPopular').value === 'true';
+  const actionType = document.getElementById('pActionType').value;
+
+  // Auto-derive display fields from simplified inputs
+  const priceDisplay = price > 0 ? (currency === 'USD' ? '$' + price.toLocaleString() : price.toLocaleString()) : '';
+  const currencyLabel = currency === 'USD' ? '' : currency;
+
   const data = {
     name: document.getElementById('pName').value,
     name_ru: document.getElementById('pNameRu').value,
-    tier: document.getElementById('pTier').value,
-    cssClass: document.getElementById('pCssClass').value,
-    tierLabel: document.getElementById('pTierLabel').value,
-    tierLabel_ru: document.getElementById('pTierLabelRu').value,
     tagline: document.getElementById('pTagline').value,
-    tagline_ru: document.getElementById('pTaglineRu').value,
-    priceAmount: document.getElementById('pPriceAmount').value,
-    priceCurrency: document.getElementById('pPriceCurrency').value,
-    priceNumeric: parseFloat(document.getElementById('pPriceNumeric').value) || 0,
-    purchaseCurrency: document.getElementById('pPurchaseCurrency').value,
+    tagline_ru: '',
+    tier: popular ? 'popular' : 'standard',
+    cssClass: popular ? 'popular' : '',
+    tierLabel: '',
+    tierLabel_ru: '',
+    priceAmount: priceDisplay,
+    priceCurrency: currencyLabel,
+    priceNumeric: price,
+    purchaseCurrency: currency,
     features: document.getElementById('pFeatures').value.split('\n').map(s => s.trim()).filter(Boolean),
     features_ru: document.getElementById('pFeaturesRu').value.split('\n').map(s => s.trim()).filter(Boolean),
-    buttonText: document.getElementById('pBtnText').value,
-    buttonText_ru: document.getElementById('pBtnTextRu').value,
-    actionType: document.getElementById('pActionType').value,
-    popular: document.getElementById('pPopular').value === 'true',
-    order: parseInt(document.getElementById('pOrder').value) || 0
+    buttonText: actionType === 'purchase' ? 'Get Started' : 'Contact Us',
+    buttonText_ru: actionType === 'purchase' ? 'Начать' : 'Связаться',
+    actionType,
+    popular,
+    order: id ? (programs.find(p => p._id === id) || {}).order || 0 : programs.length + 1
   };
 
   try {
