@@ -32,7 +32,6 @@ const TELEGRAM_BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || '').trim();
 const TELEGRAM_CHAT_ID = (process.env.TELEGRAM_CHAT_ID || '').trim();
 
 const DEFAULT_ALLOWED_ORIGINS = [
-  'https://baitursagynbekov3-stack.github.io',
   'https://kvantum-api.vercel.app'
 ];
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || DEFAULT_ALLOWED_ORIGINS.join(','))

@@ -1,10 +1,8 @@
 // Frontend runtime config.
-// Localhost -> local API, GitHub Pages -> production API, other hosts -> same-origin API by default.
+// Localhost -> local API, other hosts -> same-origin API by default.
 (function () {
   var host = window.location.hostname || '';
   var isLocal = host === 'localhost' || host === '127.0.0.1';
-  var isGitHubPages = host.endsWith('github.io');
-
   var queryOverride = '';
   try {
     queryOverride = (new URLSearchParams(window.location.search).get('apiBase') || '').trim();
@@ -26,8 +24,6 @@
     window.QUANTUM_API_BASE_URL = override.replace(/\/$/, '');
   } else if (isLocal) {
     window.QUANTUM_API_BASE_URL = 'http://localhost:3000';
-  } else if (isGitHubPages) {
-    window.QUANTUM_API_BASE_URL = 'https://kvantum-api.vercel.app';
   } else {
     // Vercel/custom domain where frontend and API are served by same app.
     window.QUANTUM_API_BASE_URL = '';
