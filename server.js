@@ -584,50 +584,192 @@ function buildLeadMessage(rawMessage, source) {
   return `[${normalizedSource}] ${message}`;
 }
 
-function getRuleBasedReply(message) {
+const CHAT_KB_STOP_WORDS = new Set([
+  'and', 'the', 'that', 'this', 'with', 'from', 'for', 'you', 'your', 'have', 'about', 'what', 'when', 'where',
+  'как', 'что', 'это', 'для', 'или', 'если', 'нам', 'вас', 'вам', 'мне', 'моя', 'твой', 'ваш', 'они', 'она',
+  'есть', 'быть', 'чтобы', 'когда', 'где', 'какой', 'какая', 'какие', 'можно', 'нужно', 'просто', 'очень', 'тема', 'сайт'
+]);
+
+function tokenizeKnowledgeQuery(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/[^a-zа-яё0-9\s-]/giu, ' ')
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 3 && !CHAT_KB_STOP_WORDS.has(token));
+}
+
+function parseKnowledgeSections(knowledgeText) {
+  const source = String(knowledgeText || '').trim();
+  if (!source) return [];
+
+  const lines = source.split(/\r?\n/);
+  const sections = [];
+  let current = null;
+
+  for (const line of lines) {
+    const headingMatch = line.match(/^##\s+(.+)$/);
+    if (headingMatch) {
+      if (current) sections.push(current);
+      current = {
+        title: String(headingMatch[1] || '').trim(),
+        bodyLines: []
+      };
+      continue;
+    }
+
+    if (!current) continue;
+    current.bodyLines.push(line);
+  }
+
+  if (current) sections.push(current);
+
+  return sections.map((section) => {
+    const body = section.bodyLines
+      .map((line) => String(line || '').trim())
+      .filter(Boolean)
+      .join('\n');
+
+    const bullets = section.bodyLines
+      .map((line) => String(line || '').trim())
+      .filter((line) => /^[-*]\s+/.test(line))
+      .map((line) => line.replace(/^[-*]\s+/, '').trim())
+      .filter(Boolean);
+
+    return {
+      title: section.title,
+      body,
+      bullets
+    };
+  }).filter((section) => section.title || section.body);
+}
+
+function pickKnowledgeSection(message, knowledgeText) {
+  const sections = parseKnowledgeSections(knowledgeText);
+  if (!sections.length) return null;
+
+  const tokens = tokenizeKnowledgeQuery(message);
+  if (!tokens.length) return sections[0] || null;
+
+  let bestSection = null;
+  let bestScore = 0;
+
+  for (const section of sections) {
+    const title = String(section.title || '').toLowerCase();
+    const body = String(section.body || '').toLowerCase();
+
+    let score = 0;
+    for (const token of tokens) {
+      if (title.includes(token)) score += 3;
+      if (body.includes(token)) score += 1;
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestSection = section;
+    }
+  }
+
+  return bestScore > 0 ? bestSection : null;
+}
+
+function formatKnowledgeFallback(section, useRu) {
+  if (!section) return '';
+
+  const lines = (section.bullets.length ? section.bullets : section.body.split('\n'))
+    .map((line) => String(line || '').trim())
+    .filter(Boolean)
+    .slice(0, 5);
+
+  if (!lines.length) return '';
+
+  if (useRu) {
+    return [
+      `По теме "${section.title}" у нас так:`,
+      ...lines.map((line) => `- ${line}`),
+      '',
+      'Если хотите, помогу выбрать программу и сразу оформлю бесплатную консультацию в чате.'
+    ].join('\n');
+  }
+
+  return [
+    `Here is what we have on "${section.title}":`,
+    ...lines.map((line) => `- ${line}`),
+    '',
+    'If you want, I can help you choose a program and create a free consultation request in chat.'
+  ].join('\n');
+}
+
+function getRuleBasedReply(message, useRu, knowledgeText) {
   const lowerMsg = String(message || '').toLowerCase();
 
   if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('привет') || lowerMsg.includes('здравствуйте')) {
-    return 'Welcome to KVANTUM! I am your AI assistant. How can I help you today? You can ask about our programs, pricing, or book a free consultation.';
+    return useRu
+      ? 'Добро пожаловать в KVANTUM! Я могу рассказать о программах, ценах и сразу оформить бесплатную консультацию.'
+      : 'Welcome to KVANTUM! I can explain programs, pricing, and create a free consultation request right in chat.';
   }
 
   if (lowerMsg.includes('price') || lowerMsg.includes('cost') || lowerMsg.includes('цена') || lowerMsg.includes('стоимость') || lowerMsg.includes('сколько')) {
-    return 'Our programs:\n\n1. Brain Charge (entry level) - 1,000 KGS/RUB\n2. Resources Club - 5,000 KGS/month\n3. Intensive "Mom & Dad - My 2 Wings" - $300 / 26,300 KGS\n4. REBOOT course - $1,000\n5. Mentorship - contact our managers for pricing\n\nWould you like to book a free consultation to find the best program for you?';
+    return useRu
+      ? 'Актуальные программы и цены:\n\n1. Brain Charge — 1,000 KGS/RUB\n2. Resources Club — 5,000 KGS/месяц\n3. Intensive "Mom & Dad - My 2 Wings" — $300 / 26,300 KGS\n4. REBOOT — $1,000\n5. Mentorship — цену уточняет менеджер\n\nМогу помочь выбрать под вашу задачу и сразу оформить бесплатную консультацию.'
+      : 'Current programs and pricing:\n\n1. Brain Charge — 1,000 KGS/RUB\n2. Resources Club — 5,000 KGS/month\n3. Intensive "Mom & Dad - My 2 Wings" — $300 / 26,300 KGS\n4. REBOOT — $1,000\n5. Mentorship — pricing via manager\n\nI can help you choose the best option and create a free consultation request now.';
   }
 
   if (lowerMsg.includes('brain') || lowerMsg.includes('зарядка') || lowerMsg.includes('мозг')) {
-    return 'Brain Charge is our entry-level program:\n- 21 days\n- 15 minutes per day\n- Starts at 6:00 AM (Kyrgyzstan time)\n- Price: 1,000 KGS/RUB\n\nIt is the simplest way to start your transformation journey!';
+    return useRu
+      ? 'Brain Charge — входная программа: 21 день, по ~15 минут в день, стоимость 1,000 KGS/RUB. Подходит, чтобы мягко начать трансформацию состояния и привычек.'
+      : 'Brain Charge is our entry program: 21 days, about 15 minutes daily, price 1,000 KGS/RUB. It is the easiest way to start your transformation.';
   }
 
   if (lowerMsg.includes('resource') || lowerMsg.includes('club') || lowerMsg.includes('клуб') || lowerMsg.includes('ресурс')) {
-    return 'Resources Club helps strengthen your inner state:\n- 4 weeks\n- 2 sessions with Altynai\n- 2 sessions with a curator\n- Focus: confidence, self-worth, inner freedom\n- Price: 5,000 KGS/month\n\nWant to join?';
+    return useRu
+      ? 'Resources Club: 4 недели, 2 сессии с Алтынай и 2 с куратором, фокус на внутреннем состоянии, уверенности и самоценности. Цена — 5,000 KGS/месяц.'
+      : 'Resources Club: 4 weeks, 2 sessions with Altynai and 2 with a curator, focused on confidence, self-worth, and inner state. Price is 5,000 KGS/month.';
   }
 
   if (lowerMsg.includes('intensive') || lowerMsg.includes('интенсив') || lowerMsg.includes('papa') || lowerMsg.includes('mama') || lowerMsg.includes('папа') || lowerMsg.includes('мама')) {
-    return 'The Intensive "Mom & Dad - My 2 Wings" works with ancestral roots:\n- 1 month, 10 lessons, 20 practices\n- 3 Zoom sessions\n- Topics: separation, breaking free from inherited patterns, restoring hierarchy\n- Price: $300 / 26,300 KGS';
+    return useRu
+      ? 'Интенсив "Mom & Dad - My 2 Wings": формат 1 месяц, 10 уроков, 20 практик, 3 Zoom-сессии. Тема — работа с родовыми паттернами. Стоимость: $300 / 26,300 KGS.'
+      : 'The "Mom & Dad - My 2 Wings" intensive runs for 1 month with 10 lessons, 20 practices, and 3 Zoom sessions. Focus is family-pattern work. Price: $300 / 26,300 KGS.';
   }
 
   if (lowerMsg.includes('reboot') || lowerMsg.includes('перезагрузка')) {
-    return 'REBOOT - Conscious Reality Management:\n- 8 weeks, 24 sessions\n- 20 lessons, 20 practices\n- 1 personal session with Altynai + 2 curator sessions\n- Topics: values, state management, relationships, finances\n- Price: $1,000';
+    return useRu
+      ? 'REBOOT — 8 недель, 24 занятия: ценности, состояние, отношения, финансы. Включает глубокую практическую работу. Стоимость — $1,000.'
+      : 'REBOOT is an 8-week program with 24 sessions covering values, state management, relationships, and finances. Price is $1,000.';
   }
 
-  if (lowerMsg.includes('mentor') || lowerMsg.includes('наставничество')) {
-    return 'Mentorship (University of Self-Knowledge) is our premium program:\n- Field reading, emotions & subconscious blocks\n- Quantum field work\n- 30 NLP practices\n- Constellation fundamentals\n- Live practice with curators\n\nContact our managers for pricing!';
+  if (lowerMsg.includes('mentor') || lowerMsg.includes('наставнич')) {
+    return useRu
+      ? 'Mentorship (University of Self-Knowledge) — премиальный формат, цена по запросу через менеджера. Могу сразу оформить заявку на бесплатную консультацию для подбора.'
+      : 'Mentorship (University of Self-Knowledge) is our premium format, with pricing provided by managers. I can create a free consultation request right now.';
   }
 
   if (lowerMsg.includes('consult') || lowerMsg.includes('консультац') || lowerMsg.includes('записаться') || lowerMsg.includes('book')) {
-    return 'To book a free consultation, share your name, email, and phone number with country code (+...). We will contact you via WhatsApp/Telegram.';
+    return useRu
+      ? 'Для бесплатной консультации отправьте: имя, email и телефон в международном формате (+код страны). Я сразу оформлю заявку.'
+      : 'To book a free consultation, please send your name, email, and phone in international format (+country code). I will create your request immediately.';
   }
 
   if (lowerMsg.includes('altynai') || lowerMsg.includes('алтынай') || lowerMsg.includes('founder') || lowerMsg.includes('основатель')) {
-    return 'Altynai Eshinbekova is the founder of KVANTUM:\n- Specialist in subconscious and quantum field work\n- NLP Master\n- Master of deep analysis sessions\n\nShe works deeply, ecologically, and delivers real results. She personally accompanies clients to their goals.';
+    return useRu
+      ? 'Алтынай Ешинбекова — основатель KVANTUM. Фокус: работа с подсознанием, NLP-инструменты и трансформация состояния.'
+      : 'Altynai Eshinbekova is the founder of KVANTUM. Her focus includes subconscious work, NLP tools, and deep state transformation.';
   }
 
   if (lowerMsg.includes('whatsapp') || lowerMsg.includes('telegram') || lowerMsg.includes('contact') || lowerMsg.includes('связ') || lowerMsg.includes('контакт')) {
-    return 'You can reach us via:\n- WhatsApp: Click the WhatsApp button on our website\n- Telegram: Click the Telegram button\n- Or fill out the contact form and we will reach out to you!\n\nWe are happy to help you start your transformation journey.';
+    return useRu
+      ? 'Связаться можно через WhatsApp и Telegram-кнопки на сайте, либо через заявку в форме/чате. Команда свяжется с вами после заявки.'
+      : 'You can contact us via the WhatsApp and Telegram buttons on the website, or leave a request in the form/chat. Our team will follow up.';
   }
 
-  return 'Thank you for your message! I can help you with:\n\n- Program information and pricing\n- Booking a free consultation\n- Learning about our founder Altynai\n- Understanding how we work\n\nJust ask me anything, or click "Book Consultation" to get started!';
+  const section = pickKnowledgeSection(message, knowledgeText);
+  const knowledgeReply = formatKnowledgeFallback(section, useRu);
+  if (knowledgeReply) return knowledgeReply;
+
+  return useRu
+    ? 'Могу помочь по темам KVANTUM: программы, цены, консультация и подбор формата. Напишите вашу цель, и я предложу лучший вариант.'
+    : 'I can help with KVANTUM topics: programs, pricing, consultation, and choosing the right format. Share your goal, and I will suggest the best option.';
 }
 
 function extractAssistantText(content) {
@@ -1653,7 +1795,8 @@ app.post('/api/chat', async (req, res) => {
     }
 
     if (!reply) {
-      reply = getRuleBasedReply(message);
+      const knowledgeText = await getKnowledgeBaseText();
+      reply = getRuleBasedReply(message, useRu, knowledgeText);
     }
 
     appendChatHistory(session, 'user', message);
