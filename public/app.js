@@ -6,7 +6,8 @@ let currentLang = localStorage.getItem('quantum_lang') || 'en';
 let adminOverviewData = null;
 let adminFilters = {
   search: '',
-  bookingStatus: 'all'
+  bookingStatus: 'all',
+  period: 'all'
 };
 let adminExportData = {
   users: [],
@@ -2631,7 +2632,14 @@ function getAdminLabels() {
       emptyAudit: 'Действий пока нет',
       searchPlaceholder: 'Поиск: имя, email, телефон, роль, продукт',
       bookingStatusFilter: 'Фильтр статуса',
+      periodFilter: 'Период',
+      periodAll: 'За всё время',
+      period7d: 'Последние 7 дней',
+      period30d: 'Последние 30 дней',
       statusAll: 'Все статусы',
+      metricRevenue: 'Выручка',
+      metricConversion: 'Конверсия оплат',
+      metricAdmins: 'Админы',
       notePlaceholder: 'Заметка менеджера (опционально)',
       save: 'Сохранить',
       refresh: 'Обновить',
@@ -2703,7 +2711,14 @@ function getAdminLabels() {
     emptyAudit: 'No actions yet',
     searchPlaceholder: 'Search: name, email, phone, role, product',
     bookingStatusFilter: 'Status filter',
+    periodFilter: 'Period',
+    periodAll: 'All time',
+    period7d: 'Last 7 days',
+    period30d: 'Last 30 days',
     statusAll: 'All statuses',
+    metricRevenue: 'Revenue',
+    metricConversion: 'Payment conversion',
+    metricAdmins: 'Admins',
     notePlaceholder: 'Manager note (optional)',
     save: 'Save',
     refresh: 'Refresh',
@@ -2763,9 +2778,16 @@ function setAdminBookingStatus(value) {
   if (adminOverviewData) renderAdminOverview(adminOverviewData);
 }
 
+function setAdminPeriod(value) {
+  const normalized = normalizeAdminValue(value);
+  adminFilters.period = (normalized === '7d' || normalized === '30d') ? normalized : 'all';
+  if (adminOverviewData) renderAdminOverview(adminOverviewData);
+}
+
 function clearAdminFilters() {
   adminFilters.search = '';
   adminFilters.bookingStatus = 'all';
+  adminFilters.period = 'all';
   if (adminOverviewData) renderAdminOverview(adminOverviewData);
 }
 
@@ -3030,16 +3052,34 @@ function renderAdminOverview(data) {
 
   const searchQuery = normalizeAdminValue(adminFilters.search);
   const bookingStatusFilter = normalizeAdminValue(adminFilters.bookingStatus || 'all');
+  const periodFilter = normalizeAdminValue(adminFilters.period || 'all');
 
-  const users = usersRaw.filter((user) => matchesAdminSearch(searchQuery, [user.name, user.email, user.phone, user.role, user.authProvider]));
+  const now = Date.now();
+  const periodMs = periodFilter === '7d'
+    ? 7 * 24 * 60 * 60 * 1000
+    : (periodFilter === '30d' ? 30 * 24 * 60 * 60 * 1000 : 0);
+  const minTimestamp = periodMs > 0 ? now - periodMs : null;
 
-  const bookings = bookingsRaw.filter((booking) => {
+  function inSelectedPeriod(dateValue) {
+    if (!minTimestamp) return true;
+    const ts = new Date(dateValue).getTime();
+    return Number.isFinite(ts) && ts >= minTimestamp;
+  }
+
+  const usersSource = usersRaw.filter((user) => inSelectedPeriod(user && user.createdAt));
+  const bookingsSource = bookingsRaw.filter((booking) => inSelectedPeriod(booking && booking.createdAt));
+  const paymentsSource = paymentsRaw.filter((payment) => inSelectedPeriod(payment && payment.createdAt));
+  const auditSource = auditRaw.filter((entry) => inSelectedPeriod(entry && entry.createdAt));
+
+  const users = usersSource.filter((user) => matchesAdminSearch(searchQuery, [user.name, user.email, user.phone, user.role, user.authProvider]));
+
+  const bookings = bookingsSource.filter((booking) => {
     const statusOk = bookingStatusFilter === 'all' || normalizeAdminValue(booking.status) === bookingStatusFilter;
     if (!statusOk) return false;
     return matchesAdminSearch(searchQuery, [booking.name, booking.email, booking.phone, booking.service, booking.status, booking.message]);
   });
 
-  const payments = paymentsRaw.filter((payment) => matchesAdminSearch(searchQuery, [
+  const payments = paymentsSource.filter((payment) => matchesAdminSearch(searchQuery, [
     payment.id,
     payment.productId,
     payment.productName,
@@ -3048,7 +3088,7 @@ function renderAdminOverview(data) {
     payment.user && payment.user.name
   ]));
 
-  const audit = auditRaw.filter((entry) => {
+  const audit = auditSource.filter((entry) => {
     const detailsText = getAdminAuditDetailsText(entry && entry.details);
     return matchesAdminSearch(searchQuery, [
       entry && entry.action,
@@ -3067,6 +3107,30 @@ function renderAdminOverview(data) {
     audit: audit.slice()
   };
 
+  const totalRevenue = payments.reduce((sum, payment) => {
+    const amount = Number(payment && payment.amount);
+    return sum + (Number.isFinite(amount) ? amount : 0);
+  }, 0);
+  const revenueLabel = totalRevenue.toLocaleString(currentLang === 'ru' ? 'ru-RU' : 'en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+  const conversionLabel = bookings.length > 0
+    ? `${((payments.length / bookings.length) * 100).toFixed(1)}%`
+    : '0%';
+  const adminCount = users.filter((user) => normalizeAdminValue(user && user.role) === 'admin').length;
+
+  const periodOptions = [
+    { value: 'all', label: labels.periodAll },
+    { value: '7d', label: labels.period7d },
+    { value: '30d', label: labels.period30d }
+  ];
+
+  const usersTitleCount = periodFilter === 'all' ? Number(totals.users || usersRaw.length) : usersSource.length;
+  const bookingsTitleCount = periodFilter === 'all' ? Number(totals.bookings || bookingsRaw.length) : bookingsSource.length;
+  const paymentsTitleCount = periodFilter === 'all' ? Number(totals.payments || paymentsRaw.length) : paymentsSource.length;
+  const auditTitleCount = periodFilter === 'all' ? auditRaw.length : auditSource.length;
+
   const statusOptions = ['pending', 'new', 'in_progress', 'done', 'cancelled'];
 
   panelBody.innerHTML = `
@@ -3082,6 +3146,9 @@ function renderAdminOverview(data) {
         <option value="all" ${bookingStatusFilter === 'all' ? 'selected' : ''}>${escapeHtml(labels.statusAll)}</option>
         ${statusOptions.map((statusKey) => `<option value="${statusKey}" ${bookingStatusFilter === statusKey ? 'selected' : ''}>${escapeHtml(getBookingStatusLabel(statusKey, labels))}</option>`).join('')}
       </select>
+      <select class="admin-filter-select" onchange="setAdminPeriod(this.value)">
+        ${periodOptions.map((item) => `<option value="${item.value}" ${periodFilter === item.value ? 'selected' : ''}>${escapeHtml(labels.periodFilter)}: ${escapeHtml(item.label)}</option>`).join('')}
+      </select>
       <button class="btn btn-outline btn-sm" onclick="refreshAdminOverview()">${escapeHtml(labels.refresh)}</button>
       <button class="btn btn-outline btn-sm" onclick="clearAdminFilters()">${escapeHtml(labels.clear)}</button>
       <div class="admin-export-actions">
@@ -3096,10 +3163,13 @@ function renderAdminOverview(data) {
       <div class="admin-stat-card"><span class="admin-stat-label">${labels.users}</span><strong>${Number(users.length).toLocaleString()}</strong></div>
       <div class="admin-stat-card"><span class="admin-stat-label">${labels.bookings}</span><strong>${Number(bookings.length).toLocaleString()}</strong></div>
       <div class="admin-stat-card"><span class="admin-stat-label">${labels.payments}</span><strong>${Number(payments.length).toLocaleString()}</strong></div>
+      <div class="admin-stat-card"><span class="admin-stat-label">${labels.metricRevenue}</span><strong>${escapeHtml(revenueLabel)}</strong></div>
+      <div class="admin-stat-card"><span class="admin-stat-label">${labels.metricConversion}</span><strong>${escapeHtml(conversionLabel)}</strong></div>
+      <div class="admin-stat-card"><span class="admin-stat-label">${labels.metricAdmins}</span><strong>${Number(adminCount).toLocaleString()}</strong></div>
     </div>
 
     <section class="admin-section">
-      <h3>${labels.usersTitle} (${Number(totals.users || usersRaw.length).toLocaleString()})</h3>
+      <h3>${labels.usersTitle} (${Number(usersTitleCount).toLocaleString()})</h3>
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
@@ -3149,7 +3219,7 @@ function renderAdminOverview(data) {
     </section>
 
     <section class="admin-section">
-      <h3>${labels.bookingsTitle} (${Number(totals.bookings || bookingsRaw.length).toLocaleString()})</h3>
+      <h3>${labels.bookingsTitle} (${Number(bookingsTitleCount).toLocaleString()})</h3>
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
@@ -3195,7 +3265,7 @@ function renderAdminOverview(data) {
     </section>
 
     <section class="admin-section">
-      <h3>${labels.paymentsTitle} (${Number(totals.payments || paymentsRaw.length).toLocaleString()})</h3>
+      <h3>${labels.paymentsTitle} (${Number(paymentsTitleCount).toLocaleString()})</h3>
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
@@ -3225,7 +3295,7 @@ function renderAdminOverview(data) {
     </section>
 
     <section class="admin-section">
-      <h3>${labels.auditTitle} (${Number(auditRaw.length).toLocaleString()})</h3>
+      <h3>${labels.auditTitle} (${Number(auditTitleCount).toLocaleString()})</h3>
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
