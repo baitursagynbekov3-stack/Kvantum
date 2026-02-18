@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = global.prisma || new PrismaClient();
@@ -30,6 +31,8 @@ const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || '').trim();
 const OPENAI_MODEL = (process.env.OPENAI_MODEL || 'gpt-4o-mini').trim();
 const TELEGRAM_BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || '').trim();
 const TELEGRAM_CHAT_ID = (process.env.TELEGRAM_CHAT_ID || '').trim();
+const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID || '').trim();
+const googleOAuthClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://baitursagynbekov3-stack.github.io',
@@ -1104,6 +1107,107 @@ function buildPublicUser(user, role) {
   };
 }
 
+async function createSocialPasswordHash() {
+  const randomSecret = crypto.randomBytes(32).toString('hex');
+  return bcrypt.hash(randomSecret, 10);
+}
+
+// Google Sign-In
+app.post('/api/auth/google', authRateLimiter, async (req, res) => {
+  try {
+    if (!googleOAuthClient || !GOOGLE_CLIENT_ID) {
+      return res.status(503).json({ error: 'Google authentication is not configured' });
+    }
+
+    const credential = String(req.body.credential || '').trim();
+    if (!credential) {
+      return res.status(400).json({ error: 'Google credential is required' });
+    }
+
+    const ticket = await googleOAuthClient.verifyIdToken({
+      idToken: credential,
+      audience: GOOGLE_CLIENT_ID
+    });
+    const payload = ticket.getPayload() || {};
+
+    const googleId = String(payload.sub || '').trim();
+    const email = String(payload.email || '').trim().toLowerCase();
+    const emailVerified = payload.email_verified === true;
+
+    if (!googleId || !email || !emailVerified || !isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid Google account data' });
+    }
+
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { googleId },
+          { email }
+        ]
+      }
+    });
+
+    if (user && user.googleId && user.googleId !== googleId) {
+      return res.status(409).json({ error: 'Email already linked to another Google account' });
+    }
+
+    let role = isAdminEmail(email) ? 'admin' : 'user';
+
+    if (!user) {
+      const passwordHash = await createSocialPasswordHash();
+      user = await prisma.user.create({
+        data: {
+          name: String(payload.name || email.split('@')[0] || 'User').trim().slice(0, 120),
+          email,
+          password: passwordHash,
+          role,
+          authProvider: 'google',
+          googleId
+        }
+      });
+    } else {
+      role = normalizeUserRole(user.role);
+      if (isAdminEmail(email)) {
+        role = 'admin';
+      }
+
+      const updates = {};
+      if (!user.googleId) updates.googleId = googleId;
+      if (user.authProvider !== 'google') updates.authProvider = 'google';
+      if (role !== normalizeUserRole(user.role)) updates.role = role;
+
+      if (Object.keys(updates).length > 0) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: updates
+        });
+      }
+    }
+
+    const token = buildAuthToken(user, role);
+
+    return res.json({
+      message: 'Google sign-in successful',
+      token,
+      user: buildPublicUser(user, role)
+    });
+  } catch (err) {
+    const errorMessage = err && err.message ? err.message : '';
+    const isGoogleTokenError = /Wrong recipient|Token used too late|Invalid token|audience/i.test(errorMessage);
+
+    if (isGoogleTokenError) {
+      return res.status(401).json({ error: 'Invalid Google token' });
+    }
+
+    if (err && err.code === 'P2002') {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
+
+    console.error('[auth/google] failed:', errorMessage || err);
+    return res.status(500).json({ error: 'Google authentication failed' });
+  }
+});
+
 // Register
 app.post('/api/register', authRateLimiter, async (req, res) => {
   try {
@@ -2170,6 +2274,12 @@ if (require.main === module) {
       console.log('Telegram lead notifications enabled');
     } else {
       console.log('Telegram lead notifications disabled (missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID)');
+    }
+
+    if (GOOGLE_CLIENT_ID) {
+      console.log('Google auth enabled');
+    } else {
+      console.log('Google auth disabled (GOOGLE_CLIENT_ID is not set)');
     }
   });
 

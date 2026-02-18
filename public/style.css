@@ -1185,6 +1185,34 @@ body.dark-mode .phone-input-group .country-code-select {
 }
 .form-note { text-align: center; font-size: 0.85rem; color: var(--gray-500); margin-top: 16px; }
 .form-note a { color: var(--primary); font-weight: 600; }
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 14px 0 10px;
+  color: var(--gray-500);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.oauth-divider::before,
+.oauth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--gray-200);
+}
+.oauth-divider span {
+  padding: 0 10px;
+}
+.google-signin-slot {
+  display: flex;
+  justify-content: center;
+}
+.google-signin-slot > div {
+  width: 100%;
+  max-width: 320px;
+}
 .modal-success { text-align: center; padding: 48px 40px; }
 .success-icon {
   width: 72px;

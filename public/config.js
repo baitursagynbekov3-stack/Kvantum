@@ -35,6 +35,10 @@
 
   window.QUANTUM_USE_DEMO_API = false;
 
+  // Google OAuth Client ID for Google Sign-In (Web application type).
+  // Example: 1234567890-abc123def456.apps.googleusercontent.com
+  window.QUANTUM_GOOGLE_CLIENT_ID = '145410914930-2n3ccc2otdud4hds5ob54fu7utubonl3.apps.googleusercontent.com';
+
   // Demo admin emails — these accounts get admin access in demo mode.
   // In production, admin is determined by DB role + ADMIN_EMAILS bootstrap on backend.
   window.QUANTUM_DEMO_ADMIN_EMAILS = ['admin@quantum.com'];

@@ -555,6 +555,8 @@
           <input type="password" name="password" data-i18n-placeholder="modal.pass_ph" placeholder="Enter password" required>
         </div>
         <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.login">Login</button>
+        <div class="oauth-divider"><span>or</span></div>
+        <div id="googleSignInLogin" class="google-signin-slot"></div>
         <p class="form-note"><a href="#" onclick="openResetModal(); return false;" data-i18n="modal.forgot">Forgot password?</a></p>
         <p class="form-note" data-i18n-html="modal.no_account">Don't have an account? <a href="#" onclick="switchTab('register')">Register here</a></p>
       </form>
@@ -596,6 +598,8 @@
           <input type="password" name="password" data-i18n-placeholder="modal.create_pass_ph" placeholder="Create a password" required minlength="8">
         </div>
         <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.register">Register</button>
+        <div class="oauth-divider"><span>or</span></div>
+        <div id="googleSignInRegister" class="google-signin-slot"></div>
         <p class="form-note" data-i18n-html="modal.has_account">Already have an account? <a href="#" onclick="switchTab('login')">Login here</a></p>
       </form>
     </div>
@@ -820,6 +824,7 @@
     </div>
   </div>
 
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="./config.js"></script>
   <script src="./app.js"></script>
 

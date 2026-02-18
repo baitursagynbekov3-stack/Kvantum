@@ -12,8 +12,11 @@ let adminFilters = {
 // Use external API in static hosting (GitHub Pages) via public/config.js
 const API_BASE_URL = (window.QUANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
 const USE_DEMO_API = window.QUANTUM_USE_DEMO_API === true || (!API_BASE_URL && window.location.hostname.endsWith('github.io'));
+const GOOGLE_CLIENT_ID = (window.QUANTUM_GOOGLE_CLIENT_ID || '').trim();
 const CHAT_SESSION_STORAGE_KEY = 'quantum_chat_session_id';
 const chatSessionIdCache = Object.create(null);
+let googleSignInInitialized = false;
+let googleSignInInitAttempts = 0;
 
 function getChatIdentityKey() {
   if (currentUser && typeof currentUser === 'object') {
@@ -145,6 +148,20 @@ function normalizePhone(value, countryCode) {
   return '+' + digits;
 }
 
+function decodeJwtPayload(token) {
+  try {
+    const parts = String(token || '').split('.');
+    if (parts.length < 2) return null;
+
+    const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
+    const decoded = atob(padded);
+    return JSON.parse(decoded);
+  } catch (err) {
+    return null;
+  }
+}
+
 function parseJsonBody(options) {
   if (!options || !options.body) return {};
   try {
@@ -256,6 +273,52 @@ function demoApi(path, options) {
     const token = 'demo-' + btoa(email + ':' + Date.now());
     return createApiResponse(200, {
       message: 'Login successful (demo mode)',
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role || 'user' }
+    });
+  }
+
+  if (path === '/api/auth/google') {
+    const credential = String(body.credential || '').trim();
+    if (!credential) {
+      return createApiResponse(400, { error: 'Google credential is required' });
+    }
+
+    const payload = decodeJwtPayload(credential);
+    const email = String(payload && payload.email ? payload.email : '').trim().toLowerCase();
+    const emailVerified = payload && payload.email_verified !== false;
+    const name = String(payload && payload.name ? payload.name : (email.split('@')[0] || 'User')).trim();
+
+    if (!email || !emailVerified || !isValidEmail(email)) {
+      return createApiResponse(400, { error: 'Invalid Google account data' });
+    }
+
+    const users = getStorageArray(usersKey);
+    let user = users.find((u) => u.email === email);
+
+    if (!user) {
+      const demoAdmins = (window.QUANTUM_DEMO_ADMIN_EMAILS || []).map((e) => e.toLowerCase());
+      const role = demoAdmins.includes(email) ? 'admin' : 'user';
+      user = {
+        id: Date.now(),
+        name: name || 'User',
+        email,
+        phone: '',
+        password: String(Math.random()).slice(2),
+        role,
+        authProvider: 'google',
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+      setStorageArray(usersKey, users);
+    } else if (!user.authProvider) {
+      user.authProvider = 'google';
+      setStorageArray(usersKey, users);
+    }
+
+    const token = 'demo-' + btoa(email + ':' + Date.now());
+    return createApiResponse(200, {
+      message: 'Google sign-in successful (demo mode)',
       token,
       user: { id: user.id, name: user.name, email: user.email, role: user.role || 'user' }
     });
@@ -1000,7 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateLangButton();
   if (currentLang !== 'en') applyTranslations(currentLang);
   loadSiteContent();
-
+  initGoogleSignIn();
 
   // Trigger hero animations immediately
   setTimeout(() => {
@@ -1155,6 +1218,84 @@ function updateUIForLoggedIn() {
 function toggleUserMenu() {
   const dropdown = document.getElementById('userDropdown');
   dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+async function handleGoogleCredentialResponse(response) {
+  const credential = String(response && response.credential ? response.credential : '').trim();
+  if (!credential) {
+    showToast(currentLang === 'ru' ? 'Ошибка входа через Google.' : 'Google sign-in failed.', 'error');
+    return;
+  }
+
+  try {
+    const res = await apiFetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential })
+    });
+    const result = await res.json();
+
+    if (res.ok) {
+      authToken = result.token;
+      currentUser = result.user;
+      localStorage.setItem('quantum_token', authToken);
+      localStorage.setItem('quantum_user', JSON.stringify(currentUser));
+      updateUIForLoggedIn();
+      closeModal('loginModal');
+      showToast(currentLang === 'ru' ? 'Вход через Google выполнен.' : 'Signed in with Google.', 'success');
+      return;
+    }
+
+    showToast(result.error || (currentLang === 'ru' ? 'Google вход недоступен.' : 'Google sign-in is unavailable.'), 'error');
+  } catch (err) {
+    showToast(currentLang === 'ru' ? 'Ошибка соединения. Попробуйте снова.' : 'Connection error. Please try again.', 'error');
+  }
+}
+
+function initGoogleSignIn() {
+  if (!GOOGLE_CLIENT_ID) return;
+
+  const loginContainer = document.getElementById('googleSignInLogin');
+  const registerContainer = document.getElementById('googleSignInRegister');
+  if (!loginContainer && !registerContainer) return;
+
+  const tryInitialize = () => {
+    if (googleSignInInitialized) return;
+
+    if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+      if (googleSignInInitAttempts < 25) {
+        googleSignInInitAttempts += 1;
+        setTimeout(tryInitialize, 200);
+      }
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredentialResponse
+    });
+
+    const buttonOptions = {
+      theme: 'outline',
+      size: 'large',
+      text: 'continue_with',
+      width: 320
+    };
+
+    if (loginContainer) {
+      loginContainer.innerHTML = '';
+      window.google.accounts.id.renderButton(loginContainer, buttonOptions);
+    }
+
+    if (registerContainer) {
+      registerContainer.innerHTML = '';
+      window.google.accounts.id.renderButton(registerContainer, buttonOptions);
+    }
+
+    googleSignInInitialized = true;
+  };
+
+  tryInitialize();
 }
 
 async function handleLogin(e) {
@@ -1358,6 +1499,11 @@ function handleLogout() {
   currentUser = null;
   localStorage.removeItem('quantum_token');
   localStorage.removeItem('quantum_user');
+
+  if (window.google && window.google.accounts && window.google.accounts.id) {
+    window.google.accounts.id.disableAutoSelect();
+  }
+
   updateUIForLoggedIn();
   document.getElementById('userDropdown').style.display = 'none';
   showToast('You have been logged out.', 'info');
