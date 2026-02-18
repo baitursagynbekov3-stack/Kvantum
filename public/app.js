@@ -8,6 +8,12 @@ let adminFilters = {
   search: '',
   bookingStatus: 'all'
 };
+let adminExportData = {
+  users: [],
+  bookings: [],
+  payments: [],
+  audit: []
+};
 let profileDashboardData = null;
 let activeProfileSection = 'account';
 
@@ -2607,6 +2613,12 @@ function getAdminLabels() {
       paymentProduct: 'Продукт',
       paymentAmount: 'Сумма',
       paymentClient: 'Клиент',
+      exportUsers: 'CSV пользователи',
+      exportBookings: 'CSV заявки',
+      exportPayments: 'CSV оплаты',
+      exportAudit: 'CSV журнал',
+      exportNoData: 'Нет данных для экспорта',
+      exportReady: 'CSV файл выгружен',
       auditTitle: 'Журнал действий админа',
       auditWhen: 'Когда',
       auditBy: 'Кто',
@@ -2673,6 +2685,12 @@ function getAdminLabels() {
     paymentProduct: 'Product',
     paymentAmount: 'Amount',
     paymentClient: 'Client',
+    exportUsers: 'CSV users',
+    exportBookings: 'CSV bookings',
+    exportPayments: 'CSV payments',
+    exportAudit: 'CSV audit',
+    exportNoData: 'No data to export',
+    exportReady: 'CSV file downloaded',
     auditTitle: 'Admin Activity Log',
     auditWhen: 'When',
     auditBy: 'By',
@@ -2831,6 +2849,113 @@ function getAdminAuditDetailsText(details) {
   return parts.join(' | ').slice(0, 260);
 }
 
+function toCsvCell(value) {
+  const text = value === null || value === undefined ? '' : String(value);
+  if (/[,"\n\r]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
+function buildCsvContent(headers, rows) {
+  const lines = [];
+  lines.push(headers.map(toCsvCell).join(','));
+  rows.forEach((row) => {
+    const normalizedRow = Array.isArray(row) ? row : [];
+    lines.push(normalizedRow.map(toCsvCell).join(','));
+  });
+  return '\uFEFF' + lines.join('\n');
+}
+
+function downloadCsvFile(filename, content) {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function buildAdminExportFilename(type) {
+  const safeType = String(type || 'data').replace(/[^a-z0-9_-]/gi, '').toLowerCase() || 'data';
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  return `kvantum-${safeType}-${stamp}.csv`;
+}
+
+function exportAdminData(type) {
+  const labels = getAdminLabels();
+  const key = String(type || '').trim().toLowerCase();
+  const rowsSource = Array.isArray(adminExportData[key]) ? adminExportData[key] : [];
+
+  if (!rowsSource.length) {
+    showToast(labels.exportNoData || 'No data to export', 'info');
+    return;
+  }
+
+  let headers = [];
+  let rows = [];
+
+  if (key === 'users') {
+    headers = ['id', 'name', 'email', 'phone', 'role', 'provider', 'last_login', 'created_at'];
+    rows = rowsSource.map((item) => [
+      item && item.id,
+      item && item.name,
+      item && item.email,
+      item && item.phone,
+      item && item.role,
+      item && item.authProvider,
+      item && item.lastLoginAt,
+      item && item.createdAt
+    ]);
+  } else if (key === 'bookings') {
+    headers = ['id', 'name', 'email', 'phone', 'service', 'status', 'created_at', 'message'];
+    rows = rowsSource.map((item) => [
+      item && item.id,
+      item && item.name,
+      item && item.email,
+      item && item.phone,
+      item && item.service,
+      item && item.status,
+      item && item.createdAt,
+      item && item.message
+    ]);
+  } else if (key === 'payments') {
+    headers = ['id', 'product_id', 'product_name', 'amount', 'currency', 'status', 'user_email', 'created_at'];
+    rows = rowsSource.map((item) => [
+      item && item.id,
+      item && item.productId,
+      item && item.productName,
+      item && item.amount,
+      item && item.currency,
+      item && item.status,
+      item && item.user && item.user.email,
+      item && item.createdAt
+    ]);
+  } else if (key === 'audit') {
+    headers = ['id', 'created_at', 'admin_name', 'admin_email', 'action', 'target_type', 'target_id', 'details'];
+    rows = rowsSource.map((item) => [
+      item && item.id,
+      item && item.createdAt,
+      item && item.adminUser && item.adminUser.name,
+      item && item.adminUser && item.adminUser.email,
+      item && item.action,
+      item && item.targetType,
+      item && item.targetId,
+      item && item.details ? JSON.stringify(item.details) : ''
+    ]);
+  } else {
+    showToast(labels.exportNoData || 'No data to export', 'info');
+    return;
+  }
+
+  const content = buildCsvContent(headers, rows);
+  downloadCsvFile(buildAdminExportFilename(key), content);
+  showToast(`${labels.exportReady || 'CSV file downloaded'} (${rows.length})`, 'success');
+}
+
 async function saveUserRoleAdmin(userId) {
   const labels = getAdminLabels();
 
@@ -2935,6 +3060,13 @@ function renderAdminOverview(data) {
     ]);
   });
 
+  adminExportData = {
+    users: users.slice(),
+    bookings: bookings.slice(),
+    payments: payments.slice(),
+    audit: audit.slice()
+  };
+
   const statusOptions = ['pending', 'new', 'in_progress', 'done', 'cancelled'];
 
   panelBody.innerHTML = `
@@ -2952,6 +3084,12 @@ function renderAdminOverview(data) {
       </select>
       <button class="btn btn-outline btn-sm" onclick="refreshAdminOverview()">${escapeHtml(labels.refresh)}</button>
       <button class="btn btn-outline btn-sm" onclick="clearAdminFilters()">${escapeHtml(labels.clear)}</button>
+      <div class="admin-export-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportAdminData('users')">${escapeHtml(labels.exportUsers)}</button>
+        <button class="btn btn-outline btn-sm" onclick="exportAdminData('bookings')">${escapeHtml(labels.exportBookings)}</button>
+        <button class="btn btn-outline btn-sm" onclick="exportAdminData('payments')">${escapeHtml(labels.exportPayments)}</button>
+        <button class="btn btn-outline btn-sm" onclick="exportAdminData('audit')">${escapeHtml(labels.exportAudit)}</button>
+      </div>
     </div>
 
     <div class="admin-stats-grid">

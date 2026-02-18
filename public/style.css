@@ -1326,6 +1326,12 @@ body.dark-mode .phone-input-group .country-code-select {
   align-items: center;
   flex-wrap: wrap;
 }
+.admin-export-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
 .admin-filter-input,
 .admin-filter-select,
 .admin-status-select,
@@ -1869,6 +1875,10 @@ body.dark-mode .profile-danger-zone {
   .admin-filter-select {
     width: 100%;
     min-width: 0;
+  }
+  .admin-export-actions {
+    width: 100%;
+    margin-left: 0;
   }
   .admin-booking-actions,
   .admin-user-role-actions {
