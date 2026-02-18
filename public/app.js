@@ -8,6 +8,26 @@ let adminFilters = {
   search: '',
   bookingStatus: 'all'
 };
+let profileDashboardData = null;
+let activeProfileSection = 'account';
+
+const COUNTRY_PHONE_CODES = [
+  { value: '+996', label: '+996 KG' },
+  { value: '+1', label: '+1 US' },
+  { value: '+7', label: '+7 RU/KZ' },
+  { value: '+44', label: '+44 UK' },
+  { value: '+49', label: '+49 DE' },
+  { value: '+90', label: '+90 TR' },
+  { value: '+82', label: '+82 KR' },
+  { value: '+86', label: '+86 CN' },
+  { value: '+91', label: '+91 IN' },
+  { value: '+971', label: '+971 AE' },
+  { value: '+81', label: '+81 JP' },
+  { value: '+33', label: '+33 FR' },
+  { value: '+39', label: '+39 IT' },
+  { value: '+34', label: '+34 ES' },
+  { value: '+61', label: '+61 AU' }
+];
 
 // Use external API in static hosting (GitHub Pages) via public/config.js
 const API_BASE_URL = (window.QUANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
@@ -148,6 +168,33 @@ function normalizePhone(value, countryCode) {
   return '+' + digits;
 }
 
+function getCountryCodeOptionsHtml(selectedCode) {
+  const normalizedSelected = String(selectedCode || '+996').trim();
+  return COUNTRY_PHONE_CODES.map((item) => {
+    const selectedAttr = normalizedSelected === item.value ? ' selected' : '';
+    return `<option value="${escapeHtml(item.value)}"${selectedAttr}>${escapeHtml(item.label)}</option>`;
+  }).join('');
+}
+
+function splitPhoneForForm(phone) {
+  const normalized = normalizePhone(phone);
+  if (!normalized) {
+    return { countryCode: '+996', localNumber: '' };
+  }
+
+  const sortedCodes = COUNTRY_PHONE_CODES
+    .map((item) => item.value)
+    .sort((a, b) => b.length - a.length);
+
+  const matchedCode = sortedCodes.find((code) => normalized.startsWith(code)) || '+996';
+  const localNumber = normalized.slice(matchedCode.length).replace(/^0+/, '');
+
+  return {
+    countryCode: matchedCode,
+    localNumber
+  };
+}
+
 function decodeJwtPayload(token) {
   try {
     const parts = String(token || '').split('.');
@@ -208,6 +255,25 @@ function demoApi(path, options) {
   const usersKey = 'quantum_demo_users';
   const bookingsKey = 'quantum_demo_bookings';
   const paymentsKey = 'quantum_demo_payments';
+
+  function getDemoAuthEmail() {
+    const auth = readHeader(options && options.headers, 'Authorization');
+    if (!auth || !auth.startsWith('Bearer demo-')) return '';
+
+    try {
+      const decoded = atob(auth.replace('Bearer demo-', ''));
+      return String(decoded.split(':')[0] || '').trim().toLowerCase();
+    } catch (err) {
+      return '';
+    }
+  }
+
+  function getDemoSessionUser() {
+    const email = getDemoAuthEmail();
+    if (!email) return null;
+    const users = getStorageArray(usersKey);
+    return users.find((user) => String(user.email || '').trim().toLowerCase() === email) || null;
+  }
 
   if (path === '/api/health') {
     return createApiResponse(200, { ok: true, demo: true });
@@ -322,6 +388,130 @@ function demoApi(path, options) {
       token,
       user: { id: user.id, name: user.name, email: user.email, role: user.role || 'user' }
     });
+  }
+
+  if (path === '/api/profile' && String((options && options.method) || 'GET').toUpperCase() === 'GET') {
+    const sessionUser = getDemoSessionUser();
+    if (!sessionUser) {
+      return createApiResponse(401, { error: 'Access denied' });
+    }
+
+    return createApiResponse(200, {
+      id: sessionUser.id,
+      name: sessionUser.name,
+      email: sessionUser.email,
+      phone: sessionUser.phone || '',
+      role: sessionUser.role || 'user',
+      authProvider: sessionUser.authProvider || 'local',
+      createdAt: sessionUser.createdAt || new Date().toISOString()
+    });
+  }
+
+  if (path === '/api/profile' && String((options && options.method) || 'GET').toUpperCase() === 'PATCH') {
+    const sessionUser = getDemoSessionUser();
+    if (!sessionUser) {
+      return createApiResponse(401, { error: 'Access denied' });
+    }
+
+    const users = getStorageArray(usersKey);
+    const index = users.findIndex((u) => Number(u.id) === Number(sessionUser.id));
+    if (index === -1) {
+      return createApiResponse(404, { error: 'User not found' });
+    }
+
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
+    const phoneRaw = typeof body.phone === 'string' ? body.phone : '';
+
+    if (!name && !phoneRaw) {
+      return createApiResponse(400, { error: 'Nothing to update' });
+    }
+
+    if (name) {
+      if (name.length < 2 || name.length > 120) {
+        return createApiResponse(400, { error: 'Name must be between 2 and 120 characters' });
+      }
+      users[index].name = name;
+    }
+
+    if (phoneRaw) {
+      const phone = normalizePhone(phoneRaw);
+      if (!phone) {
+        return createApiResponse(400, { error: 'Invalid phone format' });
+      }
+      users[index].phone = phone;
+    }
+
+    setStorageArray(usersKey, users);
+
+    const updated = users[index];
+    return createApiResponse(200, {
+      message: 'Profile updated successfully (demo mode)',
+      user: {
+        id: updated.id,
+        name: updated.name,
+        email: updated.email,
+        phone: updated.phone || '',
+        role: updated.role || 'user',
+        authProvider: updated.authProvider || 'local',
+        createdAt: updated.createdAt || new Date().toISOString()
+      }
+    });
+  }
+
+  if (path === '/api/profile/change-password' && String((options && options.method) || 'POST').toUpperCase() === 'POST') {
+    const sessionUser = getDemoSessionUser();
+    if (!sessionUser) {
+      return createApiResponse(401, { error: 'Access denied' });
+    }
+
+    const users = getStorageArray(usersKey);
+    const index = users.findIndex((u) => Number(u.id) === Number(sessionUser.id));
+    if (index === -1) {
+      return createApiResponse(404, { error: 'User not found' });
+    }
+
+    const provider = String(users[index].authProvider || 'local').toLowerCase();
+    const currentPassword = String(body.currentPassword || '');
+    const newPassword = String(body.newPassword || '');
+
+    if (!isStrongPassword(newPassword)) {
+      return createApiResponse(400, { error: 'Password must be at least 8 characters and include letters and numbers' });
+    }
+
+    if (provider === 'local' && users[index].password !== currentPassword) {
+      return createApiResponse(400, { error: 'Current password is incorrect' });
+    }
+
+    users[index].password = newPassword;
+    setStorageArray(usersKey, users);
+
+    return createApiResponse(200, { message: 'Password changed successfully (demo mode)' });
+  }
+
+  if (path.startsWith('/api/profile/bookings')) {
+    const sessionUser = getDemoSessionUser();
+    if (!sessionUser) {
+      return createApiResponse(401, { error: 'Access denied' });
+    }
+
+    const bookings = getStorageArray(bookingsKey)
+      .filter((booking) => String(booking.email || '').trim().toLowerCase() === String(sessionUser.email || '').trim().toLowerCase())
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return createApiResponse(200, { bookings: bookings.slice(0, 200) });
+  }
+
+  if (path.startsWith('/api/profile/payments')) {
+    const sessionUser = getDemoSessionUser();
+    if (!sessionUser) {
+      return createApiResponse(401, { error: 'Access denied' });
+    }
+
+    const payments = getStorageArray(paymentsKey)
+      .filter((payment) => Number(payment.userId) === Number(sessionUser.id))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return createApiResponse(200, { payments: payments.slice(0, 200) });
   }
 
   if (path === '/api/reset-password/request-code') {
@@ -460,14 +650,15 @@ function demoApi(path, options) {
   }
 
   if (path === '/api/payment') {
-    const auth = readHeader(options && options.headers, 'Authorization');
-    if (!auth || !auth.startsWith('Bearer demo-')) {
+    const sessionUser = getDemoSessionUser();
+    if (!sessionUser) {
       return createApiResponse(401, { error: 'Access denied' });
     }
 
     const payments = getStorageArray(paymentsKey);
     const payment = {
       id: 'PAY-' + Date.now(),
+      userId: sessionUser.id,
       productId: body.productId,
       productName: body.productName,
       amount: body.amount,
@@ -946,6 +1137,16 @@ function toggleLanguage() {
   updateLangButton();
   if (cachedTestimonials) renderTestimonials(cachedTestimonials);
   if (cachedPrograms) renderPrograms(cachedPrograms);
+
+  const adminModal = document.getElementById('adminModal');
+  if (adminOverviewData && adminModal && adminModal.classList.contains('active')) {
+    renderAdminOverview(adminOverviewData);
+  }
+
+  const profileModal = document.getElementById('profileModal');
+  if (profileDashboardData && profileModal && profileModal.classList.contains('active')) {
+    renderProfileDashboard(profileDashboardData, activeProfileSection);
+  }
 }
 
 function updateLangButton() {
@@ -1509,14 +1710,481 @@ function handleLogout() {
   showToast('You have been logged out.', 'info');
 }
 
+function getProfileLabels() {
+  if (currentLang === 'ru') {
+    return {
+      title: 'Личный кабинет',
+      description: 'Управляйте данными аккаунта, безопасностью, заявками и оплатами.',
+      loading: 'Загрузка данных...',
+      account: 'Аккаунт',
+      security: 'Безопасность',
+      bookings: 'Заявки',
+      payments: 'Оплаты',
+      name: 'Имя',
+      email: 'Email',
+      phone: 'Телефон',
+      role: 'Роль',
+      authProvider: 'Способ входа',
+      memberSince: 'Дата регистрации',
+      providerLocal: 'Email + пароль',
+      providerGoogle: 'Google',
+      saveProfile: 'Сохранить профиль',
+      profileSaved: 'Профиль обновлен',
+      profileSaveError: 'Не удалось обновить профиль',
+      currentPassword: 'Текущий пароль',
+      newPassword: 'Новый пароль',
+      confirmPassword: 'Повторите новый пароль',
+      updatePassword: 'Сменить пароль',
+      passwordSaved: 'Пароль успешно обновлен',
+      passwordError: 'Не удалось обновить пароль',
+      passwordMismatch: 'Новые пароли не совпадают',
+      passwordRule: 'Минимум 8 символов, буквы и цифры.',
+      googlePasswordHint: 'Вы входите через Google. Текущий пароль вводить не обязательно.',
+      localPasswordHint: 'Для смены пароля введите текущий пароль.',
+      emptyBookings: 'Заявок пока нет',
+      emptyPayments: 'Оплат пока нет',
+      bookingId: 'ID',
+      bookingService: 'Услуга',
+      bookingStatus: 'Статус',
+      bookingDate: 'Дата',
+      bookingMessage: 'Комментарий',
+      paymentId: 'ID оплаты',
+      paymentProduct: 'Продукт',
+      paymentAmount: 'Сумма',
+      paymentStatus: 'Статус',
+      paymentDate: 'Дата',
+      sectionJump: 'Перейти к разделу',
+      statusPending: 'Ожидание',
+      statusNew: 'Новая',
+      statusInProgress: 'В работе',
+      statusDone: 'Завершено',
+      statusCancelled: 'Отменено',
+      statusCompleted: 'Оплачено'
+    };
+  }
+
+  return {
+    title: 'Profile Dashboard',
+    description: 'Manage account details, security, bookings, and payments.',
+    loading: 'Loading profile data...',
+    account: 'Account',
+    security: 'Security',
+    bookings: 'Bookings',
+    payments: 'Payments',
+    name: 'Name',
+    email: 'Email',
+    phone: 'Phone',
+    role: 'Role',
+    authProvider: 'Login method',
+    memberSince: 'Member since',
+    providerLocal: 'Email + password',
+    providerGoogle: 'Google',
+    saveProfile: 'Save profile',
+    profileSaved: 'Profile updated successfully',
+    profileSaveError: 'Failed to update profile',
+    currentPassword: 'Current password',
+    newPassword: 'New password',
+    confirmPassword: 'Confirm new password',
+    updatePassword: 'Update password',
+    passwordSaved: 'Password updated successfully',
+    passwordError: 'Failed to update password',
+    passwordMismatch: 'New passwords do not match',
+    passwordRule: 'At least 8 characters with letters and numbers.',
+    googlePasswordHint: 'You signed in with Google. Current password is optional.',
+    localPasswordHint: 'To change password, enter your current password.',
+    emptyBookings: 'No bookings yet',
+    emptyPayments: 'No payments yet',
+    bookingId: 'ID',
+    bookingService: 'Service',
+    bookingStatus: 'Status',
+    bookingDate: 'Created',
+    bookingMessage: 'Message',
+    paymentId: 'Payment ID',
+    paymentProduct: 'Product',
+    paymentAmount: 'Amount',
+    paymentStatus: 'Status',
+    paymentDate: 'Date',
+    sectionJump: 'Jump to section',
+    statusPending: 'Pending',
+    statusNew: 'New',
+    statusInProgress: 'In Progress',
+    statusDone: 'Done',
+    statusCancelled: 'Cancelled',
+    statusCompleted: 'Completed'
+  };
+}
+
+function formatProfileStatus(status, labels) {
+  const value = String(status || '').trim().toLowerCase();
+  if (value === 'pending') return labels.statusPending;
+  if (value === 'new') return labels.statusNew;
+  if (value === 'in_progress') return labels.statusInProgress;
+  if (value === 'done') return labels.statusDone;
+  if (value === 'cancelled') return labels.statusCancelled;
+  if (value === 'completed') return labels.statusCompleted;
+  return status || '-';
+}
+
+function ensureProfileModalExists() {
+  let modal = document.getElementById('profileModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.id = 'profileModal';
+    modal.innerHTML = `
+      <div class="modal profile-modal">
+        <button class="modal-close" onclick="closeModal('profileModal')">&times;</button>
+        <h2 id="profileModalTitle"></h2>
+        <p class="modal-description" id="profileModalDescription"></p>
+        <div id="profilePanelBody" class="profile-panel-body"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  return document.getElementById('profilePanelBody');
+}
+
+function scrollProfileSection(section) {
+  activeProfileSection = section;
+
+  document.querySelectorAll('.profile-tab-btn').forEach((button) => {
+    const target = button.getAttribute('data-target');
+    button.classList.toggle('active', target === section);
+  });
+
+  const sectionEl = document.getElementById('profile-section-' + section);
+  if (sectionEl) {
+    sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function renderProfileDashboard(data, preferredSection) {
+  const panel = ensureProfileModalExists();
+  if (!panel || !data || !data.profile) return;
+
+  const labels = getProfileLabels();
+  const profile = data.profile;
+  const bookings = Array.isArray(data.bookings) ? data.bookings : [];
+  const payments = Array.isArray(data.payments) ? data.payments : [];
+  const phone = splitPhoneForForm(profile.phone || '');
+  const provider = String(profile.authProvider || 'local').trim().toLowerCase();
+  const providerLabel = provider === 'google' ? labels.providerGoogle : labels.providerLocal;
+  const localAuth = provider !== 'google';
+  const currentSection = preferredSection || activeProfileSection || 'account';
+
+  const bookingsRows = bookings.length
+    ? bookings.map((booking) => {
+      const bookingId = Number(booking.id);
+      const status = formatProfileStatus(booking.status, labels);
+      const statusClass = normalizeAdminValue(booking.status).replace(/[^a-z0-9_]/g, '') || 'pending';
+      const bookingMessage = String(booking.message || '').trim();
+      const compactMessage = bookingMessage.length > 120 ? bookingMessage.slice(0, 117) + '...' : bookingMessage;
+
+      return `<tr>
+        <td>${escapeHtml(String(bookingId))}</td>
+        <td>${escapeHtml(booking.service || '-')}</td>
+        <td><span class="profile-status-badge status-${statusClass}">${escapeHtml(status)}</span></td>
+        <td>${escapeHtml(formatAdminDate(booking.createdAt))}</td>
+        <td>${escapeHtml(compactMessage || '-')}</td>
+      </tr>`;
+    }).join('')
+    : `<tr><td colspan="5" class="admin-empty-row">${escapeHtml(labels.emptyBookings)}</td></tr>`;
+
+  const paymentsRows = payments.length
+    ? payments.map((payment) => {
+      const amount = Number(payment.amount);
+      const amountLabel = Number.isFinite(amount) ? amount.toLocaleString() : String(payment.amount || '-');
+      const status = formatProfileStatus(payment.status, labels);
+      const statusClass = normalizeAdminValue(payment.status).replace(/[^a-z0-9_]/g, '') || 'completed';
+      const productLabel = payment.productName || payment.productId || '-';
+
+      return `<tr>
+        <td>${escapeHtml(payment.id || '-')}</td>
+        <td>${escapeHtml(productLabel)}</td>
+        <td>${escapeHtml(String(amountLabel))} ${escapeHtml(payment.currency || '')}</td>
+        <td><span class="profile-status-badge status-${statusClass}">${escapeHtml(status)}</span></td>
+        <td>${escapeHtml(formatAdminDate(payment.createdAt))}</td>
+      </tr>`;
+    }).join('')
+    : `<tr><td colspan="5" class="admin-empty-row">${escapeHtml(labels.emptyPayments)}</td></tr>`;
+
+  panel.innerHTML = `
+    <div class="profile-section-tabs">
+      <span class="profile-tabs-label">${escapeHtml(labels.sectionJump)}:</span>
+      <button class="profile-tab-btn ${currentSection === 'account' ? 'active' : ''}" data-target="account" onclick="scrollProfileSection('account')">${escapeHtml(labels.account)}</button>
+      <button class="profile-tab-btn ${currentSection === 'security' ? 'active' : ''}" data-target="security" onclick="scrollProfileSection('security')">${escapeHtml(labels.security)}</button>
+      <button class="profile-tab-btn ${currentSection === 'bookings' ? 'active' : ''}" data-target="bookings" onclick="scrollProfileSection('bookings')">${escapeHtml(labels.bookings)}</button>
+      <button class="profile-tab-btn ${currentSection === 'payments' ? 'active' : ''}" data-target="payments" onclick="scrollProfileSection('payments')">${escapeHtml(labels.payments)}</button>
+    </div>
+
+    <section id="profile-section-account" class="profile-section">
+      <h3>${escapeHtml(labels.account)}</h3>
+      <div class="profile-overview">
+        <div class="profile-meta">
+          <span>${escapeHtml(labels.role)}</span>
+          <strong>${escapeHtml(profile.role || 'user')}</strong>
+        </div>
+        <div class="profile-meta">
+          <span>${escapeHtml(labels.authProvider)}</span>
+          <strong>${escapeHtml(providerLabel)}</strong>
+        </div>
+        <div class="profile-meta">
+          <span>${escapeHtml(labels.memberSince)}</span>
+          <strong>${escapeHtml(formatAdminDate(profile.createdAt))}</strong>
+        </div>
+      </div>
+
+      <form class="profile-form" onsubmit="handleProfileSave(event)">
+        <div class="form-group">
+          <label>${escapeHtml(labels.name)}</label>
+          <input type="text" name="name" value="${escapeHtml(profile.name || '')}" minlength="2" maxlength="120" required>
+        </div>
+        <div class="form-group">
+          <label>${escapeHtml(labels.email)}</label>
+          <input type="email" name="email" value="${escapeHtml(profile.email || '')}" readonly>
+        </div>
+        <div class="form-group">
+          <label>${escapeHtml(labels.phone)}</label>
+          <div class="phone-input-group">
+            <select class="country-code-select" name="countryCode">${getCountryCodeOptionsHtml(phone.countryCode)}</select>
+            <input type="tel" name="phone" value="${escapeHtml(phone.localNumber || '')}" placeholder="555 123 456" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">${escapeHtml(labels.saveProfile)}</button>
+      </form>
+    </section>
+
+    <section id="profile-section-security" class="profile-section">
+      <h3>${escapeHtml(labels.security)}</h3>
+      <p class="profile-helper">${escapeHtml(localAuth ? labels.localPasswordHint : labels.googlePasswordHint)}</p>
+      <form class="profile-form" onsubmit="handleProfilePasswordChange(event)">
+        ${localAuth ? `<div class="form-group"><label>${escapeHtml(labels.currentPassword)}</label><input type="password" name="currentPassword" autocomplete="current-password" required></div>` : ''}
+        <div class="form-group">
+          <label>${escapeHtml(labels.newPassword)}</label>
+          <input type="password" name="newPassword" autocomplete="new-password" minlength="8" required>
+        </div>
+        <div class="form-group">
+          <label>${escapeHtml(labels.confirmPassword)}</label>
+          <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required>
+        </div>
+        <p class="profile-helper">${escapeHtml(labels.passwordRule)}</p>
+        <button type="submit" class="btn btn-primary">${escapeHtml(labels.updatePassword)}</button>
+      </form>
+    </section>
+
+    <section id="profile-section-bookings" class="profile-section">
+      <h3>${escapeHtml(labels.bookings)}</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table profile-table">
+          <thead>
+            <tr>
+              <th>${escapeHtml(labels.bookingId)}</th>
+              <th>${escapeHtml(labels.bookingService)}</th>
+              <th>${escapeHtml(labels.bookingStatus)}</th>
+              <th>${escapeHtml(labels.bookingDate)}</th>
+              <th>${escapeHtml(labels.bookingMessage)}</th>
+            </tr>
+          </thead>
+          <tbody>${bookingsRows}</tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="profile-section-payments" class="profile-section">
+      <h3>${escapeHtml(labels.payments)}</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table profile-table">
+          <thead>
+            <tr>
+              <th>${escapeHtml(labels.paymentId)}</th>
+              <th>${escapeHtml(labels.paymentProduct)}</th>
+              <th>${escapeHtml(labels.paymentAmount)}</th>
+              <th>${escapeHtml(labels.paymentStatus)}</th>
+              <th>${escapeHtml(labels.paymentDate)}</th>
+            </tr>
+          </thead>
+          <tbody>${paymentsRows}</tbody>
+        </table>
+      </div>
+    </section>
+  `;
+
+  const title = document.getElementById('profileModalTitle');
+  const description = document.getElementById('profileModalDescription');
+  if (title) title.textContent = labels.title;
+  if (description) description.textContent = labels.description;
+
+  activeProfileSection = currentSection;
+  requestAnimationFrame(() => {
+    scrollProfileSection(currentSection);
+  });
+}
+
+async function refreshProfileDashboard(section) {
+  const panel = ensureProfileModalExists();
+  if (!panel) return;
+
+  const labels = getProfileLabels();
+  panel.innerHTML = `<p class="admin-empty">${escapeHtml(labels.loading)}</p>`;
+
+  try {
+    const [profileRes, bookingsRes, paymentsRes] = await Promise.all([
+      apiFetch('/api/profile', {
+        method: 'GET',
+        headers: { Authorization: 'Bearer ' + authToken }
+      }),
+      apiFetch('/api/profile/bookings?limit=200', {
+        method: 'GET',
+        headers: { Authorization: 'Bearer ' + authToken }
+      }),
+      apiFetch('/api/profile/payments?limit=200', {
+        method: 'GET',
+        headers: { Authorization: 'Bearer ' + authToken }
+      })
+    ]);
+
+    const profileBody = await profileRes.json();
+    if (!profileRes.ok) {
+      panel.innerHTML = `<p class="admin-empty">${escapeHtml(profileBody.error || 'Failed to load profile')}</p>`;
+      return;
+    }
+
+    const bookingsBody = bookingsRes.ok ? await bookingsRes.json() : { bookings: [] };
+    const paymentsBody = paymentsRes.ok ? await paymentsRes.json() : { payments: [] };
+
+    profileDashboardData = {
+      profile: profileBody,
+      bookings: Array.isArray(bookingsBody.bookings) ? bookingsBody.bookings : [],
+      payments: Array.isArray(paymentsBody.payments) ? paymentsBody.payments : []
+    };
+
+    renderProfileDashboard(profileDashboardData, section || activeProfileSection);
+  } catch (err) {
+    panel.innerHTML = `<p class="admin-empty">${currentLang === 'ru' ? 'Ошибка соединения. Попробуйте снова.' : 'Connection error. Please try again.'}</p>`;
+  }
+}
+
+async function handleProfileSave(e) {
+  e.preventDefault();
+  if (!authToken) return;
+
+  const form = e.target;
+  const labels = getProfileLabels();
+  const name = String(form.name.value || '').trim();
+  const phone = normalizePhone(form.phone.value, form.countryCode.value);
+
+  if (!name || name.length < 2) {
+    showToast(currentLang === 'ru' ? 'Имя слишком короткое.' : 'Name is too short.', 'error');
+    return;
+  }
+
+  if (!phone) {
+    showToast(currentLang === 'ru' ? 'Введите корректный номер телефона.' : 'Please enter a valid phone number.', 'error');
+    return;
+  }
+
+  try {
+    const res = await apiFetch('/api/profile', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + authToken
+      },
+      body: JSON.stringify({ name, phone })
+    });
+
+    const result = await res.json();
+    if (!res.ok) {
+      showToast(result.error || labels.profileSaveError, 'error');
+      return;
+    }
+
+    profileDashboardData = profileDashboardData || {};
+    profileDashboardData.profile = result.user;
+
+    currentUser = currentUser || {};
+    currentUser.name = result.user.name;
+    currentUser.email = result.user.email;
+    currentUser.role = result.user.role || currentUser.role || 'user';
+    localStorage.setItem('quantum_user', JSON.stringify(currentUser));
+    updateUIForLoggedIn();
+
+    renderProfileDashboard(profileDashboardData, 'account');
+    showToast(labels.profileSaved, 'success');
+  } catch (err) {
+    showToast(labels.profileSaveError, 'error');
+  }
+}
+
+async function handleProfilePasswordChange(e) {
+  e.preventDefault();
+  if (!authToken) return;
+
+  const labels = getProfileLabels();
+  const form = e.target;
+  const currentPassword = form.currentPassword ? String(form.currentPassword.value || '') : '';
+  const newPassword = String(form.newPassword.value || '');
+  const confirmPassword = String(form.confirmPassword.value || '');
+
+  if (newPassword !== confirmPassword) {
+    showToast(labels.passwordMismatch, 'error');
+    return;
+  }
+
+  if (!isStrongPassword(newPassword)) {
+    showToast(labels.passwordRule, 'error');
+    return;
+  }
+
+  try {
+    const res = await apiFetch('/api/profile/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + authToken
+      },
+      body: JSON.stringify({
+        currentPassword,
+        newPassword
+      })
+    });
+
+    const result = await res.json();
+    if (!res.ok) {
+      showToast(result.error || labels.passwordError, 'error');
+      return;
+    }
+
+    form.reset();
+    showToast(labels.passwordSaved, 'success');
+  } catch (err) {
+    showToast(labels.passwordError, 'error');
+  }
+}
+
+function openProfileDashboard(section) {
+  const dropdown = document.getElementById('userDropdown');
+  if (dropdown) dropdown.style.display = 'none';
+
+  if (!authToken) {
+    showToast(currentLang === 'ru' ? 'Сначала войдите в аккаунт.' : 'Please login first.', 'info');
+    openModal('loginModal');
+    switchTab('login');
+    return;
+  }
+
+  ensureProfileModalExists();
+  openModal('profileModal');
+  refreshProfileDashboard(section || 'account');
+}
+
 function showProfile() {
-  showToast('Profile page coming soon!', 'info');
-  document.getElementById('userDropdown').style.display = 'none';
+  openProfileDashboard('account');
 }
 
 function showPurchases() {
-  showToast('Purchases page coming soon!', 'info');
-  document.getElementById('userDropdown').style.display = 'none';
+  openProfileDashboard('payments');
 }
 
 function formatAdminDate(value) {

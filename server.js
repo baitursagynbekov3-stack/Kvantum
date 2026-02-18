@@ -1409,13 +1409,179 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, name: true, email: true, phone: true, role: true }
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        authProvider: true,
+        createdAt: true
+      }
     });
 
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update user profile
+app.patch('/api/profile', authenticateToken, async (req, res) => {
+  try {
+    const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+    const phoneRaw = typeof req.body.phone === 'string' ? req.body.phone : '';
+
+    const updateData = {};
+
+    if (name) {
+      if (name.length < 2 || name.length > 120) {
+        return res.status(400).json({ error: 'Name must be between 2 and 120 characters' });
+      }
+      updateData.name = name;
+    }
+
+    if (phoneRaw) {
+      const normalizedPhone = normalizePhone(phoneRaw);
+      if (!normalizedPhone) {
+        return res.status(400).json({ error: 'Invalid phone format' });
+      }
+      updateData.phone = normalizedPhone;
+    }
+
+    if (!Object.keys(updateData).length) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updateData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        authProvider: true,
+        createdAt: true
+      }
+    });
+
+    return res.json({
+      message: 'Profile updated successfully',
+      user
+    });
+  } catch (err) {
+    if (err && err.code === 'P2025') {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Change password in authenticated session
+app.post('/api/profile/change-password', authenticateToken, authRateLimiter, async (req, res) => {
+  try {
+    const currentPassword = String(req.body.currentPassword || '');
+    const newPassword = String(req.body.newPassword || '');
+
+    if (!isStrongPassword(newPassword)) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters and include letters and numbers' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, password: true, authProvider: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const provider = String(user.authProvider || 'local').trim().toLowerCase();
+    if (provider === 'local') {
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required' });
+      }
+
+      const valid = await bcrypt.compare(currentPassword, user.password);
+      if (!valid) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword }
+    });
+
+    return res.json({ message: 'Password changed successfully' });
+  } catch (err) {
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// User bookings (resolved by account email)
+app.get('/api/profile/bookings', authenticateToken, async (req, res) => {
+  try {
+    const limitRaw = parseInt(req.query.limit, 10);
+    const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 200) : 50;
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { email: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const bookings = await prisma.booking.findMany({
+      where: { email: user.email },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        service: true,
+        status: true,
+        message: true,
+        createdAt: true
+      }
+    });
+
+    return res.json({ bookings });
+  } catch (err) {
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// User payments
+app.get('/api/profile/payments', authenticateToken, async (req, res) => {
+  try {
+    const limitRaw = parseInt(req.query.limit, 10);
+    const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 200) : 50;
+
+    const payments = await prisma.payment.findMany({
+      where: { userId: req.user.id },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        productId: true,
+        productName: true,
+        amount: true,
+        currency: true,
+        status: true,
+        createdAt: true
+      }
+    });
+
+    return res.json({ payments });
+  } catch (err) {
+    return res.status(500).json({ error: 'Server error' });
   }
 });
 
