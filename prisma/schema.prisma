@@ -16,7 +16,9 @@ model User {
   role         String    @default("user")
   authProvider String    @default("local")
   googleId     String?   @unique
+  avatarUrl    String    @default("")
   createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
   bookings     Booking[]
   payments     Payment[]
 

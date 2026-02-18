@@ -354,6 +354,19 @@ function isStrongPassword(password) {
   return true;
 }
 
+function isValidAvatarUrl(value) {
+  const url = String(value || '').trim();
+  if (!url) return true;
+  if (url.length > 500) return false;
+
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch (err) {
+    return false;
+  }
+}
+
 function normalizePhone(phone) {
   const raw = String(phone || '').trim();
   if (!raw) return '';
@@ -1120,7 +1133,9 @@ function buildPublicUser(user, role) {
     id: user.id,
     name: user.name,
     email: user.email,
-    role
+    role,
+    authProvider: user.authProvider || 'local',
+    avatarUrl: user.avatarUrl || ''
   };
 }
 
@@ -1150,6 +1165,8 @@ app.post('/api/auth/google', authRateLimiter, async (req, res) => {
     const googleId = String(payload.sub || '').trim();
     const email = String(payload.email || '').trim().toLowerCase();
     const emailVerified = payload.email_verified === true;
+    const profilePicture = String(payload.picture || '').trim();
+    const normalizedPicture = isValidAvatarUrl(profilePicture) ? profilePicture.slice(0, 500) : '';
 
     if (!googleId || !email || !emailVerified || !isValidEmail(email)) {
       return res.status(400).json({ error: 'Invalid Google account data' });
@@ -1179,7 +1196,9 @@ app.post('/api/auth/google', authRateLimiter, async (req, res) => {
           password: passwordHash,
           role,
           authProvider: 'google',
-          googleId
+          googleId,
+          avatarUrl: normalizedPicture,
+          lastLoginAt: new Date()
         }
       });
     } else {
@@ -1188,17 +1207,18 @@ app.post('/api/auth/google', authRateLimiter, async (req, res) => {
         role = 'admin';
       }
 
-      const updates = {};
+      const updates = { lastLoginAt: new Date() };
       if (!user.googleId) updates.googleId = googleId;
       if (user.authProvider !== 'google') updates.authProvider = 'google';
       if (role !== normalizeUserRole(user.role)) updates.role = role;
-
-      if (Object.keys(updates).length > 0) {
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: updates
-        });
+      if (normalizedPicture && normalizedPicture !== String(user.avatarUrl || '')) {
+        updates.avatarUrl = normalizedPicture;
       }
+
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: updates
+      });
     }
 
     const token = buildAuthToken(user, role);
@@ -1257,7 +1277,8 @@ app.post('/api/register', authRateLimiter, async (req, res) => {
         email: normalizedEmail,
         password: hashedPassword,
         phone: normalizedPhone,
-        role
+        role,
+        lastLoginAt: new Date()
       }
     });
 
@@ -1297,19 +1318,20 @@ app.post('/api/login', authRateLimiter, async (req, res) => {
       role = 'admin';
     }
 
-    if (role !== normalizeUserRole(user.role)) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { role }
-      });
-    }
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        role,
+        lastLoginAt: new Date()
+      }
+    });
 
-    const token = buildAuthToken(user, role);
+    const token = buildAuthToken(updatedUser, role);
 
     res.json({
       message: 'Login successful',
       token,
-      user: buildPublicUser(user, role)
+      user: buildPublicUser(updatedUser, role)
     });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
@@ -1433,7 +1455,9 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
         phone: true,
         role: true,
         authProvider: true,
-        createdAt: true
+        avatarUrl: true,
+        createdAt: true,
+        lastLoginAt: true
       }
     });
 
@@ -1449,6 +1473,8 @@ app.patch('/api/profile', authenticateToken, async (req, res) => {
   try {
     const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
     const phoneRaw = typeof req.body.phone === 'string' ? req.body.phone : '';
+    const hasAvatarField = Object.prototype.hasOwnProperty.call(req.body || {}, 'avatarUrl');
+    const avatarRaw = hasAvatarField ? String(req.body.avatarUrl || '').trim() : '';
 
     const updateData = {};
 
@@ -1467,6 +1493,13 @@ app.patch('/api/profile', authenticateToken, async (req, res) => {
       updateData.phone = normalizedPhone;
     }
 
+    if (hasAvatarField) {
+      if (!isValidAvatarUrl(avatarRaw)) {
+        return res.status(400).json({ error: 'Avatar URL must be a valid http/https link' });
+      }
+      updateData.avatarUrl = avatarRaw.slice(0, 500);
+    }
+
     if (!Object.keys(updateData).length) {
       return res.status(400).json({ error: 'Nothing to update' });
     }
@@ -1481,7 +1514,9 @@ app.patch('/api/profile', authenticateToken, async (req, res) => {
         phone: true,
         role: true,
         authProvider: true,
-        createdAt: true
+        avatarUrl: true,
+        createdAt: true,
+        lastLoginAt: true
       }
     });
 
@@ -1536,6 +1571,77 @@ app.post('/api/profile/change-password', authenticateToken, authRateLimiter, asy
     });
 
     return res.json({ message: 'Password changed successfully' });
+  } catch (err) {
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Delete account (with password confirmation for local auth)
+app.delete('/api/profile', authenticateToken, authRateLimiter, async (req, res) => {
+  try {
+    const currentPassword = String(req.body.currentPassword || '');
+    const confirmation = String(req.body.confirmation || '').trim().toUpperCase();
+
+    if (confirmation !== 'DELETE') {
+      return res.status(400).json({ error: 'Confirmation text must be DELETE' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        authProvider: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const provider = String(user.authProvider || 'local').trim().toLowerCase();
+    if (provider === 'local') {
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required' });
+      }
+
+      const valid = await bcrypt.compare(currentPassword, user.password);
+      if (!valid) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+    }
+
+    const anonymizedEmail = `deleted-user-${user.id}-${Date.now()}@deleted.local`;
+
+    await prisma.$transaction(async (tx) => {
+      await tx.booking.updateMany({
+        where: {
+          OR: [
+            { userId: user.id },
+            {
+              AND: [
+                { userId: null },
+                { email: user.email }
+              ]
+            }
+          ]
+        },
+        data: {
+          userId: null,
+          name: 'Deleted User',
+          email: anonymizedEmail,
+          phone: '',
+          message: '[Data removed after account deletion]'
+        }
+      });
+
+      await tx.user.delete({
+        where: { id: user.id }
+      });
+    });
+
+    return res.json({ message: 'Account deleted successfully' });
   } catch (err) {
     return res.status(500).json({ error: 'Server error' });
   }

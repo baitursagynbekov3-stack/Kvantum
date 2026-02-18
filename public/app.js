@@ -144,6 +144,13 @@ function isStrongPassword(value) {
   return password.length >= 8 && /[a-z]/i.test(password) && /\d/.test(password);
 }
 
+function isValidAvatarUrl(value) {
+  const url = String(value || '').trim();
+  if (!url) return true;
+  if (url.length > 500) return false;
+  return /^https?:\/\//i.test(url);
+}
+
 function normalizePhone(value, countryCode) {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -312,7 +319,10 @@ function demoApi(path, options) {
       phone,
       password,
       role,
-      createdAt: new Date().toISOString()
+      authProvider: 'local',
+      avatarUrl: '',
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString()
     };
 
     users.push(user);
@@ -322,7 +332,14 @@ function demoApi(path, options) {
     return createApiResponse(200, {
       message: 'Registration successful (demo mode)',
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role }
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        authProvider: user.authProvider || 'local',
+        avatarUrl: user.avatarUrl || ''
+      }
     });
   }
 
@@ -330,17 +347,28 @@ function demoApi(path, options) {
     const email = (body.email || '').trim().toLowerCase();
     const password = body.password || '';
     const users = getStorageArray(usersKey);
-    const user = users.find((u) => u.email === email);
+    const index = users.findIndex((u) => u.email === email);
 
-    if (!user || user.password !== password) {
+    if (index === -1 || users[index].password !== password) {
       return createApiResponse(400, { error: 'Invalid credentials' });
     }
+
+    users[index].lastLoginAt = new Date().toISOString();
+    setStorageArray(usersKey, users);
+    const user = users[index];
 
     const token = 'demo-' + btoa(email + ':' + Date.now());
     return createApiResponse(200, {
       message: 'Login successful (demo mode)',
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role || 'user' }
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role || 'user',
+        authProvider: user.authProvider || 'local',
+        avatarUrl: user.avatarUrl || ''
+      }
     });
   }
 
@@ -354,18 +382,20 @@ function demoApi(path, options) {
     const email = String(payload && payload.email ? payload.email : '').trim().toLowerCase();
     const emailVerified = payload && payload.email_verified !== false;
     const name = String(payload && payload.name ? payload.name : (email.split('@')[0] || 'User')).trim();
+    const avatarUrl = String(payload && payload.picture ? payload.picture : '').trim();
+    const normalizedAvatar = isValidAvatarUrl(avatarUrl) ? avatarUrl : '';
 
     if (!email || !emailVerified || !isValidEmail(email)) {
       return createApiResponse(400, { error: 'Invalid Google account data' });
     }
 
     const users = getStorageArray(usersKey);
-    let user = users.find((u) => u.email === email);
+    let index = users.findIndex((u) => u.email === email);
 
-    if (!user) {
+    if (index === -1) {
       const demoAdmins = (window.QUANTUM_DEMO_ADMIN_EMAILS || []).map((e) => e.toLowerCase());
       const role = demoAdmins.includes(email) ? 'admin' : 'user';
-      user = {
+      users.push({
         id: Date.now(),
         name: name || 'User',
         email,
@@ -373,20 +403,34 @@ function demoApi(path, options) {
         password: String(Math.random()).slice(2),
         role,
         authProvider: 'google',
-        createdAt: new Date().toISOString()
-      };
-      users.push(user);
-      setStorageArray(usersKey, users);
-    } else if (!user.authProvider) {
-      user.authProvider = 'google';
-      setStorageArray(usersKey, users);
+        avatarUrl: normalizedAvatar,
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString()
+      });
+      index = users.length - 1;
+    } else {
+      users[index].authProvider = 'google';
+      users[index].lastLoginAt = new Date().toISOString();
+      if (normalizedAvatar) {
+        users[index].avatarUrl = normalizedAvatar;
+      }
     }
+
+    setStorageArray(usersKey, users);
+    const user = users[index];
 
     const token = 'demo-' + btoa(email + ':' + Date.now());
     return createApiResponse(200, {
       message: 'Google sign-in successful (demo mode)',
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role || 'user' }
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role || 'user',
+        authProvider: user.authProvider || 'google',
+        avatarUrl: user.avatarUrl || ''
+      }
     });
   }
 
@@ -403,7 +447,9 @@ function demoApi(path, options) {
       phone: sessionUser.phone || '',
       role: sessionUser.role || 'user',
       authProvider: sessionUser.authProvider || 'local',
-      createdAt: sessionUser.createdAt || new Date().toISOString()
+      avatarUrl: sessionUser.avatarUrl || '',
+      createdAt: sessionUser.createdAt || new Date().toISOString(),
+      lastLoginAt: sessionUser.lastLoginAt || null
     });
   }
 
@@ -421,8 +467,10 @@ function demoApi(path, options) {
 
     const name = typeof body.name === 'string' ? body.name.trim() : '';
     const phoneRaw = typeof body.phone === 'string' ? body.phone : '';
+    const hasAvatarField = Object.prototype.hasOwnProperty.call(body || {}, 'avatarUrl');
+    const avatarRaw = hasAvatarField ? String(body.avatarUrl || '').trim() : '';
 
-    if (!name && !phoneRaw) {
+    if (!name && !phoneRaw && !hasAvatarField) {
       return createApiResponse(400, { error: 'Nothing to update' });
     }
 
@@ -441,6 +489,13 @@ function demoApi(path, options) {
       users[index].phone = phone;
     }
 
+    if (hasAvatarField) {
+      if (!isValidAvatarUrl(avatarRaw)) {
+        return createApiResponse(400, { error: 'Avatar URL must be a valid http/https link' });
+      }
+      users[index].avatarUrl = avatarRaw;
+    }
+
     setStorageArray(usersKey, users);
 
     const updated = users[index];
@@ -453,7 +508,9 @@ function demoApi(path, options) {
         phone: updated.phone || '',
         role: updated.role || 'user',
         authProvider: updated.authProvider || 'local',
-        createdAt: updated.createdAt || new Date().toISOString()
+        avatarUrl: updated.avatarUrl || '',
+        createdAt: updated.createdAt || new Date().toISOString(),
+        lastLoginAt: updated.lastLoginAt || null
       }
     });
   }
@@ -486,6 +543,59 @@ function demoApi(path, options) {
     setStorageArray(usersKey, users);
 
     return createApiResponse(200, { message: 'Password changed successfully (demo mode)' });
+  }
+
+  if (path === '/api/profile' && String((options && options.method) || 'DELETE').toUpperCase() === 'DELETE') {
+    const sessionUser = getDemoSessionUser();
+    if (!sessionUser) {
+      return createApiResponse(401, { error: 'Access denied' });
+    }
+
+    const users = getStorageArray(usersKey);
+    const index = users.findIndex((u) => Number(u.id) === Number(sessionUser.id));
+    if (index === -1) {
+      return createApiResponse(404, { error: 'User not found' });
+    }
+
+    const confirmation = String(body.confirmation || '').trim().toUpperCase();
+    if (confirmation !== 'DELETE') {
+      return createApiResponse(400, { error: 'Confirmation text must be DELETE' });
+    }
+
+    const provider = String(users[index].authProvider || 'local').toLowerCase();
+    const currentPassword = String(body.currentPassword || '');
+    if (provider === 'local' && users[index].password !== currentPassword) {
+      return createApiResponse(400, { error: 'Current password is incorrect' });
+    }
+
+    const userEmail = String(users[index].email || '').trim().toLowerCase();
+    const anonymizedEmail = `deleted-user-${users[index].id}-${Date.now()}@deleted.local`;
+
+    users.splice(index, 1);
+    setStorageArray(usersKey, users);
+
+    const bookings = getStorageArray(bookingsKey).map((booking) => {
+      const linkedById = Number(booking.userId) === Number(sessionUser.id);
+      const linkedByLegacyEmail = (booking.userId === null || booking.userId === undefined)
+        && String(booking.email || '').trim().toLowerCase() === userEmail;
+
+      if (!linkedById && !linkedByLegacyEmail) return booking;
+
+      return {
+        ...booking,
+        userId: null,
+        name: 'Deleted User',
+        email: anonymizedEmail,
+        phone: '',
+        message: '[Data removed after account deletion]'
+      };
+    });
+    setStorageArray(bookingsKey, bookings);
+
+    const payments = getStorageArray(paymentsKey).filter((payment) => Number(payment.userId) !== Number(sessionUser.id));
+    setStorageArray(paymentsKey, payments);
+
+    return createApiResponse(200, { message: 'Account deleted successfully (demo mode)' });
   }
 
   if (path.startsWith('/api/profile/bookings')) {
@@ -1143,8 +1253,11 @@ function storeOriginals() {
   });
 }
 
-function toggleLanguage() {
-  currentLang = currentLang === 'en' ? 'ru' : 'en';
+function setLanguage(lang) {
+  const nextLang = lang === 'ru' ? 'ru' : 'en';
+  if (currentLang === nextLang) return;
+
+  currentLang = nextLang;
   localStorage.setItem('quantum_lang', currentLang);
   applyTranslations(currentLang);
   updateLangButton();
@@ -1160,6 +1273,10 @@ function toggleLanguage() {
   if (profileDashboardData && profileModal && profileModal.classList.contains('active')) {
     renderProfileDashboard(profileDashboardData, activeProfileSection);
   }
+}
+
+function toggleLanguage() {
+  setLanguage(currentLang === 'en' ? 'ru' : 'en');
 }
 
 function updateLangButton() {
@@ -1414,7 +1531,20 @@ function updateUIForLoggedIn() {
     if (navCtaBtn) navCtaBtn.style.display = 'none';
     if (userMenu) userMenu.style.display = 'block';
     if (userName) userName.textContent = currentUser.name;
-    if (userInitials) userInitials.textContent = currentUser.name.charAt(0).toUpperCase();
+
+    if (userInitials) {
+      const avatarUrl = getSafeAvatarUrl(currentUser.avatarUrl || '');
+      if (avatarUrl) {
+        userInitials.textContent = '';
+        userInitials.style.backgroundImage = `url('${avatarUrl.replace(/'/g, '%27')}')`;
+        userInitials.classList.add('has-avatar-image');
+      } else {
+        userInitials.textContent = getUserInitial(currentUser.name);
+        userInitials.style.backgroundImage = '';
+        userInitials.classList.remove('has-avatar-image');
+      }
+    }
+
     const isAdmin = currentUser.role === 'admin';
     if (adminLink) adminLink.style.display = isAdmin ? 'block' : 'none';
     const adminDashboardLink = document.getElementById('adminDashboardLink');
@@ -1423,6 +1553,11 @@ function updateUIForLoggedIn() {
     if (loginBtn) loginBtn.style.display = '';
     if (navCtaBtn) navCtaBtn.style.display = '';
     if (userMenu) userMenu.style.display = 'none';
+    if (userInitials) {
+      userInitials.textContent = 'U';
+      userInitials.style.backgroundImage = '';
+      userInitials.classList.remove('has-avatar-image');
+    }
     if (adminLink) adminLink.style.display = 'none';
     const adminDashboardLink = document.getElementById('adminDashboardLink');
     if (adminDashboardLink) adminDashboardLink.style.display = 'none';
@@ -1739,8 +1874,14 @@ function getProfileLabels() {
       role: 'Роль',
       authProvider: 'Способ входа',
       memberSince: 'Дата регистрации',
+      lastLogin: 'Последний вход',
       providerLocal: 'Email + пароль',
       providerGoogle: 'Google',
+      avatarUrl: 'Ссылка на аватар (URL)',
+      avatarHint: 'Вставьте прямую ссылку на изображение (http/https).',
+      language: 'Язык интерфейса',
+      languageRu: 'Русский',
+      languageEn: 'English',
       saveProfile: 'Сохранить профиль',
       profileSaved: 'Профиль обновлен',
       profileSaveError: 'Не удалось обновить профиль',
@@ -1754,6 +1895,13 @@ function getProfileLabels() {
       passwordRule: 'Минимум 8 символов, буквы и цифры.',
       googlePasswordHint: 'Вы входите через Google. Текущий пароль вводить не обязательно.',
       localPasswordHint: 'Для смены пароля введите текущий пароль.',
+      deleteAccountTitle: 'Удаление аккаунта',
+      deleteAccountHint: 'Действие необратимо: профиль и оплаты удалятся, заявки будут обезличены.',
+      deleteConfirmLabel: 'Введите DELETE для подтверждения',
+      deleteButton: 'Удалить аккаунт',
+      deleteSuccess: 'Аккаунт удален',
+      deleteError: 'Не удалось удалить аккаунт',
+      deleteConfirmError: 'Введите DELETE для подтверждения',
       emptyBookings: 'Заявок пока нет',
       emptyPayments: 'Оплат пока нет',
       bookingId: 'ID',
@@ -1790,8 +1938,14 @@ function getProfileLabels() {
     role: 'Role',
     authProvider: 'Login method',
     memberSince: 'Member since',
+    lastLogin: 'Last login',
     providerLocal: 'Email + password',
     providerGoogle: 'Google',
+    avatarUrl: 'Avatar URL',
+    avatarHint: 'Paste a direct image URL (http/https).',
+    language: 'Interface language',
+    languageRu: 'Russian',
+    languageEn: 'English',
     saveProfile: 'Save profile',
     profileSaved: 'Profile updated successfully',
     profileSaveError: 'Failed to update profile',
@@ -1805,6 +1959,13 @@ function getProfileLabels() {
     passwordRule: 'At least 8 characters with letters and numbers.',
     googlePasswordHint: 'You signed in with Google. Current password is optional.',
     localPasswordHint: 'To change password, enter your current password.',
+    deleteAccountTitle: 'Delete account',
+    deleteAccountHint: 'This action is irreversible: profile and payments are removed, bookings are anonymized.',
+    deleteConfirmLabel: 'Type DELETE to confirm',
+    deleteButton: 'Delete account',
+    deleteSuccess: 'Account deleted',
+    deleteError: 'Failed to delete account',
+    deleteConfirmError: 'Type DELETE to confirm',
     emptyBookings: 'No bookings yet',
     emptyPayments: 'No payments yet',
     bookingId: 'ID',
@@ -1836,6 +1997,16 @@ function formatProfileStatus(status, labels) {
   if (value === 'cancelled') return labels.statusCancelled;
   if (value === 'completed') return labels.statusCompleted;
   return status || '-';
+}
+
+function getSafeAvatarUrl(value) {
+  const url = String(value || '').trim();
+  return isValidAvatarUrl(url) ? url : '';
+}
+
+function getUserInitial(value) {
+  const normalized = String(value || '').trim();
+  return normalized ? normalized.charAt(0).toUpperCase() : 'U';
 }
 
 function ensureProfileModalExists() {
@@ -1885,6 +2056,11 @@ function renderProfileDashboard(data, preferredSection) {
   const providerLabel = provider === 'google' ? labels.providerGoogle : labels.providerLocal;
   const localAuth = provider !== 'google';
   const currentSection = preferredSection || activeProfileSection || 'account';
+  const avatarUrl = getSafeAvatarUrl(profile.avatarUrl || '');
+  const avatarPreview = avatarUrl
+    ? `<img src="${escapeHtml(avatarUrl)}" alt="avatar" loading="lazy">`
+    : `<span>${escapeHtml(getUserInitial(profile.name))}</span>`;
+  const lastLoginLabel = profile.lastLoginAt ? formatAdminDate(profile.lastLoginAt) : '-';
 
   const bookingsRows = bookings.length
     ? bookings.map((booking) => {
@@ -1933,6 +2109,15 @@ function renderProfileDashboard(data, preferredSection) {
 
     <section id="profile-section-account" class="profile-section">
       <h3>${escapeHtml(labels.account)}</h3>
+
+      <div class="profile-account-head">
+        <div class="profile-avatar-preview ${avatarUrl ? 'has-image' : ''}">${avatarPreview}</div>
+        <div class="profile-avatar-meta">
+          <strong>${escapeHtml(profile.name || 'User')}</strong>
+          <span>${escapeHtml(profile.email || '-')}</span>
+        </div>
+      </div>
+
       <div class="profile-overview">
         <div class="profile-meta">
           <span>${escapeHtml(labels.role)}</span>
@@ -1945,6 +2130,10 @@ function renderProfileDashboard(data, preferredSection) {
         <div class="profile-meta">
           <span>${escapeHtml(labels.memberSince)}</span>
           <strong>${escapeHtml(formatAdminDate(profile.createdAt))}</strong>
+        </div>
+        <div class="profile-meta">
+          <span>${escapeHtml(labels.lastLogin)}</span>
+          <strong>${escapeHtml(lastLoginLabel)}</strong>
         </div>
       </div>
 
@@ -1962,6 +2151,18 @@ function renderProfileDashboard(data, preferredSection) {
           <div class="phone-input-group">
             <select class="country-code-select" name="countryCode">${getCountryCodeOptionsHtml(phone.countryCode)}</select>
             <input type="tel" name="phone" value="${escapeHtml(phone.localNumber || '')}" placeholder="555 123 456" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>${escapeHtml(labels.avatarUrl)}</label>
+          <input type="url" name="avatarUrl" value="${escapeHtml(profile.avatarUrl || '')}" placeholder="https://..." maxlength="500">
+          <p class="profile-helper">${escapeHtml(labels.avatarHint)}</p>
+        </div>
+        <div class="profile-lang-switch">
+          <span>${escapeHtml(labels.language)}</span>
+          <div class="profile-lang-actions">
+            <button type="button" class="btn btn-outline btn-sm ${currentLang === 'en' ? 'active' : ''}" onclick="setLanguage('en')">${escapeHtml(labels.languageEn)}</button>
+            <button type="button" class="btn btn-outline btn-sm ${currentLang === 'ru' ? 'active' : ''}" onclick="setLanguage('ru')">${escapeHtml(labels.languageRu)}</button>
           </div>
         </div>
         <button type="submit" class="btn btn-primary">${escapeHtml(labels.saveProfile)}</button>
@@ -1984,6 +2185,19 @@ function renderProfileDashboard(data, preferredSection) {
         <p class="profile-helper">${escapeHtml(labels.passwordRule)}</p>
         <button type="submit" class="btn btn-primary">${escapeHtml(labels.updatePassword)}</button>
       </form>
+
+      <div class="profile-danger-zone">
+        <h4>${escapeHtml(labels.deleteAccountTitle)}</h4>
+        <p class="profile-helper">${escapeHtml(labels.deleteAccountHint)}</p>
+        <form class="profile-form" onsubmit="handleProfileDeleteAccount(event)">
+          ${localAuth ? `<div class="form-group"><label>${escapeHtml(labels.currentPassword)}</label><input type="password" name="currentPassword" autocomplete="current-password" required></div>` : ''}
+          <div class="form-group">
+            <label>${escapeHtml(labels.deleteConfirmLabel)}</label>
+            <input type="text" name="confirmDelete" placeholder="DELETE" required>
+          </div>
+          <button type="submit" class="btn btn-danger">${escapeHtml(labels.deleteButton)}</button>
+        </form>
+      </div>
     </section>
 
     <section id="profile-section-bookings" class="profile-section">
@@ -2086,6 +2300,7 @@ async function handleProfileSave(e) {
   const labels = getProfileLabels();
   const name = String(form.name.value || '').trim();
   const phone = normalizePhone(form.phone.value, form.countryCode.value);
+  const avatarUrl = String(form.avatarUrl ? form.avatarUrl.value || '' : '').trim();
 
   if (!name || name.length < 2) {
     showToast(currentLang === 'ru' ? 'Имя слишком короткое.' : 'Name is too short.', 'error');
@@ -2097,6 +2312,11 @@ async function handleProfileSave(e) {
     return;
   }
 
+  if (!isValidAvatarUrl(avatarUrl)) {
+    showToast(currentLang === 'ru' ? 'Ссылка на аватар должна начинаться с http/https.' : 'Avatar URL must start with http/https.', 'error');
+    return;
+  }
+
   try {
     const res = await apiFetch('/api/profile', {
       method: 'PATCH',
@@ -2104,7 +2324,7 @@ async function handleProfileSave(e) {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + authToken
       },
-      body: JSON.stringify({ name, phone })
+      body: JSON.stringify({ name, phone, avatarUrl })
     });
 
     const result = await res.json();
@@ -2120,6 +2340,8 @@ async function handleProfileSave(e) {
     currentUser.name = result.user.name;
     currentUser.email = result.user.email;
     currentUser.role = result.user.role || currentUser.role || 'user';
+    currentUser.authProvider = result.user.authProvider || currentUser.authProvider || 'local';
+    currentUser.avatarUrl = result.user.avatarUrl || '';
     localStorage.setItem('quantum_user', JSON.stringify(currentUser));
     updateUIForLoggedIn();
 
@@ -2173,6 +2395,52 @@ async function handleProfilePasswordChange(e) {
     showToast(labels.passwordSaved, 'success');
   } catch (err) {
     showToast(labels.passwordError, 'error');
+  }
+}
+
+async function handleProfileDeleteAccount(e) {
+  e.preventDefault();
+  if (!authToken) return;
+
+  const labels = getProfileLabels();
+  const form = e.target;
+  const currentPassword = form.currentPassword ? String(form.currentPassword.value || '') : '';
+  const confirmDelete = String(form.confirmDelete ? form.confirmDelete.value || '' : '').trim().toUpperCase();
+
+  if (confirmDelete !== 'DELETE') {
+    showToast(labels.deleteConfirmError, 'error');
+    return;
+  }
+
+  const approve = window.confirm(currentLang === 'ru'
+    ? 'Удалить аккаунт без возможности восстановления?'
+    : 'Delete account permanently?');
+  if (!approve) return;
+
+  try {
+    const res = await apiFetch('/api/profile', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + authToken
+      },
+      body: JSON.stringify({
+        currentPassword,
+        confirmation: 'DELETE'
+      })
+    });
+
+    const result = await res.json();
+    if (!res.ok) {
+      showToast(result.error || labels.deleteError, 'error');
+      return;
+    }
+
+    closeModal('profileModal');
+    handleLogout();
+    showToast(labels.deleteSuccess, 'success');
+  } catch (err) {
+    showToast(labels.deleteError, 'error');
   }
 }
 
