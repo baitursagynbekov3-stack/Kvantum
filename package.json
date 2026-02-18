@@ -12,7 +12,9 @@
     "prisma:deploy": "prisma db push",
     "prisma:studio": "prisma studio",
     "postinstall": "prisma generate",
-    "prisma:migrate:deploy": "prisma migrate deploy"
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "lint": "eslint public/index.html public/admin.html",
+    "lint:fix": "eslint public/index.html public/admin.html --fix"
   },
   "private": true,
   "dependencies": {
@@ -24,6 +26,8 @@
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "eslint": "^10.0.0",
+    "eslint-plugin-html": "^8.1.4",
     "prisma": "^6.19.0"
   }
 }
