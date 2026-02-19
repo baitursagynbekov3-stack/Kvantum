@@ -151,6 +151,27 @@ function isStrongPassword(value) {
   return password.length >= 8 && /[a-z]/i.test(password) && /\d/.test(password);
 }
 
+function isLikelyPlaceholderProfileName(name, email) {
+  const normalizedName = String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  if (!normalizedName) return true;
+
+  const emailLocal = String(email || '').trim().toLowerCase().split('@')[0];
+  if (emailLocal && normalizedName === emailLocal) return true;
+
+  if (!/[A-Za-zА-Яа-яЁё]/.test(normalizedName)) return true;
+  return false;
+}
+
+function isContactProfileComplete(user) {
+  const profile = user && typeof user === 'object' ? user : {};
+  const name = String(profile.name || '').trim();
+
+  if (name.length < 2 || name.length > 120) return false;
+  if (isLikelyPlaceholderProfileName(name, profile.email)) return false;
+
+  return Boolean(normalizePhone(profile.phone));
+}
+
 function isValidAvatarUrl(value) {
   const url = String(value || '').trim();
   if (!url) return true;
@@ -366,6 +387,7 @@ function demoApi(path, options) {
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone || '',
         role: user.role,
         authProvider: user.authProvider || 'local',
         avatarUrl: user.avatarUrl || ''
@@ -395,6 +417,7 @@ function demoApi(path, options) {
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone || '',
         role: user.role || 'user',
         authProvider: user.authProvider || 'local',
         avatarUrl: user.avatarUrl || ''
@@ -453,10 +476,12 @@ function demoApi(path, options) {
     return createApiResponse(200, {
       message: 'Google sign-in successful (demo mode)',
       token,
+      profileIncomplete: !isContactProfileComplete(user),
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone || '',
         role: user.role || 'user',
         authProvider: user.authProvider || 'google',
         avatarUrl: user.avatarUrl || ''
@@ -1705,6 +1730,19 @@ async function handleGoogleCredentialResponse(response) {
       updateUIForLoggedIn();
       closeModal('loginModal');
       showToast(currentLang === 'ru' ? 'Вход через Google выполнен.' : 'Signed in with Google.', 'success');
+
+      const profileIncomplete = Boolean(result.profileIncomplete) || !isContactProfileComplete(currentUser);
+      if (profileIncomplete) {
+        setTimeout(() => {
+          showToast(
+            currentLang === 'ru'
+              ? 'Заполните профиль: реальное имя и телефон обязательны.'
+              : 'Complete your profile: real name and phone are required.',
+            'info'
+          );
+          openProfileDashboard('account');
+        }, 180);
+      }
       return;
     }
 
@@ -2452,6 +2490,7 @@ async function handleProfileSave(e) {
     currentUser = currentUser || {};
     currentUser.name = result.user.name;
     currentUser.email = result.user.email;
+    currentUser.phone = result.user.phone || '';
     currentUser.role = result.user.role || currentUser.role || 'user';
     currentUser.authProvider = result.user.authProvider || currentUser.authProvider || 'local';
     currentUser.avatarUrl = result.user.avatarUrl || '';
@@ -2597,9 +2636,11 @@ function getAdminLabels() {
       users: 'Пользователи',
       bookings: 'Заявки',
       payments: 'Оплаты',
+      clients: 'Клиенты',
       usersTitle: 'Последние регистрации',
       bookingsTitle: 'Последние заявки',
       paymentsTitle: 'Последние оплаты',
+      clientsTitle: 'Контакты клиентов',
       userName: 'Имя',
       userEmail: 'Email',
       userPhone: 'Телефон',
@@ -2614,6 +2655,10 @@ function getAdminLabels() {
       paymentProduct: 'Продукт',
       paymentAmount: 'Сумма',
       paymentClient: 'Клиент',
+      clientSource: 'Источник',
+      clientBookings: 'Заявки',
+      clientLastStatus: 'Последний статус',
+      clientLastBooking: 'Последняя заявка',
       exportUsers: 'CSV пользователи',
       exportBookings: 'CSV заявки',
       exportPayments: 'CSV оплаты',
@@ -2629,6 +2674,7 @@ function getAdminLabels() {
       emptyUsers: 'Регистраций пока нет',
       emptyBookings: 'Заявок пока нет',
       emptyPayments: 'Оплат пока нет',
+      emptyClients: 'Контактов пока нет',
       emptyAudit: 'Действий пока нет',
       searchPlaceholder: 'Поиск: имя, email, телефон, роль, продукт',
       bookingStatusFilter: 'Фильтр статуса',
@@ -2658,6 +2704,11 @@ function getAdminLabels() {
         local: 'Email + пароль',
         google: 'Google'
       },
+      clientSourceValues: {
+        user: 'Аккаунт',
+        booking: 'Форма/чат',
+        both: 'Аккаунт + заявка'
+      },
       auditActions: {
         booking_status_changed: 'Изменен статус заявки',
         user_role_changed: 'Изменена роль пользователя'
@@ -2676,9 +2727,11 @@ function getAdminLabels() {
     users: 'Users',
     bookings: 'Bookings',
     payments: 'Payments',
+    clients: 'Clients',
     usersTitle: 'Latest Registrations',
     bookingsTitle: 'Latest Requests',
     paymentsTitle: 'Latest Payments',
+    clientsTitle: 'Client Contacts',
     userName: 'Name',
     userEmail: 'Email',
     userPhone: 'Phone',
@@ -2693,6 +2746,10 @@ function getAdminLabels() {
     paymentProduct: 'Product',
     paymentAmount: 'Amount',
     paymentClient: 'Client',
+    clientSource: 'Source',
+    clientBookings: 'Bookings',
+    clientLastStatus: 'Latest status',
+    clientLastBooking: 'Last booking',
     exportUsers: 'CSV users',
     exportBookings: 'CSV bookings',
     exportPayments: 'CSV payments',
@@ -2708,6 +2765,7 @@ function getAdminLabels() {
     emptyUsers: 'No registrations yet',
     emptyBookings: 'No requests yet',
     emptyPayments: 'No payments yet',
+    emptyClients: 'No client contacts yet',
     emptyAudit: 'No actions yet',
     searchPlaceholder: 'Search: name, email, phone, role, product',
     bookingStatusFilter: 'Status filter',
@@ -2736,6 +2794,11 @@ function getAdminLabels() {
     provider: {
       local: 'Email + password',
       google: 'Google'
+    },
+    clientSourceValues: {
+      user: 'Account',
+      booking: 'Form/chat',
+      both: 'Account + booking'
     },
     auditActions: {
       booking_status_changed: 'Booking status changed',
@@ -2869,6 +2932,182 @@ function getAdminAuditDetailsText(details) {
     });
 
   return parts.join(' | ').slice(0, 260);
+}
+
+function normalizeClientEmail(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function normalizeClientPhoneKey(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  let phone = raw.replace(/[^\d+]/g, '');
+  if (phone.startsWith('00')) {
+    phone = '+' + phone.slice(2);
+  }
+
+  if (!phone.startsWith('+')) return '';
+
+  const digits = phone.slice(1).replace(/\D/g, '');
+  if (digits.length < 8 || digits.length > 15) return '';
+
+  return '+' + digits;
+}
+
+function scoreClientName(name, email) {
+  const value = String(name || '').trim();
+  if (!value) return 0;
+
+  let score = value.length >= 2 ? 2 : 1;
+  if (/[A-Za-zА-Яа-яЁё]/.test(value)) score += 2;
+  if (/\s/.test(value)) score += 1;
+
+  const emailLocal = normalizeClientEmail(email).split('@')[0];
+  if (emailLocal && value.toLowerCase() !== emailLocal) {
+    score += 2;
+  }
+
+  return score;
+}
+
+function pickBestClientName(currentName, nextName, email) {
+  const current = String(currentName || '').trim();
+  const next = String(nextName || '').trim();
+  if (!next) return current;
+  if (!current) return next;
+
+  return scoreClientName(next, email) > scoreClientName(current, email) ? next : current;
+}
+
+function getClientSourceLabel(source, labels) {
+  const key = normalizeAdminValue(source);
+  if (labels.clientSourceValues && labels.clientSourceValues[key]) {
+    return labels.clientSourceValues[key];
+  }
+  return source || '-';
+}
+
+function buildAdminClients(users, bookings) {
+  const clientsMap = new Map();
+  const emailIndex = new Map();
+  const phoneIndex = new Map();
+  let anonymousCounter = 0;
+
+  function getTimestamp(value) {
+    const ts = new Date(value).getTime();
+    return Number.isFinite(ts) ? ts : 0;
+  }
+
+  function ensureClient(seed, sourceType) {
+    const emailKey = normalizeClientEmail(seed && seed.email);
+    const phoneKey = normalizeClientPhoneKey(seed && seed.phone);
+
+    let key = '';
+    if (emailKey && emailIndex.has(emailKey)) {
+      key = emailIndex.get(emailKey);
+    } else if (phoneKey && phoneIndex.has(phoneKey)) {
+      key = phoneIndex.get(phoneKey);
+    }
+
+    if (!key) {
+      key = emailKey ? `email:${emailKey}` : (phoneKey ? `phone:${phoneKey}` : `anon:${++anonymousCounter}`);
+      clientsMap.set(key, {
+        key,
+        name: '',
+        email: '',
+        phone: '',
+        provider: '',
+        bookingsCount: 0,
+        lastBookingAt: '',
+        lastBookingStatus: '',
+        createdAt: '',
+        lastLoginAt: '',
+        hasUser: false,
+        hasBooking: false
+      });
+    }
+
+    const client = clientsMap.get(key);
+
+    if (emailKey) {
+      emailIndex.set(emailKey, key);
+      if (!client.email) client.email = String(seed.email || '').trim() || emailKey;
+    }
+
+    if (phoneKey) {
+      phoneIndex.set(phoneKey, key);
+      if (!client.phone) client.phone = String(seed.phone || '').trim() || phoneKey;
+    }
+
+    if (seed && seed.name) {
+      client.name = pickBestClientName(client.name, seed.name, client.email || seed.email || '');
+    }
+
+    if (sourceType === 'user') client.hasUser = true;
+    if (sourceType === 'booking') client.hasBooking = true;
+
+    return client;
+  }
+
+  (Array.isArray(users) ? users : []).forEach((user) => {
+    if (!user) return;
+
+    const client = ensureClient({
+      name: user.name,
+      email: user.email,
+      phone: user.phone
+    }, 'user');
+
+    if (!client.provider && user.authProvider) {
+      client.provider = String(user.authProvider || '').trim();
+    }
+
+    if (user.createdAt && (!client.createdAt || getTimestamp(user.createdAt) < getTimestamp(client.createdAt))) {
+      client.createdAt = user.createdAt;
+    }
+
+    if (user.lastLoginAt && (!client.lastLoginAt || getTimestamp(user.lastLoginAt) > getTimestamp(client.lastLoginAt))) {
+      client.lastLoginAt = user.lastLoginAt;
+    }
+  });
+
+  (Array.isArray(bookings) ? bookings : []).forEach((booking) => {
+    if (!booking) return;
+
+    const client = ensureClient({
+      name: booking.name,
+      email: booking.email,
+      phone: booking.phone
+    }, 'booking');
+
+    client.bookingsCount += 1;
+
+    if (booking.createdAt && (!client.lastBookingAt || getTimestamp(booking.createdAt) > getTimestamp(client.lastBookingAt))) {
+      client.lastBookingAt = booking.createdAt;
+      client.lastBookingStatus = booking.status || '';
+    }
+  });
+
+  return Array.from(clientsMap.values())
+    .map((client) => {
+      const source = client.hasUser && client.hasBooking
+        ? 'both'
+        : (client.hasBooking ? 'booking' : 'user');
+
+      return {
+        ...client,
+        source,
+        name: client.name || '-',
+        email: client.email || '-',
+        phone: client.phone || '-'
+      };
+    })
+    .sort((a, b) => {
+      const aTs = getTimestamp(a.lastBookingAt || a.lastLoginAt || a.createdAt);
+      const bTs = getTimestamp(b.lastBookingAt || b.lastLoginAt || b.createdAt);
+      return bTs - aTs;
+    });
 }
 
 function toCsvCell(value) {
@@ -3100,6 +3339,15 @@ function renderAdminOverview(data) {
     ]);
   });
 
+  const clients = buildAdminClients(usersSource, bookingsSource).filter((client) => matchesAdminSearch(searchQuery, [
+    client.name,
+    client.email,
+    client.phone,
+    client.source,
+    client.lastBookingStatus,
+    client.provider
+  ]));
+
   adminExportData = {
     users: users.slice(),
     bookings: bookings.slice(),
@@ -3127,6 +3375,7 @@ function renderAdminOverview(data) {
   ];
 
   const usersTitleCount = periodFilter === 'all' ? Number(totals.users || usersRaw.length) : usersSource.length;
+  const clientsTitleCount = clients.length;
   const bookingsTitleCount = periodFilter === 'all' ? Number(totals.bookings || bookingsRaw.length) : bookingsSource.length;
   const paymentsTitleCount = periodFilter === 'all' ? Number(totals.payments || paymentsRaw.length) : paymentsSource.length;
   const auditTitleCount = periodFilter === 'all' ? auditRaw.length : auditSource.length;
@@ -3161,6 +3410,7 @@ function renderAdminOverview(data) {
 
     <div class="admin-stats-grid">
       <div class="admin-stat-card"><span class="admin-stat-label">${labels.users}</span><strong>${Number(users.length).toLocaleString()}</strong></div>
+      <div class="admin-stat-card"><span class="admin-stat-label">${labels.clients}</span><strong>${Number(clients.length).toLocaleString()}</strong></div>
       <div class="admin-stat-card"><span class="admin-stat-label">${labels.bookings}</span><strong>${Number(bookings.length).toLocaleString()}</strong></div>
       <div class="admin-stat-card"><span class="admin-stat-label">${labels.payments}</span><strong>${Number(payments.length).toLocaleString()}</strong></div>
       <div class="admin-stat-card"><span class="admin-stat-label">${labels.metricRevenue}</span><strong>${escapeHtml(revenueLabel)}</strong></div>
@@ -3219,6 +3469,47 @@ function renderAdminOverview(data) {
     </section>
 
     <section class="admin-section">
+      <h3>${labels.clientsTitle} (${Number(clientsTitleCount).toLocaleString()})</h3>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>${labels.userName}</th>
+              <th>${labels.userEmail}</th>
+              <th>${labels.userPhone}</th>
+              <th>${labels.clientSource}</th>
+              <th>${labels.clientBookings}</th>
+              <th>${labels.clientLastStatus}</th>
+              <th>${labels.clientLastBooking}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${buildAdminRows(
+              clients,
+              (client) => {
+                const statusLabel = client.lastBookingStatus
+                  ? getBookingStatusLabel(client.lastBookingStatus, labels)
+                  : '-';
+
+                return `<tr>
+                  <td>${escapeHtml(client.name || '-')}</td>
+                  <td>${escapeHtml(client.email || '-')}</td>
+                  <td>${escapeHtml(client.phone || '-')}</td>
+                  <td>${escapeHtml(getClientSourceLabel(client.source, labels))}</td>
+                  <td>${escapeHtml(String(client.bookingsCount || 0))}</td>
+                  <td>${escapeHtml(statusLabel)}</td>
+                  <td>${escapeHtml(client.lastBookingAt ? formatAdminDate(client.lastBookingAt) : '-')}</td>
+                </tr>`;
+              },
+              7,
+              labels.emptyClients
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
       <h3>${labels.bookingsTitle} (${Number(bookingsTitleCount).toLocaleString()})</h3>
       <div class="admin-table-wrap">
         <table class="admin-table">
@@ -3226,6 +3517,7 @@ function renderAdminOverview(data) {
             <tr>
               <th>${labels.userName}</th>
               <th>${labels.userEmail}</th>
+              <th>${labels.userPhone}</th>
               <th>${labels.bookingService}</th>
               <th>${labels.bookingStatus}</th>
               <th>${labels.createdAt}</th>
@@ -3242,6 +3534,7 @@ function renderAdminOverview(data) {
                 return `<tr>
                   <td>${escapeHtml(booking.name || '-')}</td>
                   <td>${escapeHtml(booking.email || '-')}</td>
+                  <td>${escapeHtml(booking.phone || '-')}</td>
                   <td>${escapeHtml(booking.service || '-')}</td>
                   <td>${escapeHtml(getBookingStatusLabel(booking.status, labels))}</td>
                   <td>${escapeHtml(formatAdminDate(booking.createdAt))}</td>
@@ -3256,7 +3549,7 @@ function renderAdminOverview(data) {
                   </td>
                 </tr>`;
               },
-              6,
+              7,
               labels.emptyBookings
             )}
           </tbody>

@@ -385,6 +385,27 @@ function normalizePhone(phone) {
   return '+' + digits;
 }
 
+function isNameLikelyPlaceholder(name, email) {
+  const normalizedName = String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  if (!normalizedName) return true;
+
+  const emailLocal = String(email || '').trim().toLowerCase().split('@')[0];
+  if (emailLocal && normalizedName === emailLocal) return true;
+
+  if (!/[\p{L}]/u.test(normalizedName)) return true;
+  return false;
+}
+
+function hasCompleteContactProfile(user) {
+  if (!user) return false;
+
+  const name = String(user.name || '').trim();
+  if (name.length < 2 || name.length > 120) return false;
+  if (isNameLikelyPlaceholder(name, user.email)) return false;
+
+  return Boolean(normalizePhone(user.phone));
+}
+
 function normalizeKnowledgeText(value) {
   return String(value || '').trim().slice(0, 12000);
 }
@@ -1156,6 +1177,7 @@ function buildPublicUser(user, role) {
     id: user.id,
     name: user.name,
     email: user.email,
+    phone: user.phone || '',
     role,
     authProvider: user.authProvider || 'local',
     avatarUrl: user.avatarUrl || ''
@@ -1249,6 +1271,7 @@ app.post('/api/auth/google', authRateLimiter, async (req, res) => {
     return res.json({
       message: 'Google sign-in successful',
       token,
+      profileIncomplete: !hasCompleteContactProfile(user),
       user: buildPublicUser(user, role)
     });
   } catch (err) {
