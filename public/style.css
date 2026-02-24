@@ -523,7 +523,7 @@ input:focus, select:focus, textarea:focus {
 }
 .stats-grid {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   gap: 0;
 }
@@ -531,6 +531,9 @@ input:focus, select:focus, textarea:focus {
   text-align: center;
   flex: 1;
   padding: 0 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .stat-number {
   display: block;
@@ -547,6 +550,9 @@ input:focus, select:focus, textarea:focus {
   color: var(--primary);
 }
 .stat-label {
+  display: block;
+  min-height: 2.4em;
+  line-height: 1.35;
   color: var(--gray-500);
   font-size: 0.85rem;
   font-weight: 500;
