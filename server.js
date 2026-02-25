@@ -1232,7 +1232,7 @@ app.post('/api/register', authRateLimiter, async (req, res) => {
           name: user.name,
           email: user.email,
           phone: user.phone,
-          role: user.role,
+          role: role,
           timestamp: new Date().toISOString()
         })
       });
