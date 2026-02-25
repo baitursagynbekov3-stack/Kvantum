@@ -1223,18 +1223,22 @@ app.post('/api/register', authRateLimiter, async (req, res) => {
 
     const token = buildAuthToken(user, role);
 
-    // Notify n8n of new registration (fire-and-forget)
-    fetch('https://n8n-production-5753.up.railway.app/webhook/0c651492-633f-4c72-abe0-17720b8fb6f2', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        timestamp: new Date().toISOString()
-      })
-    }).catch(err => console.error('[n8n webhook] failed:', err.message));
+    // Notify n8n of new registration (awaited so Vercel doesn't kill it before it fires)
+    try {
+      await fetch('https://n8n-production-5753.up.railway.app/webhook/0c651492-633f-4c72-abe0-17720b8fb6f2', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          timestamp: new Date().toISOString()
+        })
+      });
+    } catch (err) {
+      console.error('[n8n webhook] failed:', err.message);
+    }
 
     res.json({
       message: 'Registration successful',
