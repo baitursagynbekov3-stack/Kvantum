@@ -1784,6 +1784,34 @@ async function openAdminDashboard() {
 function openModal(id) {
   document.getElementById(id).classList.add('active');
   document.body.style.overflow = 'hidden';
+
+  if (id === 'consultModal' && currentUser) {
+    const form = document.getElementById('consultForm');
+    if (!form) return;
+
+    const nameInput = form.querySelector('[name="name"]');
+    const emailInput = form.querySelector('[name="email"]');
+    const phoneInput = form.querySelector('[name="phone"]');
+    const countrySelect = form.querySelector('[name="countryCode"]');
+
+    if (nameInput && !nameInput.value) nameInput.value = currentUser.name || '';
+    if (emailInput && !emailInput.value) emailInput.value = currentUser.email || '';
+
+    if (phoneInput && countrySelect && currentUser.phone && !phoneInput.value) {
+      const fullPhone = currentUser.phone.trim();
+      const codes = ['+971', '+996', '+44', '+49', '+81', '+82', '+86', '+90', '+91', '+33', '+34', '+39', '+61', '+7', '+1'];
+      let matched = '';
+      for (const code of codes) {
+        if (fullPhone.startsWith(code)) { matched = code; break; }
+      }
+      if (matched) {
+        countrySelect.value = matched;
+        phoneInput.value = fullPhone.slice(matched.length).replace(/^\s+/, '');
+      } else {
+        phoneInput.value = fullPhone;
+      }
+    }
+  }
 }
 
 function closeModal(id) {
