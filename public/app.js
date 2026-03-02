@@ -1368,59 +1368,93 @@ function handleLogout() {
   showToast('You have been logged out.', 'info');
 }
 
+function fillProfilePhone(phone) {
+  const form = document.getElementById('profileForm');
+  if (!form || !phone) return;
+  const phoneInput = form.querySelector('[name="phone"]');
+  const countrySelect = form.querySelector('[name="countryCode"]');
+  if (!phoneInput || !countrySelect) return;
+  const fullPhone = phone.trim();
+  const codes = ['+971', '+996', '+44', '+49', '+81', '+82', '+86', '+90', '+91', '+33', '+34', '+39', '+61', '+7', '+1'];
+  let matched = '';
+  for (const code of codes) {
+    if (fullPhone.startsWith(code)) { matched = code; break; }
+  }
+  if (matched) {
+    countrySelect.value = matched;
+    phoneInput.value = fullPhone.slice(matched.length).replace(/^\s+/, '');
+  } else {
+    phoneInput.value = fullPhone;
+  }
+}
+
 async function showProfile() {
   document.getElementById('userDropdown').style.display = 'none';
+
+  // Pre-populate from cached currentUser immediately so modal isn't empty
+  const avatarEl = document.getElementById('profileAvatar');
+  const nameEl = document.getElementById('profileDisplayName');
+  const sinceEl = document.getElementById('profileMemberSince');
+  const form = document.getElementById('profileForm');
+
+  if (currentUser) {
+    const initial = (currentUser.name || '?').charAt(0).toUpperCase();
+    if (avatarEl) avatarEl.textContent = initial;
+    if (nameEl) nameEl.textContent = currentUser.name || '';
+    if (sinceEl) sinceEl.textContent = '';
+    if (form) {
+      form.querySelector('[name="name"]').value = currentUser.name || '';
+      form.querySelector('[name="email"]').value = currentUser.email || '';
+    }
+  }
+
+  renderProfileBookings([]);
   openModal('profileModal');
 
+  if (!authToken) return;
+
   try {
+    const headers = { 'Authorization': 'Bearer ' + authToken };
     const [profRes, bookRes] = await Promise.all([
-      apiFetch('/api/profile', { headers: { 'Authorization': 'Bearer ' + authToken } }),
-      apiFetch('/api/profile/bookings', { headers: { 'Authorization': 'Bearer ' + authToken } })
+      apiFetch('/api/profile', { headers }),
+      apiFetch('/api/profile/bookings', { headers })
     ]);
 
-    if (!profRes.ok) { showToast('Could not load profile', 'error'); return; }
-    const profile = await profRes.json();
-    const bookings = bookRes.ok ? await bookRes.json() : [];
-
-    // Header
-    const avatarEl = document.getElementById('profileAvatar');
-    const nameEl = document.getElementById('profileDisplayName');
-    const sinceEl = document.getElementById('profileMemberSince');
-    if (avatarEl) avatarEl.textContent = (profile.name || '?').charAt(0).toUpperCase();
-    if (nameEl) nameEl.textContent = profile.name || '';
-    if (sinceEl) {
-      const d = new Date(profile.createdAt);
-      const locale = currentLang === 'ru' ? 'ru-RU' : 'en-US';
-      const label = currentLang === 'ru' ? 'Участник с ' : 'Member since ';
-      sinceEl.textContent = label + d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+    // If token expired/invalid, clear session and tell user to log in again
+    if (profRes.status === 401 || profRes.status === 403) {
+      authToken = null;
+      currentUser = null;
+      localStorage.removeItem('quantum_token');
+      localStorage.removeItem('quantum_user');
+      updateUIForLoggedIn();
+      closeModal('profileModal');
+      openModal('loginModal');
+      showToast(currentLang === 'ru' ? 'Сессия истекла, войдите снова.' : 'Session expired, please log in again.', 'info');
+      return;
     }
 
-    // Form
-    const form = document.getElementById('profileForm');
-    if (form) {
-      form.querySelector('[name="name"]').value = profile.name || '';
-      form.querySelector('[name="email"]').value = profile.email || '';
-      const phoneInput = form.querySelector('[name="phone"]');
-      const countrySelect = form.querySelector('[name="countryCode"]');
-      if (phoneInput && countrySelect && profile.phone) {
-        const fullPhone = profile.phone.trim();
-        const codes = ['+971', '+996', '+44', '+49', '+81', '+82', '+86', '+90', '+91', '+33', '+34', '+39', '+61', '+7', '+1'];
-        let matched = '';
-        for (const code of codes) {
-          if (fullPhone.startsWith(code)) { matched = code; break; }
-        }
-        if (matched) {
-          countrySelect.value = matched;
-          phoneInput.value = fullPhone.slice(matched.length).replace(/^\s+/, '');
-        } else {
-          phoneInput.value = fullPhone;
-        }
+    if (profRes.ok) {
+      const profile = await profRes.json();
+      if (avatarEl) avatarEl.textContent = (profile.name || '?').charAt(0).toUpperCase();
+      if (nameEl) nameEl.textContent = profile.name || '';
+      if (sinceEl && profile.createdAt) {
+        const d = new Date(profile.createdAt);
+        const locale = currentLang === 'ru' ? 'ru-RU' : 'en-US';
+        const label = currentLang === 'ru' ? 'Участник с ' : 'Member since ';
+        sinceEl.textContent = label + d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
+      }
+      if (form) {
+        form.querySelector('[name="name"]').value = profile.name || '';
+        form.querySelector('[name="email"]').value = profile.email || '';
+        fillProfilePhone(profile.phone);
       }
     }
 
+    const bookings = bookRes.ok ? await bookRes.json() : [];
     renderProfileBookings(bookings);
   } catch (err) {
-    showToast('Could not load profile', 'error');
+    // Network error — modal is still open with cached data, silently skip
+    renderProfileBookings([]);
   }
 }
 
