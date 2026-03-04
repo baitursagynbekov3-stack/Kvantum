@@ -1027,6 +1027,7 @@ input:focus, select:focus, textarea:focus {
   margin-bottom: 0;
 }
 .radio-card {
+  position: relative;
   flex: 1 1 140px;
   justify-content: center;
   min-height: 48px;
@@ -1034,15 +1035,30 @@ input:focus, select:focus, textarea:focus {
   border: 1px solid #d9dee8;
   border-radius: 14px;
   background: var(--white);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
 }
 .radio-card:hover {
   border-color: rgba(161, 134, 93, 0.45);
   box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06);
 }
 .radio-card input[type="radio"] {
-  margin: 0;
-  accent-color: var(--primary);
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.radio-card span {
+  width: 100%;
+  text-align: center;
+}
+.radio-card input[type="radio"]:checked + span {
+  color: var(--primary);
+  font-weight: 700;
+}
+.radio-card:has(input[type="radio"]:checked) {
+  border-color: rgba(161, 134, 93, 0.75);
+  background: rgba(161, 134, 93, 0.08);
+  box-shadow: 0 12px 30px rgba(161, 134, 93, 0.12);
 }
 .contact-method-group {
   display: grid;
