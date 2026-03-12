@@ -1002,6 +1002,22 @@
     });
   </script>
 
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    // Handle Stripe Checkout return
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('payment') === 'success') {
+        window.history.replaceState({}, '', window.location.pathname);
+        setTimeout(function() { showToast('Payment successful! Thank you for your purchase.', 'success'); }, 500);
+      } else if (params.get('payment') === 'cancelled') {
+        window.history.replaceState({}, '', window.location.pathname);
+        setTimeout(function() { showToast('Payment cancelled. You can try again anytime.', 'info'); }, 500);
+      }
+    })();
+  </script>
+
   <!-- Kompot.ai Web Chat Widget -->
   <script
     src="https://kompot.ai/webchat-widget.js"

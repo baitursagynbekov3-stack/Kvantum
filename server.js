@@ -8,6 +8,8 @@ const fs = require('fs');
 const crypto = require('crypto');
 const { PrismaClient } = require('@prisma/client');
 const { Resend } = require('resend');
+const Stripe = require('stripe');
+const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 const prisma = global.prisma || new PrismaClient();
 if (process.env.NODE_ENV !== 'production') {
@@ -118,6 +120,43 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+
+// Stripe webhook — must be registered before express.json() to preserve raw body
+app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  if (!stripe) return res.status(500).json({ error: 'Stripe not configured' });
+  const sig = req.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const { productId, productName, userEmail } = session.metadata || {};
+    try {
+      const user = userEmail ? await prisma.user.findUnique({ where: { email: userEmail } }) : null;
+      if (user) {
+        await prisma.payment.create({
+          data: {
+            id: session.id,
+            userId: user.id,
+            productId: productId || null,
+            productName: productName || null,
+            amount: session.amount_total / 100,
+            currency: session.currency.toUpperCase(),
+            status: 'completed'
+          }
+        });
+      }
+    } catch (err) {
+      console.error('[stripe webhook] db error:', err.message);
+    }
+  }
+  res.json({ received: true });
+});
+
 app.use(express.json());
 
 if (SERVE_STATIC) {
@@ -1574,6 +1613,47 @@ app.post('/api/book-consultation', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Stripe Checkout session
+app.post('/api/create-checkout-session', authenticateToken, async (req, res) => {
+  if (!stripe) return res.status(500).json({ error: 'Stripe is not configured' });
+  const { productId, productName, amount, currency } = req.body;
+  const normalizedAmount = Number(amount);
+  if (!productName || !Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
+    return res.status(400).json({ error: 'Invalid product or amount' });
+  }
+  const supportedCurrencies = ['usd', 'eur', 'gbp', 'kzt'];
+  const cur = (currency || 'usd').toLowerCase();
+  if (!supportedCurrencies.includes(cur)) {
+    return res.status(400).json({ error: `Currency ${currency} is not supported by Stripe. Please contact us to arrange payment.` });
+  }
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: cur,
+          product_data: { name: productName },
+          unit_amount: Math.round(normalizedAmount * 100)
+        },
+        quantity: 1
+      }],
+      mode: 'payment',
+      success_url: `${process.env.SITE_URL || 'https://kvantum.us'}/?payment=success`,
+      cancel_url: `${process.env.SITE_URL || 'https://kvantum.us'}/?payment=cancelled`,
+      customer_email: req.user.email,
+      metadata: {
+        productId: String(productId || ''),
+        productName,
+        userEmail: req.user.email,
+        userName: req.user.name
+      }
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

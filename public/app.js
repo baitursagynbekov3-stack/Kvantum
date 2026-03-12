@@ -2086,13 +2086,35 @@ async function handleContact(e) {
 }
 
 // ===== Payment =====
-function handlePurchase(productId, productName, amount, currency) {
+async function handlePurchase(productId, productName, amount, currency) {
   if (!currentUser) {
     showToast('Please login or register first to make a purchase.', 'info');
     openModal('loginModal');
     return;
   }
 
+  const stripeSupported = ['USD', 'EUR', 'GBP', 'KZT'];
+  if (stripeSupported.includes((currency || '').toUpperCase())) {
+    showToast('Redirecting to secure checkout...', 'info');
+    try {
+      const res = await apiFetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+        body: JSON.stringify({ productId, productName, amount, currency })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        showToast(data.error || 'Could not start checkout. Please try again.', 'error');
+      }
+    } catch (err) {
+      showToast('Could not connect to payment service. Please try again.', 'error');
+    }
+    return;
+  }
+
+  // Fallback: demo payment modal for non-Stripe currencies (KGS, RUB)
   currentPayment = { productId, productName, amount, currency };
 
   const summary = document.getElementById('paymentSummary');
