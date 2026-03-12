@@ -4141,9 +4141,7 @@ function escapeHtml(text) {
 // ===== Social Links =====
 function openWhatsApp() {
   const phone = '996550412941';
-  const message = currentLang === 'ru'
-    ? 'Здравствуйте! Хочу консультацию по программе KVANTUM.'
-    : 'Hello! I would like a consultation about KVANTUM programs.';
+  const message = 'Здравствуйте! Хочу узнать подробнее';
 
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
 }
