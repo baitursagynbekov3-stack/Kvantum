@@ -40,7 +40,10 @@ const COUNTRY_PHONE_CODES = [
 const API_BASE_URL = (window.QUANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
 const USE_DEMO_API = window.QUANTUM_USE_DEMO_API === true || (!API_BASE_URL && window.location.hostname.endsWith('github.io'));
 const GOOGLE_CLIENT_ID = (window.QUANTUM_GOOGLE_CLIENT_ID || '').trim();
+const TURNSTILE_SITE_KEY = (window.QUANTUM_TURNSTILE_SITE_KEY || '').trim();
 const CHAT_SESSION_STORAGE_KEY = 'quantum_chat_session_id';
+const turnstileWidgetByForm = new WeakMap();
+let turnstileScriptPromise = null;
 const chatSessionIdCache = Object.create(null);
 let googleSignInInitialized = false;
 let googleSignInInitAttempts = 0;
@@ -87,6 +90,88 @@ function getChatSessionStorageKey() {
 function buildApiUrl(path) {
   const normalizedPath = path.startsWith('/') ? path : '/' + path;
   return API_BASE_URL ? API_BASE_URL + normalizedPath : normalizedPath;
+}
+
+function loadTurnstileScript() {
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('window is not available'));
+  }
+
+  if (!TURNSTILE_SITE_KEY) {
+    return Promise.resolve(null);
+  }
+
+  if (window.turnstile && typeof window.turnstile.render === 'function') {
+    return Promise.resolve(window.turnstile);
+  }
+
+  if (turnstileScriptPromise) {
+    return turnstileScriptPromise;
+  }
+
+  turnstileScriptPromise = new Promise((resolve, reject) => {
+    const existingScript = document.querySelector('script[data-turnstile-script="1"]');
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve(window.turnstile || null), { once: true });
+      existingScript.addEventListener('error', () => reject(new Error('Failed to load Turnstile script')), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+    script.dataset.turnstileScript = '1';
+    script.onload = () => resolve(window.turnstile || null);
+    script.onerror = () => reject(new Error('Failed to load Turnstile script'));
+    document.head.appendChild(script);
+  });
+
+  return turnstileScriptPromise;
+}
+
+function resetTurnstileForForm(form) {
+  if (!form || !window.turnstile || typeof window.turnstile.reset !== 'function') return;
+
+  const widgetId = turnstileWidgetByForm.get(form);
+  if (widgetId !== undefined && widgetId !== null) {
+    window.turnstile.reset(widgetId);
+  }
+}
+
+function initTurnstileWidgets() {
+  if (!TURNSTILE_SITE_KEY) return;
+
+  const widgets = Array.from(document.querySelectorAll('[data-turnstile-widget]'));
+  if (!widgets.length) return;
+
+  loadTurnstileScript()
+    .then((turnstile) => {
+      if (!turnstile || typeof turnstile.render !== 'function') {
+        return;
+      }
+
+      widgets.forEach((widgetEl) => {
+        if (!widgetEl || widgetEl.dataset.turnstileRendered === '1') return;
+
+        const form = widgetEl.closest('form');
+        try {
+          const widgetId = turnstile.render(widgetEl, {
+            sitekey: TURNSTILE_SITE_KEY,
+            theme: 'light'
+          });
+          widgetEl.dataset.turnstileRendered = '1';
+          if (form) {
+            turnstileWidgetByForm.set(form, widgetId);
+          }
+        } catch (err) {
+          console.error('[turnstile] render failed:', err && err.message ? err.message : err);
+        }
+      });
+    })
+    .catch((err) => {
+      console.error('[turnstile] load failed:', err && err.message ? err.message : err);
+    });
 }
 
 function generateChatSessionId() {
@@ -1521,6 +1606,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (currentLang !== 'en') applyTranslations(currentLang);
   loadSiteContent();
   initGoogleSignIn();
+  initTurnstileWidgets();
 
   // Trigger hero animations immediately
   setTimeout(() => {
@@ -3887,6 +3973,17 @@ document.addEventListener('click', (e) => {
 });
 
 // ===== Consultation Booking =====
+function getFormCaptchaToken(form) {
+  if (!form || typeof form.querySelector !== 'function') return '';
+
+  const turnstileInput = form.querySelector('input[name="cf-turnstile-response"]');
+  if (turnstileInput && turnstileInput.value) {
+    return String(turnstileInput.value).trim();
+  }
+
+  return '';
+}
+
 async function handleConsultation(e) {
   e.preventDefault();
   const form = e.target;
@@ -3897,7 +3994,8 @@ async function handleConsultation(e) {
     email: form.email.value,
     phone: phone,
     service: form.service.value,
-    message: ''
+    message: '',
+    captchaToken: getFormCaptchaToken(form)
   };
 
   try {
@@ -3922,6 +4020,7 @@ async function handleConsultation(e) {
         ' to schedule your free consultation.'
       );
       form.reset();
+      resetTurnstileForForm(form);
     } else {
       showToast(result.error || 'Booking failed', 'error');
     }
@@ -3940,7 +4039,8 @@ async function handleContact(e) {
     email: form.email.value,
     phone: phone,
     service: form.service.value,
-    message: form.message.value
+    message: form.message.value,
+    captchaToken: getFormCaptchaToken(form)
   };
 
   try {
@@ -3962,6 +4062,7 @@ async function handleContact(e) {
         'Thank you, ' + data.name + '! We will contact you shortly via WhatsApp or Telegram.'
       );
       form.reset();
+      resetTurnstileForForm(form);
     } else {
       showToast(result.error || 'Submission failed', 'error');
     }
@@ -4023,7 +4124,10 @@ async function handlePayment(e) {
       for (const channel of notifyChannels) {
         const notifyRes = await apiFetch('/api/notify', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + authToken
+          },
           body: JSON.stringify({
             type: channel,
             phone: channel === 'whatsapp' ? '+996550412941' : '',

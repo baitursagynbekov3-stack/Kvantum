@@ -27,3 +27,26 @@ test('GET /api/health returns JSON payload', async () => {
     await new Promise((resolve) => server.close(resolve));
   }
 });
+
+
+test('POST /api/notify requires auth', async () => {
+  const server = http.createServer(app);
+
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+
+  try {
+    const address = server.address();
+    const baseUrl = `http://127.0.0.1:${address.port}`;
+    const response = await fetch(`${baseUrl}/api/notify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'whatsapp', phone: '+996500000000', message: 'test' })
+    });
+
+    assert.equal(response.status, 401);
+    const data = await response.json();
+    assert.equal(data.error, 'Access denied');
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+});

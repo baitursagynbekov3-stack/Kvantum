@@ -489,6 +489,9 @@
               <label data-i18n="contact.form.message">Message (optional)</label>
               <textarea name="message" data-i18n-placeholder="contact.form.message_ph" placeholder="Tell us about your goals..." rows="3"></textarea>
             </div>
+            <div class="form-group turnstile-group" data-turnstile-container>
+              <div class="turnstile-widget" data-turnstile-widget></div>
+            </div>
             <button type="submit" class="btn btn-primary btn-block btn-lg" data-i18n="contact.form.submit">Send Request</button>
           </form>
         </div>
@@ -716,6 +719,9 @@
             <label class="radio-card"><input type="radio" name="contact_method" value="telegram"> <span>Telegram</span></label>
           </div>
         </div>
+        <div class="form-group turnstile-group" data-turnstile-container>
+          <div class="turnstile-widget" data-turnstile-widget></div>
+        </div>
         <button type="submit" class="btn btn-primary btn-block btn-lg" data-i18n="consult.submit">Book Subconscious Diagnostics</button>
       </form>
     </div>
@@ -826,7 +832,7 @@
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="./config.js"></script>
-  <script src="./app.js?v=20260312-2"></script>
+  <script src="./app.js?v=20260313-1"></script>
 
   <!-- Kompot.ai Web Chat Widget -->
   <script

@@ -37,6 +37,9 @@ const EMAIL_REPLY_TO = (process.env.EMAIL_REPLY_TO || '').trim();
 const CRM_WEBHOOK_URL = (process.env.CRM_WEBHOOK_URL || process.env.N8N_CONSULTATION_WEBHOOK_URL || '').trim();
 const CRM_WEBHOOK_TOKEN = (process.env.CRM_WEBHOOK_TOKEN || '').trim();
 const CRM_WEBHOOK_TIMEOUT_MS = Math.min(Math.max(parseInt(process.env.CRM_WEBHOOK_TIMEOUT_MS || '5000', 10) || 5000, 1000), 15000);
+const BOOKING_CAPTCHA_SECRET = (process.env.BOOKING_CAPTCHA_SECRET || process.env.TURNSTILE_SECRET_KEY || '').trim();
+const BOOKING_CAPTCHA_REQUIRED = String(process.env.BOOKING_CAPTCHA_REQUIRED || '').trim() === 'true';
+const BOOKING_CAPTCHA_VERIFY_TIMEOUT_MS = Math.min(Math.max(parseInt(process.env.BOOKING_CAPTCHA_VERIFY_TIMEOUT_MS || '5000', 10) || 5000, 1000), 15000);
 const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID || '').trim();
 const googleOAuthClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
@@ -72,6 +75,16 @@ const KNOWLEDGE_CACHE_TTL_MS = 1000 * 60;
 const AUTH_RATE_LIMIT = { windowMs: 15 * 60 * 1000, max: 30, message: 'Too many auth attempts. Please try later.' };
 const RESET_RATE_LIMIT = { windowMs: 15 * 60 * 1000, max: 10, message: 'Too many reset attempts. Please try later.' };
 const CHAT_RATE_LIMIT = { windowMs: 60 * 1000, max: 40, message: 'Too many chat requests. Slow down a bit.' };
+const BOOKING_RATE_LIMIT = {
+  windowMs: Math.min(Math.max(parseInt(process.env.BOOKING_RATE_LIMIT_WINDOW_MS || String(10 * 60 * 1000), 10) || 10 * 60 * 1000, 15 * 1000), 60 * 60 * 1000),
+  max: Math.min(Math.max(parseInt(process.env.BOOKING_RATE_LIMIT_MAX || '8', 10) || 8, 1), 200),
+  message: 'Too many consultation requests. Please try again later.'
+};
+const NOTIFY_RATE_LIMIT = {
+  windowMs: Math.min(Math.max(parseInt(process.env.NOTIFY_RATE_LIMIT_WINDOW_MS || String(5 * 60 * 1000), 10) || 5 * 60 * 1000, 10 * 1000), 60 * 60 * 1000),
+  max: Math.min(Math.max(parseInt(process.env.NOTIFY_RATE_LIMIT_MAX || '20', 10) || 20, 1), 300),
+  message: 'Too many notification attempts. Please try again later.'
+};
 const RESET_CODE_TTL_MS = 10 * 60 * 1000;
 const RESET_CODE_MAX_ATTEMPTS = 5;
 const ALLOW_INSECURE_RESET_CODE_RESPONSE = String(process.env.ALLOW_INSECURE_RESET_CODE_RESPONSE || '').trim() === 'true';
@@ -162,12 +175,23 @@ function createRateLimiter(config) {
   const max = Number(config.max) || 20;
   const message = String(config.message || 'Too many requests');
   const prefix = String(config.prefix || 'global');
+  const keyGenerator = typeof config.keyGenerator === 'function' ? config.keyGenerator : null;
 
   return (req, res, next) => {
     const now = Date.now();
     cleanupRateLimitBuckets(now);
 
-    const key = `${prefix}:${getClientIp(req)}`;
+    let rawKeyPart = getClientIp(req);
+    if (keyGenerator) {
+      try {
+        rawKeyPart = keyGenerator(req);
+      } catch (err) {
+        rawKeyPart = getClientIp(req);
+      }
+    }
+
+    const keyPart = String(rawKeyPart || '').trim() || 'unknown';
+    const key = `${prefix}:${keyPart}`;
     let bucket = rateLimitBuckets.get(key);
 
     if (!bucket || now > bucket.resetAt) {
@@ -193,6 +217,15 @@ function createRateLimiter(config) {
 const authRateLimiter = createRateLimiter({ ...AUTH_RATE_LIMIT, prefix: 'auth' });
 const resetRateLimiter = createRateLimiter({ ...RESET_RATE_LIMIT, prefix: 'reset' });
 const chatRateLimiter = createRateLimiter({ ...CHAT_RATE_LIMIT, prefix: 'chat' });
+const bookingRateLimiter = createRateLimiter({ ...BOOKING_RATE_LIMIT, prefix: 'booking' });
+const notifyRateLimiter = createRateLimiter({
+  ...NOTIFY_RATE_LIMIT,
+  prefix: 'notify',
+  keyGenerator: (req) => {
+    const userId = req && req.user && req.user.id ? String(req.user.id) : 'anon';
+    return `${userId}:${getClientIp(req)}`;
+  }
+});
 
 function normalizeUserRole(role) {
   const normalized = String(role || '').trim().toLowerCase();
@@ -394,6 +427,58 @@ function normalizePhone(phone) {
   const digits = value.slice(1).replace(/\D/g, '');
   if (digits.length < 8 || digits.length > 15) return '';
   return '+' + digits;
+}
+
+async function verifyBookingCaptcha(token, req) {
+  if (!BOOKING_CAPTCHA_REQUIRED && !BOOKING_CAPTCHA_SECRET) {
+    return { ok: true, skipped: true };
+  }
+
+  if (!BOOKING_CAPTCHA_SECRET) {
+    return { ok: false, reason: 'captcha-not-configured' };
+  }
+
+  const normalizedToken = String(token || '').trim();
+  if (!normalizedToken) {
+    return { ok: false, reason: 'captcha-token-missing' };
+  }
+
+  const payload = new URLSearchParams();
+  payload.set('secret', BOOKING_CAPTCHA_SECRET);
+  payload.set('response', normalizedToken);
+
+  const remoteIp = getClientIp(req);
+  if (remoteIp && remoteIp !== 'unknown') {
+    payload.set('remoteip', remoteIp);
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), BOOKING_CAPTCHA_VERIFY_TIMEOUT_MS);
+
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: payload.toString(),
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      return { ok: false, reason: `captcha-upstream-${response.status}` };
+    }
+
+    const data = await response.json().catch(() => ({}));
+    const valid = data && data.success === true;
+    return {
+      ok: valid,
+      reason: valid ? null : 'captcha-invalid',
+      errors: Array.isArray(data['error-codes']) ? data['error-codes'] : []
+    };
+  } catch (err) {
+    return { ok: false, reason: 'captcha-request-failed' };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function isNameLikelyPlaceholder(name, email) {
@@ -2013,12 +2098,25 @@ app.get('/api/profile/payments', authenticateToken, async (req, res) => {
 });
 
 // Book consultation
-app.post('/api/book-consultation', async (req, res) => {
+app.post('/api/book-consultation', bookingRateLimiter, async (req, res) => {
   try {
     const { name, email, phone, service, message } = req.body;
+    const captchaToken = req.body && (
+      req.body.captchaToken ||
+      req.body.turnstileToken ||
+      req.body['cf-turnstile-response']
+    );
     const normalizedName = String(name || '').trim();
     const normalizedEmail = (email || '').trim().toLowerCase();
     const normalizedPhone = normalizePhone(phone);
+
+    const captchaResult = await verifyBookingCaptcha(captchaToken, req);
+    if (!captchaResult.ok) {
+      if (captchaResult.reason === 'captcha-not-configured') {
+        return res.status(503).json({ error: 'Captcha is required but not configured on server' });
+      }
+      return res.status(400).json({ error: 'Captcha verification failed' });
+    }
 
     const authPayload = getOptionalAuthPayload(req);
     let linkedUser = null;
@@ -2983,34 +3081,40 @@ app.post('/api/chat', chatRateLimiter, async (req, res) => {
 });
 
 // Send notification
-app.post('/api/notify', async (req, res) => {
-  const { type, phone, message } = req.body;
+app.post('/api/notify', authenticateToken, notifyRateLimiter, async (req, res) => {
+  const type = String(req.body && req.body.type ? req.body.type : '').trim().toLowerCase();
+  const phone = normalizePhone(req.body && req.body.phone ? req.body.phone : '');
+  const message = String(req.body && req.body.message ? req.body.message : '').trim().slice(0, 1000);
+
+  if (!type || !['whatsapp', 'telegram'].includes(type)) {
+    return res.status(400).json({ error: 'Invalid notification type' });
+  }
 
   if (type === 'whatsapp') {
-    const whatsappUrl = `https://wa.me/${(phone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message || 'Thank you for your purchase at QUANTUM!')}`;
+    if (!phone) {
+      return res.status(400).json({ error: 'Valid phone with country code is required for WhatsApp notification' });
+    }
+
+    const whatsappUrl = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message || 'Thank you for your purchase at QUANTUM!')}`;
     return res.json({ message: 'WhatsApp notification ready', url: whatsappUrl });
   }
 
-  if (type === 'telegram') {
-    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-      return res.json({ message: 'Telegram notification skipped', note: 'Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to enable delivery' });
-    }
-
-    const payload = [
-      'QUANTUM notification',
-      `Phone: ${phone || '-'}`,
-      `Message: ${message || 'Notification from website'}`
-    ].join('\n');
-
-    try {
-      await sendTelegramText(payload);
-      return res.json({ message: 'Telegram notification sent' });
-    } catch (err) {
-      return res.status(502).json({ error: 'Failed to send Telegram notification' });
-    }
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    return res.json({ message: 'Telegram notification skipped', note: 'Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to enable delivery' });
   }
 
-  return res.json({ message: 'Notification sent' });
+  const payload = [
+    'QUANTUM notification',
+    `Phone: ${phone || '-'}`,
+    `Message: ${message || 'Notification from website'}`
+  ].join('\n');
+
+  try {
+    await sendTelegramText(payload);
+    return res.json({ message: 'Telegram notification sent' });
+  } catch (err) {
+    return res.status(502).json({ error: 'Failed to send Telegram notification' });
+  }
 });
 
 if (SERVE_STATIC) {
