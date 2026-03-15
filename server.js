@@ -1471,7 +1471,7 @@ app.post('/api/reset-password/request-code', resetRateLimiter, async (req, res) 
     // Send code to user's email via Resend
     if (resend) {
       try {
-        await resend.emails.send({
+        const { error: resendError } = await resend.emails.send({
           from: RESEND_FROM_EMAIL,
           to: email,
           subject: 'KVANTUM — Password Reset Code',
@@ -1484,8 +1484,14 @@ app.post('/api/reset-password/request-code', resetRateLimiter, async (req, res) 
             </div>
           `
         });
-        delivered = true;
+        if (resendError) {
+          console.error('[Resend] password reset email error:', resendError);
+          delivered = false;
+        } else {
+          delivered = true;
+        }
       } catch (err) {
+        console.error('[Resend] password reset email exception:', err.message);
         delivered = false;
       }
     }
@@ -1998,6 +2004,19 @@ app.get('/api/content/programs', async (req, res) => {
 // Admin check
 app.get('/api/admin/check', authenticateAdmin, (req, res) => {
   res.json({ isAdmin: true });
+});
+
+app.get('/api/admin/users', authenticateAdmin, async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: { id: true, name: true, email: true, phone: true, role: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+      take: 500
+    });
+    res.json({ users });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
 });
 
 // Admin leads list (bookings with search and status filter)

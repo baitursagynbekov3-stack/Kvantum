@@ -2090,9 +2090,13 @@ function switchTab(tab) {
   }
 }
 
+let _mouseDownInsideModal = false;
+document.addEventListener('mousedown', (e) => {
+  _mouseDownInsideModal = !!e.target.closest('.modal');
+});
 document.addEventListener('click', (e) => {
   const overlay = e.target.closest('.modal-overlay');
-  if (overlay && !e.target.closest('.modal')) {
+  if (overlay && !e.target.closest('.modal') && !_mouseDownInsideModal) {
     overlay.classList.remove('active');
     document.body.style.overflow = '';
   }
