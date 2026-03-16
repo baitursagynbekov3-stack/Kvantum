@@ -1340,10 +1340,11 @@ function buildPublicUser(user, role) {
 app.post('/api/register', authRateLimiter, async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
+    const normalizedName = (name || '').trim();
     const normalizedEmail = (email || '').trim().toLowerCase();
     const normalizedPhone = normalizePhone(phone);
 
-    if (!name || !normalizedEmail || !password || !normalizedPhone) {
+    if (!normalizedName || !normalizedEmail || !password || !normalizedPhone) {
       return res.status(400).json({ error: 'Name, valid email, password and phone with country code are required' });
     }
 
@@ -1376,7 +1377,7 @@ app.post('/api/register', authRateLimiter, async (req, res) => {
 
     // Notify n8n of new registration (awaited so Vercel doesn't kill it before it fires)
     try {
-      await fetch('https://n8n-production-5753.up.railway.app/webhook/0c651492-633f-4c72-abe0-17720b8fb6f2', {
+      await fetch(process.env.N8N_REGISTRATION_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
