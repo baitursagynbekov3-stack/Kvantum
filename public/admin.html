@@ -10,14 +10,15 @@
       if (!u || u.role !== 'admin') { window.location.href = './index.html'; }
     } catch(e) { window.location.href = './index.html'; }
   </script>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; }
+    html, body { margin: 0; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e0e0e0; }
 
     /* Layout */
-    .admin-layout { display: flex; min-height: 100vh; }
+    .admin-layout { display: flex; height: 100vh; overflow: hidden; }
     .admin-sidebar {
       width: 240px; background: #111; border-right: 1px solid rgba(255,255,255,0.06);
       padding: 24px 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 10;
@@ -42,7 +43,7 @@
     .sidebar-bottom a { display: block; color: #666; text-decoration: none; font-size: 13px; padding: 6px 0; }
     .sidebar-bottom a:hover { color: #e0e0e0; }
 
-    .admin-main { margin-left: 240px; flex: 1; padding: 32px; min-height: 100vh; }
+    .admin-main { margin-left: 240px; flex: 1; padding: 32px; height: 100vh; overflow-y: auto; }
 
     /* Header */
     .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
@@ -264,13 +265,27 @@
       margin-bottom: 10px;
     }
 
+    /* Prevent background scroll when modal is open */
+    body.modal-open { overflow: hidden; }
+
+    /* Users table */
+    .users-table-wrap { overflow-x: auto; }
+    .users-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .users-table th { text-align: left; padding: 10px 12px; color: #888; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .users-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc; vertical-align: middle; }
+    .users-table tr:last-child td { border-bottom: none; }
+    .users-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .role-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .role-badge.admin { background: rgba(167,139,250,0.18); color: #a78bfa; }
+    .role-badge.user { background: rgba(255,255,255,0.06); color: #888; }
+
     /* Responsive */
     @media (max-width: 768px) {
       .admin-sidebar { width: 60px; padding: 16px 0; }
       .admin-sidebar .logo-text, .admin-sidebar .badge, .sidebar-nav a span, .sidebar-bottom { display: none; }
       .admin-sidebar .logo { padding: 0 12px 16px; }
       .sidebar-nav a { padding: 12px; justify-content: center; }
-      .admin-main { margin-left: 60px; padding: 20px; }
+      .admin-main { margin-left: 60px; padding: 20px; height: 100vh; overflow-y: auto; }
       .admin-cards { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
     }
@@ -353,6 +368,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             <span>Chatbot KB</span>
           </a>
+          <a href="#" data-section="users" onclick="switchSection('users', event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Users</span>
+          </a>
         </nav>
         <div class="sidebar-bottom">
           <a href="./index.html">Back to Site</a>
@@ -366,6 +385,9 @@
             <h1>Dashboard</h1>
             <button class="btn btn-secondary btn-sm" onclick="refreshDashboard()">↻ Refresh</button>
           </div>
+
+          <!-- Last updated timestamp -->
+          <div id="dashLastUpdated" style="font-size:12px;color:#555;margin-bottom:16px;margin-top:-16px;"></div>
 
           <!-- KPI Grid -->
           <div class="kpi-grid">
@@ -480,6 +502,36 @@
               </select>
             </div>
             <div id="chatsList" class="admin-list"></div>
+          </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="section-users" style="display:none">
+          <div class="admin-header">
+            <h1>Registered Users</h1>
+            <button class="btn btn-secondary btn-sm" onclick="loadUsers(true)">↻ Refresh</button>
+          </div>
+          <div class="admin-panel">
+            <div class="admin-toolbar">
+              <input type="search" id="userSearchInput" placeholder="Search by name / email" oninput="onUserSearchChanged()">
+            </div>
+            <div class="users-table-wrap">
+              <table class="users-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Registered</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <tr><td colspan="6" class="admin-loading">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -685,5 +737,6 @@
 
   <script src="./config.js"></script>
   <script src="./admin.js"></script>
+  <script src="./favicon-aurora.js"></script>
 </body>
 </html>
