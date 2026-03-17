@@ -326,7 +326,7 @@ function showToast(message, type) {
 }
 
 // ===== Section switching =====
-let currentSection = 'dashboard';
+let currentSection = 'testimonials';
 
 function switchSection(section, e) {
   if (e) e.preventDefault();
@@ -735,7 +735,6 @@ async function loadLeads(force) {
 
     leads = Array.isArray(data.leads) ? data.leads : [];
     renderLeads();
-    renderDashboard();
 
     if (force) showToast('Leads refreshed', 'info');
   } catch (e) {
@@ -768,21 +767,18 @@ function renderLeads() {
       .map((status) => `<option value="${esc(status)}" ${status === lead.status ? 'selected' : ''}>${esc(status)}</option>`)
       .join('');
 
-    const contactParts = [lead.email, lead.phone].filter(Boolean).map(esc).join(' · ');
-
     return `
       <div class="admin-list-item">
         <div class="admin-list-head">
-          <div>
-            <div class="lead-name">${esc(lead.name || '-')}</div>
-            <div class="lead-contact">${contactParts || '—'}</div>
-          </div>
+          <strong>${esc(lead.name || '-')}</strong>
           ${statusPill(lead.status)}
         </div>
-        ${lead.service ? `<span class="lead-service-badge">${esc(lead.service)}</span>` : ''}
-        ${lead.message ? `<div class="lead-message-preview">"${esc(truncateText(lead.message, 240))}"</div>` : ''}
-        <div class="lead-status-row">
-          <span class="lead-date">Created: ${esc(formatDateTime(lead.createdAt))}</span>
+        <div class="admin-meta">${esc(lead.email || '-')}
+${esc(lead.phone || '-')}
+Service: ${esc(lead.service || '-')}
+Created: ${esc(formatDateTime(lead.createdAt))}</div>
+        ${lead.message ? `<div class="admin-meta">${esc(truncateText(lead.message, 320))}</div>` : ''}
+        <div class="admin-toolbar" style="margin-bottom:0;">
           <select onchange="updateLeadStatus(${Number(lead.id)}, this.value)">${statusOptions}</select>
         </div>
       </div>
@@ -833,7 +829,6 @@ async function loadChats(force) {
 
     chats = Array.isArray(data.chats) ? data.chats : [];
     renderChats();
-    renderDashboard();
 
     if (activeChat && activeChat.id) {
       const refreshed = chats.find((item) => Number(item.id) === Number(activeChat.id));
@@ -873,26 +868,26 @@ function renderChats() {
       .map((status) => `<option value="${esc(status)}" ${status === chat.leadStatus ? 'selected' : ''}>${esc(status)}</option>`)
       .join('');
 
-    const name = (chat.lead && chat.lead.name) || '';
-    const email = (chat.lead && chat.lead.email) || '';
-    const phone = (chat.lead && chat.lead.phone) || '';
-    const service = (chat.lead && chat.lead.service) || '';
-    const contactParts = [email, phone].filter(Boolean).map(esc).join(' · ');
-    const lastMessage = chat.lastMessage && chat.lastMessage.content ? truncateText(chat.lastMessage.content, 200) : '';
+    const leadMeta = [
+      chat.lead && chat.lead.name ? `Lead: ${chat.lead.name}` : '',
+      chat.lead && chat.lead.email ? chat.lead.email : '',
+      chat.lead && chat.lead.phone ? chat.lead.phone : '',
+      chat.lead && chat.lead.service ? `Service: ${chat.lead.service}` : ''
+    ].filter(Boolean).join('\n');
+
+    const lastMessage = chat.lastMessage && chat.lastMessage.content ? truncateText(chat.lastMessage.content, 220) : '';
 
     return `
       <div class="admin-list-item">
         <div class="admin-list-head">
-          <div>
-            <div class="lead-name">${name ? esc(name) : 'Session ' + esc(chat.sessionId || String(chat.id))}</div>
-            <div class="lead-contact">${contactParts || '—'}</div>
-          </div>
+          <strong>Session ${esc(chat.sessionId || String(chat.id))}</strong>
           ${statusPill(chat.leadStatus)}
         </div>
-        ${service ? `<span class="lead-service-badge">${esc(service)}</span>` : ''}
-        ${lastMessage ? `<div class="lead-message-preview">${esc(lastMessage)}</div>` : ''}
-        <div class="lead-status-row">
-          <span class="lead-date">${esc(String(chat.messageCount || 0))} msgs · Updated: ${esc(formatDateTime(chat.updatedAt))}</span>
+        <div class="admin-meta">${esc(leadMeta || 'No lead data yet')}
+Messages: ${esc(String(chat.messageCount || 0))}
+Updated: ${esc(formatDateTime(chat.updatedAt))}</div>
+        ${lastMessage ? `<div class="admin-meta">Last: ${esc(lastMessage)}</div>` : ''}
+        <div class="admin-toolbar" style="margin-bottom:0;">
           <select id="chat-status-${Number(chat.id)}">${statusOptions}</select>
           <button class="btn btn-secondary btn-sm" onclick="saveInlineChatStatus(${Number(chat.id)})">Save</button>
           <button class="btn btn-primary btn-sm" onclick="openChatViewer(${Number(chat.id)})">Open Chat</button>
@@ -1069,58 +1064,6 @@ async function saveChatbotKnowledge() {
   } catch (e) {
     showToast('Failed to save chatbot knowledge', 'error');
   }
-}
-
-// ================================================================
-// DASHBOARD
-// ================================================================
-function renderDashboard() {
-  const totalLeads = leads.length;
-  const pendingLeads = leads.filter(l => ['pending', 'new', 'in_progress'].includes(l.status)).length;
-  const doneLeads = leads.filter(l => l.status === 'done').length;
-  const activeChatsCount = chats.filter(c => ['open', 'collecting'].includes(c.leadStatus)).length;
-
-  function setKpi(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = value;
-  }
-
-  setKpi('kpiTotalLeads', totalLeads);
-  setKpi('kpiPendingLeads', pendingLeads);
-  setKpi('kpiDoneLeads', doneLeads);
-  setKpi('kpiActiveChats', activeChatsCount);
-
-  // Recent leads preview (last 5)
-  const root = document.getElementById('dashRecentLeads');
-  if (!root) return;
-
-  const recent = leads.slice(0, 5);
-  if (!recent.length) {
-    root.innerHTML = '<div class="empty-state"><p>No leads yet — they will appear here once you start getting inquiries.</p></div>';
-    return;
-  }
-
-  root.innerHTML = recent.map((lead) => {
-    const contactParts = [lead.email, lead.phone].filter(Boolean).map(esc).join(' · ');
-    return `
-      <div class="admin-list-item">
-        <div class="admin-list-head">
-          <div>
-            <div class="lead-name">${esc(lead.name || '-')}</div>
-            <div class="lead-contact">${contactParts || '—'}</div>
-          </div>
-          ${statusPill(lead.status)}
-        </div>
-        ${lead.service ? `<span class="lead-service-badge">${esc(lead.service)}</span>` : ''}
-        <div class="lead-date">Created: ${esc(formatDateTime(lead.createdAt))}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function refreshDashboard() {
-  loadLeads(false);
-  loadChats(false);
 }
 
 // ================================================================

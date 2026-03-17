@@ -15,10 +15,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e0e0e0; }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; }
 
     /* Layout */
-    .admin-layout { display: flex; height: 100vh; overflow: hidden; }
+    .admin-layout { display: flex; min-height: 100vh; }
     .admin-sidebar {
       width: 240px; background: #111; border-right: 1px solid rgba(255,255,255,0.06);
       padding: 24px 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 10;
@@ -43,7 +43,7 @@
     .sidebar-bottom a { display: block; color: #666; text-decoration: none; font-size: 13px; padding: 6px 0; }
     .sidebar-bottom a:hover { color: #e0e0e0; }
 
-    .admin-main { margin-left: 240px; flex: 1; padding: 32px; height: 100vh; overflow-y: auto; }
+    .admin-main { margin-left: 240px; flex: 1; padding: 32px; min-height: 100vh; }
 
     /* Header */
     .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
@@ -265,56 +265,16 @@
       margin-bottom: 10px;
     }
 
-    /* Prevent background scroll when modal is open */
-    body.modal-open { overflow: hidden; }
-
-    /* Users table */
-    .users-table-wrap { overflow-x: auto; }
-    .users-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .users-table th { text-align: left; padding: 10px 12px; color: #888; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .users-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc; vertical-align: middle; }
-    .users-table tr:last-child td { border-bottom: none; }
-    .users-table tr:hover td { background: rgba(255,255,255,0.02); }
-    .role-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-    .role-badge.admin { background: rgba(167,139,250,0.18); color: #a78bfa; }
-    .role-badge.user { background: rgba(255,255,255,0.06); color: #888; }
-
     /* Responsive */
     @media (max-width: 768px) {
       .admin-sidebar { width: 60px; padding: 16px 0; }
       .admin-sidebar .logo-text, .admin-sidebar .badge, .sidebar-nav a span, .sidebar-bottom { display: none; }
       .admin-sidebar .logo { padding: 0 12px 16px; }
       .sidebar-nav a { padding: 12px; justify-content: center; }
-      .admin-main { margin-left: 60px; padding: 20px; height: 100vh; overflow-y: auto; }
+      .admin-main { margin-left: 60px; padding: 20px; }
       .admin-cards { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
     }
-
-    /* ===== KPI Cards ===== */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
-    .kpi-card { background: #1a1a1a; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px; transition: border-color 0.2s; }
-    .kpi-card:hover { border-color: rgba(167,139,250,0.3); }
-    .kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .kpi-icon svg { width: 22px; height: 22px; }
-    .kpi-icon-leads { background: rgba(167,139,250,0.15); color: #a78bfa; }
-    .kpi-icon-chats { background: rgba(59,130,246,0.15); color: #60a5fa; }
-    .kpi-icon-pending { background: rgba(251,191,36,0.15); color: #fbbf24; }
-    .kpi-icon-done { background: rgba(52,211,153,0.15); color: #34d399; }
-    .kpi-label { font-size: 12px; color: #888; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-    .kpi-value { font-size: 30px; font-weight: 700; color: #fff; line-height: 1; }
-    .kpi-sub { font-size: 11px; color: #666; margin-top: 4px; }
-
-    /* ===== Section Title ===== */
-    .section-title { font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.8px; margin: 0 0 12px; }
-
-    /* ===== Improved Lead/Chat Cards ===== */
-    .lead-name { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 2px; }
-    .lead-contact { font-size: 12px; color: #777; }
-    .lead-service-badge { display: inline-block; background: rgba(167,139,250,0.1); color: #a78bfa; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 600; margin: 6px 0; }
-    .lead-message-preview { font-size: 12px; color: #777; font-style: italic; margin: 6px 0; line-height: 1.4; }
-    .lead-date { font-size: 11px; color: #555; }
-    .lead-status-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-    .lead-status-row select { flex: 1; min-width: 140px; background: #0f0f0f; border: 1px solid rgba(255,255,255,0.12); color: #e0e0e0; border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -335,16 +295,12 @@
     <div class="admin-layout" id="adminLayout" style="display:none">
       <aside class="admin-sidebar">
         <a href="./index.html" class="logo">
-          <span class="logo-icon" data-i18n="logo.icon">Q</span>
+          <span class="logo-icon">Q</span>
           <span class="logo-text" data-i18n="logo.text">QUANTUM</span>
           <span class="badge">Admin</span>
         </a>
         <nav class="sidebar-nav">
-          <a href="#" class="active" data-section="dashboard" onclick="switchSection('dashboard', event)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-            <span>Dashboard</span>
-          </a>
-          <a href="#" data-section="testimonials" onclick="switchSection('testimonials', event)">
+          <a href="#" class="active" data-section="testimonials" onclick="switchSection('testimonials', event)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
             <span>Testimonials</span>
           </a>
@@ -368,10 +324,6 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             <span>Chatbot KB</span>
           </a>
-          <a href="#" data-section="users" onclick="switchSection('users', event)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span>Users</span>
-          </a>
         </nav>
         <div class="sidebar-bottom">
           <a href="./index.html">Back to Site</a>
@@ -379,63 +331,8 @@
       </aside>
 
       <main class="admin-main">
-        <!-- Dashboard Section -->
-        <div id="section-dashboard">
-          <div class="admin-header">
-            <h1>Dashboard</h1>
-            <button class="btn btn-secondary btn-sm" onclick="refreshDashboard()">↻ Refresh</button>
-          </div>
-
-          <!-- Last updated timestamp -->
-          <div id="dashLastUpdated" style="font-size:12px;color:#555;margin-bottom:16px;margin-top:-16px;"></div>
-
-          <!-- KPI Grid -->
-          <div class="kpi-grid">
-            <div class="kpi-card">
-              <div class="kpi-icon kpi-icon-leads">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              </div>
-              <div>
-                <div class="kpi-label">Total Leads</div>
-                <div class="kpi-value" id="kpiTotalLeads">—</div>
-              </div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon kpi-icon-pending">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              </div>
-              <div>
-                <div class="kpi-label">Open / Pending</div>
-                <div class="kpi-value" id="kpiPendingLeads">—</div>
-              </div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon kpi-icon-done">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              </div>
-              <div>
-                <div class="kpi-label">Done</div>
-                <div class="kpi-value" id="kpiDoneLeads">—</div>
-              </div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-icon kpi-icon-chats">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6l-4 4v-4H5a2 2 0 0 1-2-2z"/></svg>
-              </div>
-              <div>
-                <div class="kpi-label">Active Chats</div>
-                <div class="kpi-value" id="kpiActiveChats">—</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recent Leads Preview -->
-          <div class="section-title">Recent Leads</div>
-          <div id="dashRecentLeads" class="admin-list"></div>
-        </div>
-
         <!-- Testimonials Section -->
-        <div id="section-testimonials" style="display:none">
+        <div id="section-testimonials">
           <div class="admin-header">
             <h1>Testimonials</h1>
             <button class="btn btn-primary" onclick="openTestimonialForm()">+ Add Testimonial</button>
@@ -502,36 +399,6 @@
               </select>
             </div>
             <div id="chatsList" class="admin-list"></div>
-          </div>
-        </div>
-
-        <!-- Users Section -->
-        <div id="section-users" style="display:none">
-          <div class="admin-header">
-            <h1>Registered Users</h1>
-            <button class="btn btn-secondary btn-sm" onclick="loadUsers(true)">↻ Refresh</button>
-          </div>
-          <div class="admin-panel">
-            <div class="admin-toolbar">
-              <input type="search" id="userSearchInput" placeholder="Search by name / email" oninput="onUserSearchChanged()">
-            </div>
-            <div class="users-table-wrap">
-              <table class="users-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Role</th>
-                    <th>Registered</th>
-                  </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                  <tr><td colspan="6" class="admin-loading">Loading...</td></tr>
-                </tbody>
-              </table>
-            </div>
           </div>
         </div>
 
