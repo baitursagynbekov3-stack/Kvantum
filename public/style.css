@@ -1419,6 +1419,47 @@ body.dark-mode .phone-input-group .country-code-select {
   margin-bottom: 10px;
   font-size: 1rem;
 }
+.admin-section-card {
+  border: 1px solid #ececec;
+  border-radius: var(--radius);
+  padding: 14px;
+  background: #fafafa;
+}
+.admin-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.admin-section-head h3 {
+  margin: 0;
+}
+.admin-payments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.admin-payment-card {
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+}
+.admin-payment-card strong {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+.admin-payment-card span {
+  color: #222;
+  font-size: 0.86rem;
+}
+.admin-payment-card small {
+  color: var(--gray-500);
+  font-size: 0.78rem;
+}
 .admin-table-wrap {
   border: 1px solid #ececec;
   border-radius: var(--radius);

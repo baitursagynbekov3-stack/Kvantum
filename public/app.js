@@ -1828,6 +1828,7 @@ function renderAdminOverview(data) {
     payment.user && payment.user.name
   ]));
 
+  const recentPayments = payments.slice(0, 6);
   const statusOptions = ['pending', 'new', 'in_progress', 'done', 'cancelled'];
 
   panelBody.innerHTML = `
@@ -1852,6 +1853,23 @@ function renderAdminOverview(data) {
       <div class="admin-stat-card"><span class="admin-stat-label">${labels.bookings}</span><strong>${Number(bookings.length).toLocaleString()}</strong></div>
       <div class="admin-stat-card"><span class="admin-stat-label">${labels.payments}</span><strong>${Number(payments.length).toLocaleString()}</strong></div>
     </div>
+
+    <section class="admin-section admin-section-card admin-payments-block">
+      <div class="admin-section-head">
+        <h3>${labels.paymentsTitle} (${Number(totals.payments || paymentsRaw.length).toLocaleString()})</h3>
+      </div>
+      <div class="admin-payments-grid">
+        ${recentPayments.length
+          ? recentPayments.map((payment) => {
+              const amount = Number(payment.amount);
+              const amountLabel = Number.isFinite(amount) ? amount.toLocaleString() : (payment.amount || '-');
+              const userLabel = payment.user && (payment.user.name || payment.user.email) ? (payment.user.name || payment.user.email) : '-';
+              const productLabel = payment.productName || payment.productId || '-';
+              return `<article class="admin-payment-card"><strong>${escapeHtml(String(amountLabel))} ${escapeHtml(payment.currency || '')}</strong><span>${escapeHtml(productLabel)}</span><small>${escapeHtml(userLabel)} • ${escapeHtml(formatAdminDate(payment.createdAt))}</small></article>`;
+            }).join('')
+          : `<p class="admin-empty">${escapeHtml(labels.emptyPayments)}</p>`}
+      </div>
+    </section>
 
     <section class="admin-section">
       <h3>${labels.usersTitle} (${Number(totals.users || usersRaw.length).toLocaleString()})</h3>
@@ -1923,35 +1941,6 @@ function renderAdminOverview(data) {
       </div>
     </section>
 
-    <section class="admin-section">
-      <h3>${labels.paymentsTitle} (${Number(totals.payments || paymentsRaw.length).toLocaleString()})</h3>
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>${labels.paymentProduct}</th>
-              <th>${labels.paymentAmount}</th>
-              <th>${labels.paymentClient}</th>
-              <th>${labels.createdAt}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${buildAdminRows(
-              payments,
-              (payment) => {
-                const amount = Number(payment.amount);
-                const amountLabel = Number.isFinite(amount) ? amount.toLocaleString() : (payment.amount || '-');
-                const userLabel = payment.user && payment.user.email ? payment.user.email : '-';
-                return `<tr><td>${escapeHtml(payment.id || '-')}</td><td>${escapeHtml(payment.productName || payment.productId || '-')}</td><td>${escapeHtml(String(amountLabel))} ${escapeHtml(payment.currency || '')}</td><td>${escapeHtml(userLabel)}</td><td>${escapeHtml(formatAdminDate(payment.createdAt))}</td></tr>`;
-              },
-              5,
-              labels.emptyPayments
-            )}
-          </tbody>
-        </table>
-      </div>
-    </section>
   `;
 }
 
@@ -2006,7 +1995,7 @@ async function refreshAdminOverview() {
   }
 }
 
-function openAdminDashboard() {
+async function openAdminDashboard() {
   const dropdown = document.getElementById('userDropdown');
   if (dropdown) dropdown.style.display = 'none';
 
@@ -2022,7 +2011,14 @@ function openAdminDashboard() {
     return;
   }
 
-  window.location.href = './admin.html';
+  const panelBody = ensureAdminModalExists();
+  if (!panelBody) {
+    showToast(currentLang === 'ru' ? 'Не удалось открыть дашборд.' : 'Unable to open dashboard.', 'error');
+    return;
+  }
+
+  openModal('adminModal');
+  await refreshAdminOverview();
 }
 
 // ===== Modals =====
