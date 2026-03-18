@@ -190,6 +190,21 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(196,30,30,0.08);
 }
+input[type="radio"],
+input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  accent-color: var(--primary);
+}
+input[type="radio"]:focus,
+input[type="checkbox"]:focus {
+  border: 0;
+  box-shadow: none;
+}
 .container { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--container-gutter); }
 
 /* ===== Typography ===== */
@@ -1325,16 +1340,21 @@ body.dark-mode .video-reviews-title {
 }
 .radio-group {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 14px;
   margin-top: 8px;
 }
 .radio-group label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-weight: 500;
   cursor: pointer;
   font-size: 0.9rem;
+}
+.radio-group input[type="radio"] {
+  flex: 0 0 auto;
+  margin: 0;
 }
 .turnstile-group {
   display: flex;
