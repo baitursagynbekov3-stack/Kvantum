@@ -661,7 +661,87 @@ input:focus, select:focus, textarea:focus {
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 700;
+  transition: background 0.2s, color 0.2s;
 }
+
+/* Credential buttons */
+.credential-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  padding: 10px 12px;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  color: inherit;
+  font-family: inherit;
+}
+.credential-btn:hover {
+  background: rgba(196,30,30,0.05);
+  border-color: rgba(196,30,30,0.2);
+  transform: translateX(4px);
+}
+.credential-btn:hover .credential-check {
+  background: var(--primary);
+  color: #fff;
+}
+.credential-arrow {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: var(--primary);
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.credential-btn:hover .credential-arrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+/* Credential modals */
+.cred-modal {
+  max-width: 560px;
+  padding: 48px 48px 44px;
+  position: relative;
+}
+.cred-modal-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--primary);
+  opacity: 0.5;
+  margin-bottom: 14px;
+  font-family: var(--font-display);
+}
+.cred-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  line-height: 1.25;
+  margin-bottom: 20px;
+}
+.cred-modal-divider {
+  width: 40px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+  margin-bottom: 24px;
+}
+.cred-modal-body {
+  font-size: 0.97rem;
+  line-height: 1.85;
+  color: var(--gray-600);
+}
+@media (max-width: 600px) {
+  .cred-modal {
+    padding: 36px 24px 32px;
+  }
+  .cred-modal-title {
+    font-size: 1.25rem;
+  }
+}
+
 .about-quote {
   font-family: var(--font-display);
   font-style: italic;

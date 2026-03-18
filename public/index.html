@@ -148,18 +148,21 @@
           <h2 class="section-title" data-i18n-html="about.title">Altynai Eshinbekova &mdash; <span class="text-gradient">Guiding Your Transformation</span></h2>
           <p class="about-text" data-i18n="about.text">I work deeply, ecologically, and deliver real results. I personally accompany each client to their goal. My approach combines subconscious work, energy field alignment, and leader state development.</p>
           <div class="about-credentials">
-            <div class="credential">
+            <button class="credential credential-btn" onclick="openModal('credModal1')">
               <div class="credential-check">&#10003;</div>
               <span data-i18n="about.cred1.title">Subconscious &amp; Quantum Field Specialist</span>
-            </div>
-            <div class="credential">
+              <span class="credential-arrow">&#8594;</span>
+            </button>
+            <button class="credential credential-btn" onclick="openModal('credModal2')">
               <div class="credential-check">&#10003;</div>
               <span data-i18n="about.cred2.title">NLP Master</span>
-            </div>
-            <div class="credential">
+              <span class="credential-arrow">&#8594;</span>
+            </button>
+            <button class="credential credential-btn" onclick="openModal('credModal3')">
               <div class="credential-check">&#10003;</div>
               <span data-i18n="about.cred3.title">Master of Deep Analysis Sessions</span>
-            </div>
+              <span class="credential-arrow">&#8594;</span>
+            </button>
           </div>
           <blockquote class="about-quote" data-i18n="about.quote">"You are in the right place at the right time."</blockquote>
         </div>
@@ -748,6 +751,39 @@
         <button type="submit" class="btn btn-primary btn-block" data-i18n="reset.submit">Reset Password</button>
         <p class="form-note"><a href="#" onclick="closeModal('resetModal'); openModal('loginModal'); switchTab('login'); return false;" data-i18n="reset.back_login">Back to login</a></p>
       </form>
+    </div>
+  </div>
+
+  <!-- Credential Modal 1: Subconscious & Quantum Field Specialist -->
+  <div class="modal-overlay" id="credModal1">
+    <div class="modal cred-modal">
+      <button class="modal-close" onclick="closeModal('credModal1')">&times;</button>
+      <div class="cred-modal-tag">01</div>
+      <h2 class="cred-modal-title">Subconscious &amp; Quantum Field Specialist</h2>
+      <div class="cred-modal-divider"></div>
+      <p class="cred-modal-body">Altynai works at the deepest level of human psychology — where the subconscious mind and the quantum energy field intersect. Her approach goes beyond surface-level coaching by targeting the root cause of what holds people back: the invisible programs running silently beneath conscious awareness. Through her signature "Brain Charge" method, she guides clients to reprogram their thoughts, feelings, and internal states — because when those shift, everything in life follows. Relationships improve, finances open up, and life direction becomes clear. She works through the subconscious, the energetic field, and the state of a leader — and stays with clients until real results appear.</p>
+    </div>
+  </div>
+
+  <!-- Credential Modal 2: NLP Master -->
+  <div class="modal-overlay" id="credModal2">
+    <div class="modal cred-modal">
+      <button class="modal-close" onclick="closeModal('credModal2')">&times;</button>
+      <div class="cred-modal-tag">02</div>
+      <h2 class="cred-modal-title">NLP Master</h2>
+      <div class="cred-modal-divider"></div>
+      <p class="cred-modal-body">As a certified Master of NLP, Altynai brings over 30 NLP practices into her work with entrepreneurs and her mentorship program. She uses the tools of Neuro-Linguistic Programming not as theory but as live, hands-on techniques — applied directly in sessions to break limiting patterns, rewire language-based beliefs, and create fast, measurable shifts in how clients think and behave. Her NLP mastery forms the backbone of her deep analysis sessions and is passed on to students in her mentorship track, where she trains others to read emotional fields, clear subconscious blocks, and facilitate transformation professionally.</p>
+    </div>
+  </div>
+
+  <!-- Credential Modal 3: Master of Deep Analysis Sessions -->
+  <div class="modal-overlay" id="credModal3">
+    <div class="modal cred-modal">
+      <button class="modal-close" onclick="closeModal('credModal3')">&times;</button>
+      <div class="cred-modal-tag">03</div>
+      <h2 class="cred-modal-title">Master of Deep Analysis Sessions</h2>
+      <div class="cred-modal-divider"></div>
+      <p class="cred-modal-body">Altynai's deep analysis sessions are her most powerful one-on-one format — not standard coaching conversations, but precise, structured dives into the root causes behind a person's stuck patterns. Drawing on her expertise in the subconscious, quantum field work, and NLP, she rapidly identifies where a client's inner blocks originate — whether in childhood programming, family system dynamics, or inherited generational scenarios. Her intensives work directly with separation from parental patterns, release of foreign life scripts, restoration of healthy hierarchy, and removal of childhood blocks. Clients don't just gain insight — they leave with a fundamentally different internal state and a clear path forward. She works only with entrepreneurs, and only after a free consultation to ensure the right fit.</p>
     </div>
   </div>
 
