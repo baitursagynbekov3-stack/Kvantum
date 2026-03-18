@@ -8,6 +8,7 @@ let adminFilters = {
   search: '',
   bookingStatus: 'all'
 };
+let adminSearchRenderTimer = null;
 
 // Use external API in static hosting (GitHub Pages) via public/config.js
 const API_BASE_URL = (window.QUANTUM_API_BASE_URL || '').trim().replace(/\/$/, '');
@@ -1748,7 +1749,16 @@ function matchesAdminSearch(query, values) {
 
 function setAdminSearch(value) {
   adminFilters.search = String(value || '');
-  if (adminOverviewData) renderAdminOverview(adminOverviewData);
+  if (!adminOverviewData) return;
+
+  if (adminSearchRenderTimer) {
+    clearTimeout(adminSearchRenderTimer);
+  }
+
+  adminSearchRenderTimer = setTimeout(() => {
+    renderAdminOverview(adminOverviewData);
+    adminSearchRenderTimer = null;
+  }, 120);
 }
 
 function setAdminBookingStatus(value) {
@@ -1759,6 +1769,10 @@ function setAdminBookingStatus(value) {
 function clearAdminFilters() {
   adminFilters.search = '';
   adminFilters.bookingStatus = 'all';
+  if (adminSearchRenderTimer) {
+    clearTimeout(adminSearchRenderTimer);
+    adminSearchRenderTimer = null;
+  }
   if (adminOverviewData) renderAdminOverview(adminOverviewData);
 }
 
@@ -1814,6 +1828,11 @@ async function saveBookingAdmin(bookingId) {
 function renderAdminOverview(data) {
   const panelBody = document.getElementById('adminPanelBody');
   if (!panelBody) return;
+
+  const activeEl = document.activeElement;
+  const wasSearchFocused = Boolean(activeEl && activeEl.classList && activeEl.classList.contains('admin-filter-input'));
+  const searchCursorStart = wasSearchFocused ? activeEl.selectionStart : null;
+  const searchCursorEnd = wasSearchFocused ? activeEl.selectionEnd : null;
 
   const labels = getAdminLabels();
   const totals = data && data.totals ? data.totals : {};
@@ -1973,6 +1992,21 @@ function renderAdminOverview(data) {
     </section>
 
   `;
+
+  if (wasSearchFocused) {
+    const nextSearchInput = panelBody.querySelector('.admin-filter-input');
+    if (nextSearchInput) {
+      nextSearchInput.focus();
+      const valueLength = nextSearchInput.value.length;
+      const start = typeof searchCursorStart === 'number' ? Math.min(searchCursorStart, valueLength) : valueLength;
+      const end = typeof searchCursorEnd === 'number' ? Math.min(searchCursorEnd, valueLength) : start;
+      try {
+        nextSearchInput.setSelectionRange(start, end);
+      } catch (err) {
+        // no-op for unsupported input states
+      }
+    }
+  }
 }
 
 function ensureAdminModalExists() {
