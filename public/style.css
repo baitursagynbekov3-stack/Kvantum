@@ -550,23 +550,6 @@ input[type="checkbox"]:focus {
   justify-content: center;
   flex-wrap: wrap;
 }
-.hero-link-row {
-  margin-top: 12px;
-  text-align: center;
-}
-.hero-telegram-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: rgba(255,255,255,0.86);
-  font-size: 0.92rem;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.hero-telegram-link:hover {
-  color: #ffffff;
-}
 .scroll-indicator {
   position: absolute;
   bottom: 40px;
