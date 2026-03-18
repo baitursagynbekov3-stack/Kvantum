@@ -59,6 +59,14 @@
   function render(ts) {
     const t = ts / 1000;
 
+    ctx.clearRect(0, 0, SIZE, SIZE);
+
+    // Clip everything to a circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(CX, CY, SIZE / 2, 0, Math.PI * 2);
+    ctx.clip();
+
     // Deep black background
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, SIZE, SIZE);
@@ -93,6 +101,7 @@
     ctx.arc(CX, CY, 7 * pulse, 0, Math.PI * 2);
     ctx.fillStyle = orb;
     ctx.fill();
+    ctx.restore();
 
     // Update favicon
     let link = document.querySelector("link[rel~='icon']");
