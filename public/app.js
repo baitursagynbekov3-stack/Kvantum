@@ -1519,6 +1519,11 @@ function updateLangButton() {
 let cachedTestimonials = null;
 let cachedPrograms = null;
 
+function getDefaultPrograms() {
+  const defaults = window.QUANTUM_DEFAULT_PROGRAMS;
+  return Array.isArray(defaults) ? defaults.map((item) => ({ ...item })) : [];
+}
+
 async function loadSiteContent() {
   try {
     const [tRes, pRes] = await Promise.all([
@@ -1533,15 +1538,16 @@ async function loadSiteContent() {
       renderTestimonials(testimonials);
     }
 
-    if (Array.isArray(programs)) {
+    if (Array.isArray(programs) && programs.length > 0) {
       cachedPrograms = programs;
       renderPrograms(programs);
     } else {
-      renderPrograms([]);
+      cachedPrograms = getDefaultPrograms();
+      renderPrograms(cachedPrograms);
     }
   } catch (err) {
-    // No fallback stubs for programs: keep pricing grid empty on fetch errors.
-    renderPrograms([]);
+    cachedPrograms = getDefaultPrograms();
+    renderPrograms(cachedPrograms);
   }
 }
 

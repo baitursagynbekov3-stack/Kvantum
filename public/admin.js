@@ -696,6 +696,31 @@ async function deleteTestimonial(id) {
 // ================================================================
 // PROGRAMS
 // ================================================================
+function getDefaultPrograms() {
+  const defaults = window.QUANTUM_DEFAULT_PROGRAMS;
+  return Array.isArray(defaults)
+    ? defaults.map((item) => JSON.parse(JSON.stringify(item)))
+    : [];
+}
+
+function getProgramPriceDefaults(price, currency) {
+  if (price > 0) {
+    return {
+      priceAmount: currency === 'USD' ? '$' + price.toLocaleString() : price.toLocaleString(),
+      priceCurrency: currency === 'USD' ? '' : currency,
+      priceAmountRu: currency === 'USD' ? '$' + price.toLocaleString() : price.toLocaleString(),
+      priceCurrencyRu: currency === 'USD' ? '' : currency
+    };
+  }
+
+  return {
+    priceAmount: '',
+    priceCurrency: '',
+    priceAmountRu: '',
+    priceCurrencyRu: ''
+  };
+}
+
 let programs = [];
 
 async function loadPrograms() {
@@ -718,15 +743,14 @@ function renderProgramCards() {
   if (!ordered.length) {
     el.innerHTML = `<div class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-      <p>No programs yet. Add your first one!</p>
+      <p>No programs yet. Restore the standard program set or add your first one manually.</p>
+      <button class="btn btn-primary" onclick="restoreDefaultPrograms()">Restore default programs</button>
     </div>`;
     return;
   }
 
   el.innerHTML = ordered.map((p, index) => {
-    const price = p.priceNumeric || 0;
-    const cur = p.purchaseCurrency || 'KGS';
-    const priceText = price > 0 ? (cur === 'USD' ? '$' + price.toLocaleString() : price.toLocaleString() + ' ' + cur) : 'Contact for price';
+    const priceText = [p.priceAmount || '', p.priceCurrency || ''].filter(Boolean).join(' ').trim() || 'Contact for price';
     const allFeatures = Array.isArray(p.features) ? p.features : [];
     const features = allFeatures.slice(0, 3);
     const orderValue = parseOrder(p.order, index + 1);
@@ -748,17 +772,31 @@ function renderProgramCards() {
 }
 
 function openProgramForm(item) {
+  const basePrice = item ? (item.priceNumeric || 0) : 0;
+  const baseCurrency = item ? item.purchaseCurrency || 'KGS' : 'KGS';
+  const priceDefaults = getProgramPriceDefaults(basePrice, baseCurrency);
+  const defaultActionType = item ? item.actionType || 'purchase' : 'purchase';
+
   document.getElementById('programModalTitle').textContent = item ? 'Edit Program' : 'Add Program';
   document.getElementById('pId').value = item ? item._id : '';
   document.getElementById('pName').value = item ? item.name : '';
   document.getElementById('pNameRu').value = item ? item.name_ru || '' : '';
   document.getElementById('pTagline').value = item ? item.tagline || '' : '';
-  document.getElementById('pPriceNumeric').value = item ? item.priceNumeric || 0 : 0;
-  document.getElementById('pPurchaseCurrency').value = item ? item.purchaseCurrency || 'KGS' : 'KGS';
+  document.getElementById('pTaglineRu').value = item ? item.tagline_ru || '' : '';
+  document.getElementById('pTierLabel').value = item ? item.tierLabel || '' : '';
+  document.getElementById('pTierLabelRu').value = item ? item.tierLabel_ru || '' : '';
+  document.getElementById('pPriceNumeric').value = basePrice;
+  document.getElementById('pPurchaseCurrency').value = baseCurrency;
+  document.getElementById('pPriceAmount').value = item ? item.priceAmount || '' : priceDefaults.priceAmount;
+  document.getElementById('pPriceCurrency').value = item ? item.priceCurrency || '' : priceDefaults.priceCurrency;
+  document.getElementById('pPriceAmountRu').value = item ? item.priceAmount_ru || '' : priceDefaults.priceAmountRu;
+  document.getElementById('pPriceCurrencyRu').value = item ? item.priceCurrency_ru || '' : priceDefaults.priceCurrencyRu;
   document.getElementById('pFeatures').value = item ? (item.features || []).join('\n') : '';
   document.getElementById('pFeaturesRu').value = item ? (item.features_ru || []).join('\n') : '';
-  document.getElementById('pActionType').value = item ? item.actionType || 'purchase' : 'purchase';
+  document.getElementById('pActionType').value = defaultActionType;
   document.getElementById('pPopular').value = item ? String(item.popular || false) : 'false';
+  document.getElementById('pButtonText').value = item ? item.buttonText || '' : (defaultActionType === 'purchase' ? 'Get Started' : 'Contact Us');
+  document.getElementById('pButtonTextRu').value = item ? item.buttonText_ru || '' : (defaultActionType === 'purchase' ? 'Начать' : 'Связаться');
   document.getElementById('pOrder').value = item ? parseOrder(item.order, 0) : programs.length + 1;
   openAdminModal('programModal');
 }
@@ -783,32 +821,32 @@ async function moveProgram(id, direction) {
 async function saveProgram(e) {
   e.preventDefault();
   const id = document.getElementById('pId').value;
+  const existingItem = id ? programs.find((item) => item._id === id) : null;
   const price = parseFloat(document.getElementById('pPriceNumeric').value) || 0;
   const currency = document.getElementById('pPurchaseCurrency').value;
   const popular = document.getElementById('pPopular').value === 'true';
   const actionType = document.getElementById('pActionType').value;
-
-  // Auto-derive display fields from simplified inputs
-  const priceDisplay = price > 0 ? (currency === 'USD' ? '$' + price.toLocaleString() : price.toLocaleString()) : '';
-  const currencyLabel = currency === 'USD' ? '' : currency;
+  const priceDefaults = getProgramPriceDefaults(price, currency);
 
   const data = {
     name: document.getElementById('pName').value,
     name_ru: document.getElementById('pNameRu').value,
     tagline: document.getElementById('pTagline').value,
-    tagline_ru: '',
-    tier: popular ? 'popular' : 'standard',
+    tagline_ru: document.getElementById('pTaglineRu').value,
+    tier: popular ? 'popular' : (existingItem && existingItem.tier ? existingItem.tier : 'standard'),
     cssClass: popular ? 'popular' : '',
-    tierLabel: '',
-    tierLabel_ru: '',
-    priceAmount: priceDisplay,
-    priceCurrency: currencyLabel,
+    tierLabel: document.getElementById('pTierLabel').value,
+    tierLabel_ru: document.getElementById('pTierLabelRu').value,
+    priceAmount: document.getElementById('pPriceAmount').value || priceDefaults.priceAmount,
+    priceAmount_ru: document.getElementById('pPriceAmountRu').value || priceDefaults.priceAmountRu,
+    priceCurrency: document.getElementById('pPriceCurrency').value || priceDefaults.priceCurrency,
+    priceCurrency_ru: document.getElementById('pPriceCurrencyRu').value || priceDefaults.priceCurrencyRu,
     priceNumeric: price,
     purchaseCurrency: currency,
     features: document.getElementById('pFeatures').value.split('\n').map(s => s.trim()).filter(Boolean),
     features_ru: document.getElementById('pFeaturesRu').value.split('\n').map(s => s.trim()).filter(Boolean),
-    buttonText: actionType === 'purchase' ? 'Get Started' : 'Contact Us',
-    buttonText_ru: actionType === 'purchase' ? 'Начать' : 'Связаться',
+    buttonText: document.getElementById('pButtonText').value || (actionType === 'purchase' ? 'Get Started' : 'Contact Us'),
+    buttonText_ru: document.getElementById('pButtonTextRu').value || (actionType === 'purchase' ? 'Начать' : 'Связаться'),
     actionType,
     popular,
     order: parseInt(document.getElementById('pOrder').value, 10) || 0
@@ -841,6 +879,46 @@ async function deleteProgram(id) {
     }
   } catch (e) {
     showToast('Delete failed', 'error');
+  }
+}
+
+async function restoreDefaultPrograms() {
+  const defaults = getDefaultPrograms();
+
+  if (!defaults.length) {
+    showToast('Default programs are not available', 'error');
+    return;
+  }
+
+  if (!confirm('Replace the current programs with the standard set?')) return;
+
+  try {
+    const currentPrograms = Array.isArray(programs) ? [...programs] : [];
+
+    for (const item of currentPrograms) {
+      await adminFetch('/api/admin/programs/' + item._id, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+    }
+
+    for (const item of defaults) {
+      const res = await adminFetch('/api/admin/programs', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(item)
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to create a default program');
+      }
+    }
+
+    showToast('Default programs restored', 'success');
+    await loadPrograms();
+  } catch (e) {
+    showToast(e && e.message ? e.message : 'Restore failed', 'error');
   }
 }
 

@@ -50,6 +50,7 @@
     .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; }
     .admin-header h1 { font-size: 24px; font-weight: 700; color: #fff; margin: 0; }
     .admin-header .btn { padding: 10px 20px; }
+    .admin-header-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
 
     /* Cards */
     .admin-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
@@ -91,7 +92,7 @@
     .admin-modal-overlay.active { display: flex; }
     .admin-modal {
       background: #1a1a1a; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
-      width: 100%; max-width: 560px; padding: 28px; position: relative;
+      width: 100%; max-width: 720px; padding: 28px; position: relative;
     }
     .admin-modal h2 { margin: 0 0 20px; font-size: 20px; color: #fff; }
     .admin-modal .close-btn {
@@ -360,7 +361,10 @@
         <div id="section-programs" style="display:none">
           <div class="admin-header">
             <h1>Programs</h1>
-            <button class="btn btn-primary" onclick="openProgramForm()">+ Add Program</button>
+            <div class="admin-header-actions">
+              <button class="btn btn-secondary" onclick="restoreDefaultPrograms()">Restore Defaults</button>
+              <button class="btn btn-primary" onclick="openProgramForm()">+ Add Program</button>
+            </div>
           </div>
           <div class="admin-cards" id="programsList"></div>
         </div>
@@ -524,6 +528,20 @@
           <label>Short Description</label>
           <input type="text" id="pTagline" placeholder="e.g. Reality Reprogramming">
         </div>
+        <div class="form-group">
+          <label>Короткое описание (RU)</label>
+          <input type="text" id="pTaglineRu" placeholder="e.g. Перепрограммирование реальности">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Badge Label</label>
+            <input type="text" id="pTierLabel" placeholder="e.g. Premium">
+          </div>
+          <div class="form-group">
+            <label>Badge Label (RU)</label>
+            <input type="text" id="pTierLabelRu" placeholder="e.g. Премиум">
+          </div>
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label>Price</label>
@@ -536,6 +554,26 @@
               <option value="USD">USD</option>
               <option value="RUB">RUB</option>
             </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Display Price</label>
+            <input type="text" id="pPriceAmount" placeholder="e.g. $300 or 5 000">
+          </div>
+          <div class="form-group">
+            <label>Display Currency</label>
+            <input type="text" id="pPriceCurrency" placeholder="e.g. KGS / month">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Display Price (RU)</label>
+            <input type="text" id="pPriceAmountRu" placeholder="e.g. Уточните">
+          </div>
+          <div class="form-group">
+            <label>Display Currency (RU)</label>
+            <input type="text" id="pPriceCurrencyRu" placeholder="e.g. у менеджеров">
           </div>
         </div>
         <div class="form-group">
@@ -560,6 +598,16 @@
               <option value="false">No</option>
               <option value="true">Yes (featured)</option>
             </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Button Text</label>
+            <input type="text" id="pButtonText" placeholder="e.g. Start">
+          </div>
+          <div class="form-group">
+            <label>Button Text (RU)</label>
+            <input type="text" id="pButtonTextRu" placeholder="e.g. Начать">
           </div>
         </div>
         <div class="form-group">
@@ -648,8 +696,9 @@
     </div>
   </div>
 
-  <script src="./config.js"></script>
-  <script src="./admin.js"></script>
-  <script src="./favicon-aurora.js"></script>
+  <script src="./config.js?v=20260318-7"></script>
+  <script src="./program-defaults.js?v=20260318-7"></script>
+  <script src="./admin.js?v=20260318-7"></script>
+  <script src="./favicon-aurora.js?v=20260318-7"></script>
 </body>
 </html>
