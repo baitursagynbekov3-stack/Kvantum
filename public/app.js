@@ -3157,65 +3157,35 @@ async function handlePurchase(productId, productName, amount, currency) {
     items: [item]
   };
 
-  const stripeSupported = ['USD', 'EUR', 'GBP', 'KZT'];
-  if (stripeSupported.includes(normalizedCurrency)) {
-    storePendingCheckout({
-      productId,
-      productName,
-      amount: numericAmount,
-      currency: normalizedCurrency,
-      checkoutType: 'stripe'
-    });
-
-    trackAnalyticsEvent('begin_checkout', {
-      ...checkoutEventPayload,
-      checkout_type: 'stripe'
-    });
-
-    showToast('Redirecting to secure checkout...', 'info');
-    try {
-      const res = await apiFetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
-        body: JSON.stringify({ productId, productName, amount: numericAmount, currency: normalizedCurrency })
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        showToast(data.error || 'Could not start checkout. Please try again.', 'error');
-      }
-    } catch (err) {
-      showToast('Could not connect to payment service. Please try again.', 'error');
-    }
-    return;
-  }
-
-  // Fallback: demo payment modal for non-Stripe currencies (KGS, RUB)
-  currentPayment = { productId, productName, amount: numericAmount, currency: normalizedCurrency || currency };
   storePendingCheckout({
     productId,
     productName,
     amount: numericAmount,
     currency: normalizedCurrency || currency,
-    checkoutType: 'onsite'
+    checkoutType: 'stripe'
   });
 
   trackAnalyticsEvent('begin_checkout', {
     ...checkoutEventPayload,
-    checkout_type: 'onsite'
+    checkout_type: 'stripe'
   });
 
-  const summary = document.getElementById('paymentSummary');
-  summary.innerHTML = `
-    <h3>${productName}</h3>
-    <div class="payment-amount">${normalizedCurrency === 'USD' ? '$' : ''}${numericAmount.toLocaleString()} ${normalizedCurrency !== 'USD' ? normalizedCurrency : ''}</div>
-  `;
-
-  const payBtn = document.getElementById('payBtn');
-  payBtn.textContent = `Pay ${normalizedCurrency === 'USD' ? '$' : ''}${numericAmount.toLocaleString()} ${normalizedCurrency !== 'USD' ? normalizedCurrency : ''}`;
-
-  openModal('paymentModal');
+  showToast('Redirecting to secure checkout...', 'info');
+  try {
+    const res = await apiFetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+      body: JSON.stringify({ productId, productName, amount: numericAmount, currency: normalizedCurrency })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast(data.error || 'Could not start checkout. Please try again.', 'error');
+    }
+  } catch (err) {
+    showToast('Could not connect to payment service. Please try again.', 'error');
+  }
 }
 
 async function handlePayment(e) {

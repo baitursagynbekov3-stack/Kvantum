@@ -43,6 +43,21 @@ const GOOGLE_SHEETS_WEBHOOK_TIMEOUT_MS = Math.min(Math.max(parseInt(process.env.
 const BOOKING_CAPTCHA_SECRET = (process.env.BOOKING_CAPTCHA_SECRET || process.env.TURNSTILE_SECRET_KEY || '').trim();
 const BOOKING_CAPTCHA_REQUIRED = String(process.env.BOOKING_CAPTCHA_REQUIRED || '').trim() === 'true';
 const BOOKING_CAPTCHA_VERIFY_TIMEOUT_MS = Math.min(Math.max(parseInt(process.env.BOOKING_CAPTCHA_VERIFY_TIMEOUT_MS || '5000', 10) || 5000, 1000), 15000);
+const STRIPE_DIRECT_CURRENCIES = new Set(['usd', 'eur', 'gbp', 'kzt']);
+const STRIPE_USD_PER_KGS = Math.max(parseFloat(process.env.STRIPE_USD_PER_KGS || '0.0114') || 0.0114, 0.000001);
+const STRIPE_USD_PER_RUB = Math.max(parseFloat(process.env.STRIPE_USD_PER_RUB || '0.011') || 0.011, 0.000001);
+const STRIPE_USD_PER_UZS = Math.max(parseFloat(process.env.STRIPE_USD_PER_UZS || '0.000079') || 0.000079, 0.0000001);
+const STRIPE_USD_PER_KZT = Math.max(parseFloat(process.env.STRIPE_USD_PER_KZT || '0.002') || 0.002, 0.0000001);
+
+const STRIPE_FALLBACK_RATES_TO_USD = {
+  usd: 1,
+  eur: Math.max(parseFloat(process.env.STRIPE_USD_PER_EUR || '1.09') || 1.09, 0.000001),
+  gbp: Math.max(parseFloat(process.env.STRIPE_USD_PER_GBP || '1.27') || 1.27, 0.000001),
+  kzt: STRIPE_USD_PER_KZT,
+  kgs: STRIPE_USD_PER_KGS,
+  rub: STRIPE_USD_PER_RUB,
+  uzs: STRIPE_USD_PER_UZS
+};
 
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://kvantum-api.vercel.app',
@@ -151,18 +166,28 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
   }
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    const { productId, productName, userEmail } = session.metadata || {};
+    const {
+      productId,
+      productName,
+      userEmail,
+      originalAmount,
+      originalCurrency
+    } = session.metadata || {};
     try {
       const user = userEmail ? await prisma.user.findUnique({ where: { email: userEmail } }) : null;
       if (user) {
+        const normalizedOriginalAmount = Number(originalAmount);
+        const normalizedOriginalCurrency = String(originalCurrency || '').trim().toUpperCase();
         await prisma.payment.create({
           data: {
             id: session.id,
             userId: user.id,
             productId: productId || null,
             productName: productName || null,
-            amount: session.amount_total / 100,
-            currency: session.currency.toUpperCase(),
+            amount: Number.isFinite(normalizedOriginalAmount) && normalizedOriginalAmount > 0
+              ? normalizedOriginalAmount
+              : session.amount_total / 100,
+            currency: normalizedOriginalCurrency || session.currency.toUpperCase(),
             status: 'completed'
           }
         });
@@ -1416,6 +1441,40 @@ function buildAuthToken(user, role, rememberMe = false) {
   );
 }
 
+function resolveStripeCheckoutPricing(amount, currency) {
+  const normalizedAmount = Number(amount);
+  const originalCurrency = String(currency || 'USD').trim().toLowerCase() || 'usd';
+
+  if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
+    throw new Error('Invalid product or amount');
+  }
+
+  if (STRIPE_DIRECT_CURRENCIES.has(originalCurrency)) {
+    return {
+      stripeCurrency: originalCurrency,
+      stripeAmount: normalizedAmount,
+      originalCurrency,
+      originalAmount: normalizedAmount,
+      conversionApplied: false,
+      exchangeRate: 1
+    };
+  }
+
+  const usdRate = STRIPE_FALLBACK_RATES_TO_USD[originalCurrency];
+  if (!Number.isFinite(usdRate) || usdRate <= 0) {
+    throw new Error(`Currency ${currency} is not supported by Stripe. Please contact us to arrange payment.`);
+  }
+
+  return {
+    stripeCurrency: 'usd',
+    stripeAmount: normalizedAmount * usdRate,
+    originalCurrency,
+    originalAmount: normalizedAmount,
+    conversionApplied: true,
+    exchangeRate: usdRate
+  };
+}
+
 function buildPublicUser(user, role) {
   return {
     id: user.id,
@@ -1842,23 +1901,25 @@ app.post('/api/book-consultation', bookingRateLimiter, async (req, res) => {
 app.post('/api/create-checkout-session', authenticateToken, async (req, res) => {
   if (!stripe) return res.status(500).json({ error: 'Stripe is not configured' });
   const { productId, productName, amount, currency } = req.body;
-  const normalizedAmount = Number(amount);
-  if (!productName || !Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
-    return res.status(400).json({ error: 'Invalid product or amount' });
-  }
-  const supportedCurrencies = ['usd', 'eur', 'gbp', 'kzt'];
-  const cur = (currency || 'usd').toLowerCase();
-  if (!supportedCurrencies.includes(cur)) {
-    return res.status(400).json({ error: `Currency ${currency} is not supported by Stripe. Please contact us to arrange payment.` });
-  }
   try {
+    if (!productName) {
+      return res.status(400).json({ error: 'Invalid product or amount' });
+    }
+
+    const pricing = resolveStripeCheckoutPricing(amount, currency);
+    const unitAmount = Math.round(pricing.stripeAmount * 100);
+
+    if (!Number.isFinite(unitAmount) || unitAmount <= 0) {
+      return res.status(400).json({ error: 'Invalid product or amount' });
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
         price_data: {
-          currency: cur,
+          currency: pricing.stripeCurrency,
           product_data: { name: productName },
-          unit_amount: Math.round(normalizedAmount * 100)
+          unit_amount: unitAmount
         },
         quantity: 1
       }],
@@ -1869,6 +1930,12 @@ app.post('/api/create-checkout-session', authenticateToken, async (req, res) => 
       metadata: {
         productId: String(productId || ''),
         productName,
+        originalAmount: String(pricing.originalAmount),
+        originalCurrency: pricing.originalCurrency.toUpperCase(),
+        stripeAmount: String(pricing.stripeAmount),
+        stripeCurrency: pricing.stripeCurrency.toUpperCase(),
+        conversionApplied: pricing.conversionApplied ? 'true' : 'false',
+        exchangeRateToUsd: String(pricing.exchangeRate),
         userEmail: req.user.email,
         userName: req.user.name
       }
