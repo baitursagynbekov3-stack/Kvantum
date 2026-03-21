@@ -1877,6 +1877,47 @@ function buildProgramDetailsCarouselHtml(reviews, detailsId, lang) {
   </div>`;
 }
 
+function buildProgramDetailsVideosHtml(videos, lang) {
+  if (!Array.isArray(videos) || !videos.length) return '';
+
+  const primaryVideo = videos.find((video) => video && video.isPrimary) || videos[0];
+  const secondaryVideos = videos.filter((video) => video !== primaryVideo).slice(0, 2);
+
+  const renderVideoCard = (video, variant) => {
+    if (!video) return '';
+    const title = video && typeof video === 'object' ? (video.title || '') : '';
+    const subtitle = video && typeof video === 'object' ? (video.subtitle || '') : '';
+    const poster = video && typeof video === 'object' ? (video.poster || '') : '';
+    const styleAttr = poster ? ` style="background-image: linear-gradient(180deg, rgba(11,12,16,0.08) 0%, rgba(11,12,16,0.72) 100%), url('${escapeHtml(poster)}');"` : '';
+
+    return `<article class="program-detail-video-card ${variant}"${styleAttr}>
+      <div class="program-detail-video-overlay">
+        <span class="program-detail-video-pill">${lang === 'ru' ? 'Видео отзыв' : 'Video review'}</span>
+        <div class="program-detail-video-play">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+        <div class="program-detail-video-copy">
+          <strong>${escapeHtml(title || (lang === 'ru' ? 'Скоро здесь будет видео' : 'Video coming soon'))}</strong>
+          <span>${escapeHtml(subtitle || (lang === 'ru' ? 'Добавим реальный отзыв после загрузки файлов' : 'We will add the real review after upload'))}</span>
+        </div>
+      </div>
+    </article>`;
+  };
+
+  return `<section class="program-detail-videos-section">
+    <div class="program-detail-section-head">
+      <span class="program-detail-section-kicker">${lang === 'ru' ? 'Формат' : 'Format'}</span>
+      <h3>${lang === 'ru' ? 'Видео отзывы участниц' : 'Student video reviews'}</h3>
+    </div>
+    <div class="program-detail-videos-layout">
+      ${renderVideoCard(primaryVideo, 'is-primary')}
+      <div class="program-detail-videos-side">
+        ${secondaryVideos.map((video) => renderVideoCard(video, 'is-secondary')).join('')}
+      </div>
+    </div>
+  </section>`;
+}
+
 function openProgramDetailsModal(programId) {
   const items = Array.isArray(cachedPrograms) && cachedPrograms.length ? cachedPrograms : getDefaultPrograms();
   const program = items.find((item) => String(item && (item._id || item.id || '')) === String(programId));
@@ -1892,6 +1933,9 @@ function openProgramDetailsModal(programId) {
   const priceCurrency = lang === 'ru' && program.priceCurrency_ru ? program.priceCurrency_ru : program.priceCurrency;
   const btnText = lang === 'ru' && program.buttonText_ru ? program.buttonText_ru : program.buttonText;
   const detailsText = lang === 'ru' && program.detailsText_ru ? program.detailsText_ru : program.detailsText;
+  const detailsVideos = lang === 'ru' && Array.isArray(program.detailsVideos_ru) && program.detailsVideos_ru.length
+    ? program.detailsVideos_ru
+    : (Array.isArray(program.detailsVideos) ? program.detailsVideos : []);
   const detailsReviews = lang === 'ru' && Array.isArray(program.detailsReviews_ru) && program.detailsReviews_ru.length
     ? program.detailsReviews_ru
     : (Array.isArray(program.detailsReviews) ? program.detailsReviews : []);
@@ -1899,9 +1943,9 @@ function openProgramDetailsModal(programId) {
 
   let actionButtonHtml = '';
   if (program.actionType === 'consult') {
-    actionButtonHtml = `<button class="btn btn-primary btn-lg" type="button" onclick="closeModal('programDetailsModal'); openModal('consultModal');">${escapeHtml(btnText || (lang === 'ru' ? 'Записаться' : 'Contact us'))}</button>`;
+    actionButtonHtml = `<button class="btn btn-primary btn-lg" type="button" onclick="closeModal('programDetailsModal'); openModal('consultModal');">${escapeHtml(lang === 'ru' ? 'Записаться' : 'Contact us')}</button>`;
   } else if (program.priceNumeric > 0) {
-    actionButtonHtml = `<button class="btn btn-primary btn-lg" type="button" onclick="closeModal('programDetailsModal'); handlePurchase('${escapeHtml(program._id || program.id)}', '${escapeHtml(program.name)}', ${program.priceNumeric || 0}, '${escapeHtml(program.purchaseCurrency || 'KGS')}');">${escapeHtml(btnText || (lang === 'ru' ? 'Начать' : 'Start'))}</button>`;
+    actionButtonHtml = `<button class="btn btn-primary btn-lg" type="button" onclick="closeModal('programDetailsModal'); handlePurchase('${escapeHtml(program._id || program.id)}', '${escapeHtml(program.name)}', ${program.priceNumeric || 0}, '${escapeHtml(program.purchaseCurrency || 'KGS')}');">${escapeHtml(lang === 'ru' ? 'Купить программу' : 'Buy program')}</button>`;
   }
 
   body.innerHTML = `<div class="program-details-modal-shell">
@@ -1914,6 +1958,7 @@ function openProgramDetailsModal(programId) {
     <div class="program-details-card program-details-modal-card">
       <span class="pricing-details-label">${lang === 'ru' ? 'О программе' : 'About the program'}</span>
       <p>${escapeHtml(detailsText || '')}</p>
+      ${buildProgramDetailsVideosHtml(detailsVideos, lang)}
       ${buildProgramDetailsCarouselHtml(detailsReviews, modalDetailsId, lang)}
     </div>
     ${actionButtonHtml ? `<div class="program-details-modal-actions">${actionButtonHtml}</div>` : ''}
@@ -1956,6 +2001,7 @@ function renderPrograms(items) {
     const btnText = lang === 'ru' && p.buttonText_ru ? p.buttonText_ru : p.buttonText;
     const detailsButtonText = lang === 'ru' && p.detailsButton_ru ? p.detailsButton_ru : p.detailsButton;
     const detailsText = lang === 'ru' && p.detailsText_ru ? p.detailsText_ru : p.detailsText;
+    const detailsPrimaryAction = !!p.detailsPrimaryAction;
     const allFeatures = lang === 'ru' && p.features_ru && p.features_ru.length ? p.features_ru : (p.features || []);
     const visibleFeatures = allFeatures.slice(0, 8);
     const hiddenFeatureCount = Math.max(0, allFeatures.length - visibleFeatures.length);
@@ -1964,13 +2010,15 @@ function renderPrograms(items) {
     const tierBadge = !p.popular && tierLabel ? `<div class="pricing-tier">${escapeHtml(tierLabel)}</div>` : '';
 
     let btnHtml;
-    if (p.actionType === 'consult') {
+    if (detailsPrimaryAction && detailsText) {
+      btnHtml = `<button class="btn btn-primary btn-block" type="button" onclick="openProgramDetailsModal('${escapeHtml(p._id || p.id)}')">${escapeHtml(btnText)}</button>`;
+    } else if (p.actionType === 'consult') {
       btnHtml = `<button class="btn btn-primary btn-block" onclick="openModal('consultModal')">${escapeHtml(btnText)}</button>`;
     } else {
       btnHtml = `<button class="btn btn-primary btn-block" onclick="handlePurchase('${escapeHtml(p._id || p.id)}', '${escapeHtml(p.name)}', ${p.priceNumeric || 0}, '${escapeHtml(p.purchaseCurrency || 'KGS')}')">${escapeHtml(btnText)}</button>`;
     }
 
-    const detailsHtml = detailsText
+    const detailsHtml = detailsText && !detailsPrimaryAction
       ? `<button class="pricing-secondary-btn" type="button" onclick="openProgramDetailsModal('${escapeHtml(p._id || p.id)}')">${escapeHtml(detailsButtonText || (lang === 'ru' ? 'Узнать подробнее' : 'Learn more'))}</button>`
       : '';
 

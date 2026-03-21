@@ -44,10 +44,51 @@
       ],
       buttonText: 'Start',
       buttonText_ru: 'Начать',
+      detailsPrimaryAction: true,
       detailsButton: 'Learn More',
       detailsButton_ru: 'Узнать подробнее',
       detailsText: 'Brain Charge is a daily practice that rewires your thinking, removes inner blocks, and launches new results in money, state, and life. You begin to think differently, and your reality starts to change.',
       detailsText_ru: 'Зарядка мозга — это ежедневная практика, которая перепрошивает мышление, убирает внутренние блоки и запускает новые результаты в деньгах, состоянии и жизни. Ты начинаешь думать по-другому — и твоя реальность начинает меняться.',
+      detailsVideos: [
+        {
+          title: 'Main transformation story',
+          subtitle: 'Video review · Coming soon',
+          poster: '/images/review-3-poster.jpg',
+          isPrimary: true
+        },
+        {
+          title: 'Daily practice result',
+          subtitle: 'Video review · Coming soon',
+          poster: '',
+          isPrimary: false
+        },
+        {
+          title: 'Shift in state and focus',
+          subtitle: 'Video review · Coming soon',
+          poster: '',
+          isPrimary: false
+        }
+      ],
+      detailsVideos_ru: [
+        {
+          title: 'Главная история трансформации',
+          subtitle: 'Видео отзыв · скоро здесь',
+          poster: '/images/review-3-poster.jpg',
+          isPrimary: true
+        },
+        {
+          title: 'Результат ежедневной практики',
+          subtitle: 'Видео отзыв · скоро здесь',
+          poster: '',
+          isPrimary: false
+        },
+        {
+          title: 'Сдвиг в состоянии и фокусе',
+          subtitle: 'Видео отзыв · скоро здесь',
+          poster: '',
+          isPrimary: false
+        }
+      ],
       detailsReviews: [
         {
           text: 'By the first week I felt calmer, more focused, and stopped reacting to everything emotionally.',
