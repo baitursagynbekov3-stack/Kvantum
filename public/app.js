@@ -1842,19 +1842,89 @@ function goToProgramDetailsSlide(detailsId, index) {
   updateProgramDetailsCarousel(detailsId);
 }
 
-function toggleProgramDetails(detailsId, trigger) {
-  const panel = document.getElementById(detailsId);
-  if (!panel) return;
+function buildProgramDetailsCarouselHtml(reviews, detailsId, lang) {
+  if (!Array.isArray(reviews) || !reviews.length) return '';
 
-  const isOpen = panel.classList.toggle('open');
-  if (trigger) {
-    trigger.classList.toggle('active', isOpen);
-    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  return `<div class="program-detail-carousel" data-program-carousel-id="${escapeHtml(detailsId)}">
+    <div class="program-detail-carousel-head">
+      <span class="program-detail-carousel-title">${lang === 'ru' ? 'Отзывы участниц' : 'Student reviews'}</span>
+      <div class="program-detail-carousel-nav">
+        <button class="program-detail-nav" type="button" data-program-prev="${escapeHtml(detailsId)}" onclick="shiftProgramDetailsCarousel('${detailsId}', -1)" aria-label="${lang === 'ru' ? 'Предыдущий отзыв' : 'Previous review'}">&#8592;</button>
+        <button class="program-detail-nav" type="button" data-program-next="${escapeHtml(detailsId)}" onclick="shiftProgramDetailsCarousel('${detailsId}', 1)" aria-label="${lang === 'ru' ? 'Следующий отзыв' : 'Next review'}">&#8594;</button>
+      </div>
+    </div>
+    <div class="program-detail-carousel-viewport">
+      <div class="program-detail-carousel-track" id="${escapeHtml(detailsId)}-track">
+        ${reviews.map((review) => {
+          const reviewText = review && typeof review === 'object' ? review.text : String(review || '');
+          const reviewAuthor = review && typeof review === 'object' ? review.author : '';
+          const reviewRole = review && typeof review === 'object' ? review.role : '';
+          const reviewInitial = reviewAuthor ? escapeHtml(String(reviewAuthor).trim().charAt(0).toUpperCase()) : 'K';
+          return `<article class="program-detail-review">
+            <p class="program-detail-review-text">${escapeHtml(reviewText)}</p>
+            <div class="program-detail-review-author">
+              <span class="program-detail-review-avatar">${reviewInitial}</span>
+              <div>
+                <strong>${escapeHtml(reviewAuthor || (lang === 'ru' ? 'Участница' : 'Participant'))}</strong>
+                ${reviewRole ? `<span>${escapeHtml(reviewRole)}</span>` : ''}
+              </div>
+            </div>
+          </article>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="program-detail-carousel-dots" id="${escapeHtml(detailsId)}-dots"></div>
+  </div>`;
+}
+
+function openProgramDetailsModal(programId) {
+  const items = Array.isArray(cachedPrograms) && cachedPrograms.length ? cachedPrograms : getDefaultPrograms();
+  const program = items.find((item) => String(item && (item._id || item.id || '')) === String(programId));
+  const body = document.getElementById('programDetailsBody');
+
+  if (!program || !body) return;
+
+  const lang = currentLang;
+  const name = lang === 'ru' && program.name_ru ? program.name_ru : program.name;
+  const tagline = lang === 'ru' && program.tagline_ru ? program.tagline_ru : program.tagline;
+  const tierLabel = lang === 'ru' && program.tierLabel_ru ? program.tierLabel_ru : program.tierLabel;
+  const priceAmount = lang === 'ru' && program.priceAmount_ru ? program.priceAmount_ru : program.priceAmount;
+  const priceCurrency = lang === 'ru' && program.priceCurrency_ru ? program.priceCurrency_ru : program.priceCurrency;
+  const btnText = lang === 'ru' && program.buttonText_ru ? program.buttonText_ru : program.buttonText;
+  const detailsText = lang === 'ru' && program.detailsText_ru ? program.detailsText_ru : program.detailsText;
+  const detailsReviews = lang === 'ru' && Array.isArray(program.detailsReviews_ru) && program.detailsReviews_ru.length
+    ? program.detailsReviews_ru
+    : (Array.isArray(program.detailsReviews) ? program.detailsReviews : []);
+  const modalDetailsId = `program-modal-${String(program._id || program.id || 'brain-charge').replace(/[^a-z0-9_-]/gi, '-')}`;
+
+  let actionButtonHtml = '';
+  if (program.actionType === 'consult') {
+    actionButtonHtml = `<button class="btn btn-primary btn-lg" type="button" onclick="closeModal('programDetailsModal'); openModal('consultModal');">${escapeHtml(btnText || (lang === 'ru' ? 'Записаться' : 'Contact us'))}</button>`;
+  } else if (program.priceNumeric > 0) {
+    actionButtonHtml = `<button class="btn btn-primary btn-lg" type="button" onclick="closeModal('programDetailsModal'); handlePurchase('${escapeHtml(program._id || program.id)}', '${escapeHtml(program.name)}', ${program.priceNumeric || 0}, '${escapeHtml(program.purchaseCurrency || 'KGS')}');">${escapeHtml(btnText || (lang === 'ru' ? 'Начать' : 'Start'))}</button>`;
   }
 
-  if (isOpen) {
-    updateProgramDetailsCarousel(detailsId);
-  }
+  body.innerHTML = `<div class="program-details-modal-shell">
+    <div class="program-details-modal-hero">
+      ${tierLabel ? `<span class="program-details-modal-badge">${escapeHtml(tierLabel)}</span>` : ''}
+      <h2 class="program-details-modal-title">${escapeHtml(name)}</h2>
+      ${tagline ? `<p class="program-details-modal-tagline">${escapeHtml(tagline)}</p>` : ''}
+      ${(priceAmount || priceCurrency) ? `<div class="program-details-modal-price"><span>${escapeHtml(priceAmount || '')}</span>${priceCurrency ? `<small>${escapeHtml(priceCurrency)}</small>` : ''}</div>` : ''}
+    </div>
+    <div class="program-details-card program-details-modal-card">
+      <span class="pricing-details-label">${lang === 'ru' ? 'О программе' : 'About the program'}</span>
+      <p>${escapeHtml(detailsText || '')}</p>
+      ${buildProgramDetailsCarouselHtml(detailsReviews, modalDetailsId, lang)}
+    </div>
+    ${actionButtonHtml ? `<div class="program-details-modal-actions">${actionButtonHtml}</div>` : ''}
+  </div>`;
+
+  programDetailsCarouselState[modalDetailsId] = 0;
+  openModal('programDetailsModal');
+  requestAnimationFrame(() => {
+    initializeProgramDetailCarousels();
+    updateProgramDetailsCarousel(modalDetailsId);
+  });
 }
 
 function renderPrograms(items) {
@@ -1886,16 +1956,12 @@ function renderPrograms(items) {
     const btnText = lang === 'ru' && p.buttonText_ru ? p.buttonText_ru : p.buttonText;
     const detailsButtonText = lang === 'ru' && p.detailsButton_ru ? p.detailsButton_ru : p.detailsButton;
     const detailsText = lang === 'ru' && p.detailsText_ru ? p.detailsText_ru : p.detailsText;
-    const detailsReviews = lang === 'ru' && Array.isArray(p.detailsReviews_ru) && p.detailsReviews_ru.length
-      ? p.detailsReviews_ru
-      : (Array.isArray(p.detailsReviews) ? p.detailsReviews : []);
     const allFeatures = lang === 'ru' && p.features_ru && p.features_ru.length ? p.features_ru : (p.features || []);
     const visibleFeatures = allFeatures.slice(0, 8);
     const hiddenFeatureCount = Math.max(0, allFeatures.length - visibleFeatures.length);
     const cssClass = p.cssClass || '';
     const popularBadge = p.popular ? `<div class="pricing-popular-badge">${lang === 'ru' ? tierLabel : tierLabel}</div>` : '';
     const tierBadge = !p.popular && tierLabel ? `<div class="pricing-tier">${escapeHtml(tierLabel)}</div>` : '';
-    const detailsId = `program-details-${String(p._id || p.id || index).replace(/[^a-z0-9_-]/gi, '-')}`;
 
     let btnHtml;
     if (p.actionType === 'consult') {
@@ -1904,48 +1970,8 @@ function renderPrograms(items) {
       btnHtml = `<button class="btn btn-primary btn-block" onclick="handlePurchase('${escapeHtml(p._id || p.id)}', '${escapeHtml(p.name)}', ${p.priceNumeric || 0}, '${escapeHtml(p.purchaseCurrency || 'KGS')}')">${escapeHtml(btnText)}</button>`;
     }
 
-    const detailsReviewsHtml = detailsReviews.length
-      ? `<div class="program-detail-carousel" data-program-carousel-id="${escapeHtml(detailsId)}">
-           <div class="program-detail-carousel-head">
-             <span class="program-detail-carousel-title">${lang === 'ru' ? 'Отзывы участниц' : 'Student reviews'}</span>
-             <div class="program-detail-carousel-nav">
-               <button class="program-detail-nav" type="button" data-program-prev="${escapeHtml(detailsId)}" onclick="shiftProgramDetailsCarousel('${detailsId}', -1)" aria-label="${lang === 'ru' ? 'Предыдущий отзыв' : 'Previous review'}">&#8592;</button>
-               <button class="program-detail-nav" type="button" data-program-next="${escapeHtml(detailsId)}" onclick="shiftProgramDetailsCarousel('${detailsId}', 1)" aria-label="${lang === 'ru' ? 'Следующий отзыв' : 'Next review'}">&#8594;</button>
-             </div>
-           </div>
-           <div class="program-detail-carousel-viewport">
-             <div class="program-detail-carousel-track" id="${escapeHtml(detailsId)}-track">
-               ${detailsReviews.map((review) => {
-                 const reviewText = review && typeof review === 'object' ? review.text : String(review || '');
-                 const reviewAuthor = review && typeof review === 'object' ? review.author : '';
-                 const reviewRole = review && typeof review === 'object' ? review.role : '';
-                 const reviewInitial = reviewAuthor ? escapeHtml(String(reviewAuthor).trim().charAt(0).toUpperCase()) : 'K';
-                 return `<article class="program-detail-review">
-                   <p class="program-detail-review-text">${escapeHtml(reviewText)}</p>
-                   <div class="program-detail-review-author">
-                     <span class="program-detail-review-avatar">${reviewInitial}</span>
-                     <div>
-                       <strong>${escapeHtml(reviewAuthor || (lang === 'ru' ? 'Участница' : 'Participant'))}</strong>
-                       ${reviewRole ? `<span>${escapeHtml(reviewRole)}</span>` : ''}
-                     </div>
-                   </div>
-                 </article>`;
-               }).join('')}
-             </div>
-           </div>
-           <div class="program-detail-carousel-dots" id="${escapeHtml(detailsId)}-dots"></div>
-         </div>`
-      : '';
-
     const detailsHtml = detailsText
-      ? `<button class="pricing-secondary-btn" type="button" aria-expanded="false" onclick="toggleProgramDetails('${detailsId}', this)">${escapeHtml(detailsButtonText || (lang === 'ru' ? 'Узнать подробнее' : 'Learn more'))}</button>
-         <div class="pricing-details-panel" id="${escapeHtml(detailsId)}">
-           <div class="pricing-details-card">
-             <span class="pricing-details-label">${lang === 'ru' ? 'О программе' : 'About the program'}</span>
-             <p>${escapeHtml(detailsText)}</p>
-             ${detailsReviewsHtml}
-           </div>
-         </div>`
+      ? `<button class="pricing-secondary-btn" type="button" onclick="openProgramDetailsModal('${escapeHtml(p._id || p.id)}')">${escapeHtml(detailsButtonText || (lang === 'ru' ? 'Узнать подробнее' : 'Learn more'))}</button>`
       : '';
 
     return `<div class="pricing-card anim-fade-up anim-visible ${cssClass}" data-tier="${escapeHtml(p.tier || '')}" data-product-id="${escapeHtml(String(p._id || p.id || ''))}" data-product-name="${escapeHtml(String(p.name || ''))}" data-product-price="${escapeHtml(String(p.priceNumeric || 0))}" data-product-currency="${escapeHtml(String(p.purchaseCurrency || 'KGS'))}">
@@ -1967,7 +1993,6 @@ function renderPrograms(items) {
     </div>`;
   }).join('');
 
-  initializeProgramDetailCarousels();
 }
 
 // ===== Dark Mode =====
