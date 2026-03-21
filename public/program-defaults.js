@@ -44,6 +44,10 @@
       ],
       buttonText: 'Start',
       buttonText_ru: 'Начать',
+      detailsButton: 'Learn More',
+      detailsButton_ru: 'Узнать подробнее',
+      detailsText: 'Brain Charge is a daily practice that rewires your thinking, removes inner blocks, and launches new results in money, state, and life. You begin to think differently, and your reality starts to change.',
+      detailsText_ru: 'Зарядка мозга — это ежедневная практика, которая перепрошивает мышление, убирает внутренние блоки и запускает новые результаты в деньгах, состоянии и жизни. Ты начинаешь думать по-другому — и твоя реальность начинает меняться.',
       actionType: 'purchase',
       order: 1
     },

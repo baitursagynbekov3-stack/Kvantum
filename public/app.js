@@ -1580,6 +1580,81 @@ function renderTestimonials(items) {
       </div>
     </div>`;
   }).join('');
+
+  initTestimonialsCarousel();
+}
+
+let testimonialsCarouselIndex = 0;
+
+function getTestimonialsVisibleCount() {
+  const width = window.innerWidth || document.documentElement.clientWidth || 1280;
+  if (width <= 767) return 1;
+  if (width <= 1160) return 2;
+  return 3;
+}
+
+function renderTestimonialsDots(totalSlides) {
+  const dotsRoot = document.querySelector('.testimonials-dots');
+  if (!dotsRoot) return;
+
+  if (totalSlides <= 1) {
+    dotsRoot.innerHTML = '';
+    return;
+  }
+
+  dotsRoot.innerHTML = Array.from({ length: totalSlides }, (_, index) => (
+    `<button class="testimonials-dot${index === testimonialsCarouselIndex ? ' active' : ''}" type="button" aria-label="Go to testimonial slide ${index + 1}" onclick="goToTestimonialsSlide(${index})"></button>`
+  )).join('');
+}
+
+function updateTestimonialsCarousel() {
+  const carousel = document.querySelector('.testimonials-carousel');
+  const grid = document.querySelector('.testimonials-grid');
+  const cards = grid ? Array.from(grid.querySelectorAll('.testimonial-card')) : [];
+  const prevBtn = document.querySelector('.testimonials-nav.prev');
+  const nextBtn = document.querySelector('.testimonials-nav.next');
+
+  if (!carousel || !grid || !cards.length) return;
+
+  const visibleCount = Math.min(getTestimonialsVisibleCount(), cards.length);
+  const maxIndex = Math.max(0, cards.length - visibleCount);
+  const gapValue = parseFloat(getComputedStyle(grid).gap || getComputedStyle(grid).columnGap || '0') || 0;
+  const cardWidth = cards[0].getBoundingClientRect().width;
+
+  testimonialsCarouselIndex = Math.min(Math.max(testimonialsCarouselIndex, 0), maxIndex);
+  grid.style.transform = `translateX(-${testimonialsCarouselIndex * (cardWidth + gapValue)}px)`;
+  carousel.classList.toggle('is-static', maxIndex === 0);
+
+  if (prevBtn) prevBtn.disabled = testimonialsCarouselIndex === 0;
+  if (nextBtn) nextBtn.disabled = testimonialsCarouselIndex >= maxIndex;
+
+  renderTestimonialsDots(maxIndex + 1);
+}
+
+function initTestimonialsCarousel() {
+  testimonialsCarouselIndex = 0;
+  updateTestimonialsCarousel();
+}
+
+function shiftTestimonialsCarousel(step) {
+  testimonialsCarouselIndex += step;
+  updateTestimonialsCarousel();
+}
+
+function goToTestimonialsSlide(index) {
+  testimonialsCarouselIndex = Number(index) || 0;
+  updateTestimonialsCarousel();
+}
+
+function toggleProgramDetails(detailsId, trigger) {
+  const panel = document.getElementById(detailsId);
+  if (!panel) return;
+
+  const isOpen = panel.classList.toggle('open');
+  if (trigger) {
+    trigger.classList.toggle('active', isOpen);
+    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
 }
 
 function renderPrograms(items) {
@@ -1602,19 +1677,22 @@ function renderPrograms(items) {
     return String((a && a.name) || '').localeCompare(String((b && b.name) || ''));
   });
 
-  grid.innerHTML = ordered.map(p => {
+  grid.innerHTML = ordered.map((p, index) => {
     const name = lang === 'ru' && p.name_ru ? p.name_ru : p.name;
     const tagline = lang === 'ru' && p.tagline_ru ? p.tagline_ru : p.tagline;
     const tierLabel = lang === 'ru' && p.tierLabel_ru ? p.tierLabel_ru : p.tierLabel;
     const priceCurrency = lang === 'ru' && p.priceCurrency_ru ? p.priceCurrency_ru : p.priceCurrency;
     const priceAmount = lang === 'ru' && p.priceAmount_ru ? p.priceAmount_ru : p.priceAmount;
     const btnText = lang === 'ru' && p.buttonText_ru ? p.buttonText_ru : p.buttonText;
+    const detailsButtonText = lang === 'ru' && p.detailsButton_ru ? p.detailsButton_ru : p.detailsButton;
+    const detailsText = lang === 'ru' && p.detailsText_ru ? p.detailsText_ru : p.detailsText;
     const allFeatures = lang === 'ru' && p.features_ru && p.features_ru.length ? p.features_ru : (p.features || []);
     const visibleFeatures = allFeatures.slice(0, 8);
     const hiddenFeatureCount = Math.max(0, allFeatures.length - visibleFeatures.length);
     const cssClass = p.cssClass || '';
     const popularBadge = p.popular ? `<div class="pricing-popular-badge">${lang === 'ru' ? tierLabel : tierLabel}</div>` : '';
     const tierBadge = !p.popular && tierLabel ? `<div class="pricing-tier">${escapeHtml(tierLabel)}</div>` : '';
+    const detailsId = `program-details-${String(p._id || p.id || index).replace(/[^a-z0-9_-]/gi, '-')}`;
 
     let btnHtml;
     if (p.actionType === 'consult') {
@@ -1622,6 +1700,13 @@ function renderPrograms(items) {
     } else {
       btnHtml = `<button class="btn btn-primary btn-block" onclick="handlePurchase('${escapeHtml(p._id || p.id)}', '${escapeHtml(p.name)}', ${p.priceNumeric || 0}, '${escapeHtml(p.purchaseCurrency || 'KGS')}')">${escapeHtml(btnText)}</button>`;
     }
+
+    const detailsHtml = detailsText
+      ? `<button class="pricing-secondary-btn" type="button" aria-expanded="false" onclick="toggleProgramDetails('${detailsId}', this)">${escapeHtml(detailsButtonText || (lang === 'ru' ? 'Узнать подробнее' : 'Learn more'))}</button>
+         <div class="pricing-details-panel" id="${escapeHtml(detailsId)}">
+           <p>${escapeHtml(detailsText)}</p>
+         </div>`
+      : '';
 
     return `<div class="pricing-card anim-fade-up anim-visible ${cssClass}" data-tier="${escapeHtml(p.tier || '')}" data-product-id="${escapeHtml(String(p._id || p.id || ''))}" data-product-name="${escapeHtml(String(p.name || ''))}" data-product-price="${escapeHtml(String(p.priceNumeric || 0))}" data-product-currency="${escapeHtml(String(p.purchaseCurrency || 'KGS'))}">
       ${popularBadge}${tierBadge}
@@ -1635,7 +1720,10 @@ function renderPrograms(items) {
         ${visibleFeatures.map((f) => `<li>${escapeHtml(f)}</li>`).join('')}
         ${hiddenFeatureCount > 0 ? `<li>${hiddenFeatureCount} ${lang === 'ru' ? 'доп. пунктов' : 'more items'}</li>` : ''}
       </ul>
-      ${btnHtml}
+      <div class="pricing-actions">
+        ${btnHtml}
+        ${detailsHtml}
+      </div>
     </div>`;
   }).join('');
 }
@@ -1670,6 +1758,7 @@ document.addEventListener('DOMContentLoaded', () => {
   enforceLanguagePolicy();
   loadSiteContent();
   initTurnstileWidgets();
+  initTestimonialsCarousel();
 
   // Trigger hero animations immediately
   setTimeout(() => {
@@ -1677,6 +1766,10 @@ document.addEventListener('DOMContentLoaded', () => {
       el.classList.add('anim-visible');
     });
   }, 100);
+});
+
+window.addEventListener('resize', () => {
+  updateTestimonialsCarousel();
 });
 
 // ===== Navbar =====

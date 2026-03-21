@@ -287,52 +287,65 @@
         <div class="section-label" data-i18n="testimonials.label">Отзывы</div>
         <h2 class="section-title" data-i18n-html="testimonials.title">Что говорят наши <span class="text-gradient">клиенты</span></h2>
       </div>
-      <div class="testimonials-grid">
-        <div class="testimonial-card anim-fade-up">
-          <div class="testimonial-quote">&ldquo;</div>
-          <p data-i18n="testimonials.t1.text">«Всего за 21 день Зарядки мозга мой взгляд на жизнь полностью изменился. Мой доход вырос в 2 раза в следующем месяце.»</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">A</div>
-            <div class="author-info">
-              <strong>Aisuluu K.</strong>
-              <span data-i18n="testimonials.t1.role">Предприниматель</span>
+      <div class="testimonials-carousel">
+        <button class="testimonials-nav prev" type="button" onclick="shiftTestimonialsCarousel(-1)" aria-label="Previous testimonials">&#8592;</button>
+        <div class="testimonials-viewport">
+          <div class="testimonials-grid">
+            <div class="testimonial-card anim-fade-up">
+              <div class="testimonial-quote">&ldquo;</div>
+              <p data-i18n="testimonials.t1.text">«Всего за 21 день Зарядки мозга мой взгляд на жизнь полностью изменился. Мой доход вырос в 2 раза в следующем месяце.»</p>
+              <div class="testimonial-author">
+                <div class="author-avatar">A</div>
+                <div class="author-info">
+                  <strong>Aisuluu K.</strong>
+                  <span data-i18n="testimonials.t1.role">Предприниматель</span>
+                </div>
+              </div>
+            </div>
+            <div class="testimonial-card anim-fade-up anim-delay-1">
+              <div class="testimonial-quote">&ldquo;</div>
+              <p data-i18n="testimonials.t2.text">«Программа ПЕРЕЗАГРУЗКА полностью изменила то, как я справляюсь с отношениями и финансами. Я наконец чувствую контроль над своей жизнью.»</p>
+              <div class="testimonial-author">
+                <div class="author-avatar">M</div>
+                <div class="author-info">
+                  <strong>Marat B.</strong>
+                  <span data-i18n="testimonials.t2.role">Владелец бизнеса</span>
+                </div>
+              </div>
+            </div>
+            <div class="testimonial-card anim-fade-up anim-delay-2">
+              <div class="testimonial-quote">&ldquo;</div>
+              <p data-i18n="testimonials.t3.text">«Работа с Алтынай через программу наставничества дала мне инструменты, которые я использую каждый день. Мой бизнес вырос в 3 раза за 6 месяцев.»</p>
+              <div class="testimonial-author">
+                <div class="author-avatar">N</div>
+                <div class="author-info">
+                  <strong>Nuriza T.</strong>
+                  <span data-i18n="testimonials.t3.role">Консультант</span>
+                </div>
+              </div>
+            </div>
+            <div class="testimonial-card anim-fade-up anim-delay-3">
+              <div class="testimonial-quote">&ldquo;</div>
+              <p data-i18n="testimonials.t4.text">«До КВАНТУМ я жила в постоянной тревоге и сомнениях. После работы с Алтынай появилось внутреннее спокойствие, ясность и уверенность. Я запустила свой проект и вышла на стабильный доход.»</p>
+              <div class="testimonial-author">
+                <div class="author-avatar">B</div>
+                <div class="author-info">
+                  <strong>Begimai S.</strong>
+                  <span data-i18n="testimonials.t4.role">Маркетолог</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="testimonial-card anim-fade-up anim-delay-1">
-          <div class="testimonial-quote">&ldquo;</div>
-          <p data-i18n="testimonials.t2.text">«Программа ПЕРЕЗАГРУЗКА полностью изменила то, как я справляюсь с отношениями и финансами. Я наконец чувствую контроль над своей жизнью.»</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">M</div>
-            <div class="author-info">
-              <strong>Marat B.</strong>
-              <span data-i18n="testimonials.t2.role">Владелец бизнеса</span>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial-card anim-fade-up anim-delay-2">
-          <div class="testimonial-quote">&ldquo;</div>
-          <p data-i18n="testimonials.t3.text">«Работа с Алтынай через программу наставничества дала мне инструменты, которые я использую каждый день. Мой бизнес вырос в 3 раза за 6 месяцев.»</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">N</div>
-            <div class="author-info">
-              <strong>Nuriza T.</strong>
-              <span data-i18n="testimonials.t3.role">Консультант</span>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial-card anim-fade-up anim-delay-3">
-          <div class="testimonial-quote">&ldquo;</div>
-          <p data-i18n="testimonials.t4.text">«До КВАНТУМ я жила в постоянной тревоге и сомнениях. После работы с Алтынай появилось внутреннее спокойствие, ясность и уверенность. Я запустила свой проект и вышла на стабильный доход.»</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">B</div>
-            <div class="author-info">
-              <strong>Begimai S.</strong>
-              <span data-i18n="testimonials.t4.role">Маркетолог</span>
-            </div>
-          </div>
-        </div>
+        <button class="testimonials-nav next" type="button" onclick="shiftTestimonialsCarousel(1)" aria-label="Next testimonials">&#8594;</button>
       </div>
+      <div class="testimonials-dots" aria-label="Testimonials slider dots"></div>
+            </div>
+          </div>
+        </div>
+        <button class="testimonials-nav next" type="button" onclick="shiftTestimonialsCarousel(1)" aria-label="Next testimonials">&#8594;</button>
+      </div>
+      <div class="testimonials-dots" aria-label="Testimonials slider dots"></div>
 
       <!-- Video Reviews -->
       <div class="video-reviews-wrap anim-fade-up">

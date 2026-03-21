@@ -847,6 +847,10 @@ async function saveProgram(e) {
     features_ru: document.getElementById('pFeaturesRu').value.split('\n').map(s => s.trim()).filter(Boolean),
     buttonText: document.getElementById('pButtonText').value || (actionType === 'purchase' ? 'Get Started' : 'Contact Us'),
     buttonText_ru: document.getElementById('pButtonTextRu').value || (actionType === 'purchase' ? 'Начать' : 'Связаться'),
+    detailsButton: existingItem && existingItem.detailsButton ? existingItem.detailsButton : '',
+    detailsButton_ru: existingItem && existingItem.detailsButton_ru ? existingItem.detailsButton_ru : '',
+    detailsText: existingItem && existingItem.detailsText ? existingItem.detailsText : '',
+    detailsText_ru: existingItem && existingItem.detailsText_ru ? existingItem.detailsText_ru : '',
     actionType,
     popular,
     order: parseInt(document.getElementById('pOrder').value, 10) || 0
