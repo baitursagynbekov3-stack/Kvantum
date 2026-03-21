@@ -48,6 +48,40 @@
       detailsButton_ru: 'Узнать подробнее',
       detailsText: 'Brain Charge is a daily practice that rewires your thinking, removes inner blocks, and launches new results in money, state, and life. You begin to think differently, and your reality starts to change.',
       detailsText_ru: 'Зарядка мозга — это ежедневная практика, которая перепрошивает мышление, убирает внутренние блоки и запускает новые результаты в деньгах, состоянии и жизни. Ты начинаешь думать по-другому — и твоя реальность начинает меняться.',
+      detailsReviews: [
+        {
+          text: 'By the first week I felt calmer, more focused, and stopped reacting to everything emotionally.',
+          author: 'Aigerim',
+          role: 'Program participant'
+        },
+        {
+          text: 'The practice helped me make faster decisions and finally move from thoughts to real action.',
+          author: 'Elvira',
+          role: 'Entrepreneur'
+        },
+        {
+          text: 'I got my inner support back. Less chaos inside, more confidence, energy, and results.',
+          author: 'Meerim',
+          role: 'KVANTUM client'
+        }
+      ],
+      detailsReviews_ru: [
+        {
+          text: 'Уже в первую неделю я стала спокойнее, собраннее и перестала так остро реагировать на всё вокруг.',
+          author: 'Айгерим',
+          role: 'Участница программы'
+        },
+        {
+          text: 'Практика помогла быстрее принимать решения и перейти из постоянных мыслей в реальные действия.',
+          author: 'Эльвира',
+          role: 'Предприниматель'
+        },
+        {
+          text: 'Я вернула внутреннюю опору. Внутри стало меньше хаоса, а снаружи — больше уверенности, энергии и результатов.',
+          author: 'Мээрим',
+          role: 'Клиент KVANTUM'
+        }
+      ],
       actionType: 'purchase',
       order: 1
     },

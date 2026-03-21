@@ -1646,6 +1646,66 @@ function goToTestimonialsSlide(index) {
   updateTestimonialsCarousel();
 }
 
+const programDetailsCarouselState = {};
+
+function renderProgramDetailsDots(detailsId, totalSlides) {
+  const dotsRoot = document.getElementById(`${detailsId}-dots`);
+  if (!dotsRoot) return;
+
+  if (totalSlides <= 1) {
+    dotsRoot.innerHTML = '';
+    return;
+  }
+
+  const currentIndex = programDetailsCarouselState[detailsId] || 0;
+  dotsRoot.innerHTML = Array.from({ length: totalSlides }, (_, index) => (
+    `<button class="program-detail-dot${index === currentIndex ? ' active' : ''}" type="button" aria-label="Go to review ${index + 1}" onclick="goToProgramDetailsSlide('${detailsId}', ${index})"></button>`
+  )).join('');
+}
+
+function updateProgramDetailsCarousel(detailsId) {
+  const track = document.getElementById(`${detailsId}-track`);
+  const cards = track ? Array.from(track.querySelectorAll('.program-detail-review')) : [];
+  const prevBtn = document.querySelector(`[data-program-prev="${detailsId}"]`);
+  const nextBtn = document.querySelector(`[data-program-next="${detailsId}"]`);
+
+  if (!track || !cards.length) return;
+
+  const maxIndex = Math.max(0, cards.length - 1);
+  const gapValue = parseFloat(getComputedStyle(track).gap || getComputedStyle(track).columnGap || '0') || 0;
+  const cardWidth = cards[0].getBoundingClientRect().width;
+  const currentIndex = Math.min(Math.max(programDetailsCarouselState[detailsId] || 0, 0), maxIndex);
+
+  programDetailsCarouselState[detailsId] = currentIndex;
+  track.style.transform = `translateX(-${currentIndex * (cardWidth + gapValue)}px)`;
+
+  if (prevBtn) prevBtn.disabled = currentIndex === 0;
+  if (nextBtn) nextBtn.disabled = currentIndex >= maxIndex;
+
+  renderProgramDetailsDots(detailsId, maxIndex + 1);
+}
+
+function initializeProgramDetailCarousels() {
+  document.querySelectorAll('[data-program-carousel-id]').forEach((carousel) => {
+    const detailsId = carousel.getAttribute('data-program-carousel-id');
+    if (!detailsId) return;
+    if (typeof programDetailsCarouselState[detailsId] !== 'number') {
+      programDetailsCarouselState[detailsId] = 0;
+    }
+    updateProgramDetailsCarousel(detailsId);
+  });
+}
+
+function shiftProgramDetailsCarousel(detailsId, step) {
+  programDetailsCarouselState[detailsId] = (programDetailsCarouselState[detailsId] || 0) + step;
+  updateProgramDetailsCarousel(detailsId);
+}
+
+function goToProgramDetailsSlide(detailsId, index) {
+  programDetailsCarouselState[detailsId] = Number(index) || 0;
+  updateProgramDetailsCarousel(detailsId);
+}
+
 function toggleProgramDetails(detailsId, trigger) {
   const panel = document.getElementById(detailsId);
   if (!panel) return;
@@ -1654,6 +1714,10 @@ function toggleProgramDetails(detailsId, trigger) {
   if (trigger) {
     trigger.classList.toggle('active', isOpen);
     trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+
+  if (isOpen) {
+    updateProgramDetailsCarousel(detailsId);
   }
 }
 
@@ -1686,6 +1750,9 @@ function renderPrograms(items) {
     const btnText = lang === 'ru' && p.buttonText_ru ? p.buttonText_ru : p.buttonText;
     const detailsButtonText = lang === 'ru' && p.detailsButton_ru ? p.detailsButton_ru : p.detailsButton;
     const detailsText = lang === 'ru' && p.detailsText_ru ? p.detailsText_ru : p.detailsText;
+    const detailsReviews = lang === 'ru' && Array.isArray(p.detailsReviews_ru) && p.detailsReviews_ru.length
+      ? p.detailsReviews_ru
+      : (Array.isArray(p.detailsReviews) ? p.detailsReviews : []);
     const allFeatures = lang === 'ru' && p.features_ru && p.features_ru.length ? p.features_ru : (p.features || []);
     const visibleFeatures = allFeatures.slice(0, 8);
     const hiddenFeatureCount = Math.max(0, allFeatures.length - visibleFeatures.length);
@@ -1701,10 +1768,47 @@ function renderPrograms(items) {
       btnHtml = `<button class="btn btn-primary btn-block" onclick="handlePurchase('${escapeHtml(p._id || p.id)}', '${escapeHtml(p.name)}', ${p.priceNumeric || 0}, '${escapeHtml(p.purchaseCurrency || 'KGS')}')">${escapeHtml(btnText)}</button>`;
     }
 
+    const detailsReviewsHtml = detailsReviews.length
+      ? `<div class="program-detail-carousel" data-program-carousel-id="${escapeHtml(detailsId)}">
+           <div class="program-detail-carousel-head">
+             <span class="program-detail-carousel-title">${lang === 'ru' ? 'Отзывы участниц' : 'Student reviews'}</span>
+             <div class="program-detail-carousel-nav">
+               <button class="program-detail-nav" type="button" data-program-prev="${escapeHtml(detailsId)}" onclick="shiftProgramDetailsCarousel('${detailsId}', -1)" aria-label="${lang === 'ru' ? 'Предыдущий отзыв' : 'Previous review'}">&#8592;</button>
+               <button class="program-detail-nav" type="button" data-program-next="${escapeHtml(detailsId)}" onclick="shiftProgramDetailsCarousel('${detailsId}', 1)" aria-label="${lang === 'ru' ? 'Следующий отзыв' : 'Next review'}">&#8594;</button>
+             </div>
+           </div>
+           <div class="program-detail-carousel-viewport">
+             <div class="program-detail-carousel-track" id="${escapeHtml(detailsId)}-track">
+               ${detailsReviews.map((review) => {
+                 const reviewText = review && typeof review === 'object' ? review.text : String(review || '');
+                 const reviewAuthor = review && typeof review === 'object' ? review.author : '';
+                 const reviewRole = review && typeof review === 'object' ? review.role : '';
+                 const reviewInitial = reviewAuthor ? escapeHtml(String(reviewAuthor).trim().charAt(0).toUpperCase()) : 'K';
+                 return `<article class="program-detail-review">
+                   <p class="program-detail-review-text">${escapeHtml(reviewText)}</p>
+                   <div class="program-detail-review-author">
+                     <span class="program-detail-review-avatar">${reviewInitial}</span>
+                     <div>
+                       <strong>${escapeHtml(reviewAuthor || (lang === 'ru' ? 'Участница' : 'Participant'))}</strong>
+                       ${reviewRole ? `<span>${escapeHtml(reviewRole)}</span>` : ''}
+                     </div>
+                   </div>
+                 </article>`;
+               }).join('')}
+             </div>
+           </div>
+           <div class="program-detail-carousel-dots" id="${escapeHtml(detailsId)}-dots"></div>
+         </div>`
+      : '';
+
     const detailsHtml = detailsText
       ? `<button class="pricing-secondary-btn" type="button" aria-expanded="false" onclick="toggleProgramDetails('${detailsId}', this)">${escapeHtml(detailsButtonText || (lang === 'ru' ? 'Узнать подробнее' : 'Learn more'))}</button>
          <div class="pricing-details-panel" id="${escapeHtml(detailsId)}">
-           <p>${escapeHtml(detailsText)}</p>
+           <div class="pricing-details-card">
+             <span class="pricing-details-label">${lang === 'ru' ? 'О программе' : 'About the program'}</span>
+             <p>${escapeHtml(detailsText)}</p>
+             ${detailsReviewsHtml}
+           </div>
          </div>`
       : '';
 
@@ -1726,6 +1830,8 @@ function renderPrograms(items) {
       </div>
     </div>`;
   }).join('');
+
+  initializeProgramDetailCarousels();
 }
 
 // ===== Dark Mode =====
@@ -1770,6 +1876,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.addEventListener('resize', () => {
   updateTestimonialsCarousel();
+  initializeProgramDetailCarousels();
 });
 
 // ===== Navbar =====

@@ -851,6 +851,8 @@ async function saveProgram(e) {
     detailsButton_ru: existingItem && existingItem.detailsButton_ru ? existingItem.detailsButton_ru : '',
     detailsText: existingItem && existingItem.detailsText ? existingItem.detailsText : '',
     detailsText_ru: existingItem && existingItem.detailsText_ru ? existingItem.detailsText_ru : '',
+    detailsReviews: existingItem && Array.isArray(existingItem.detailsReviews) ? existingItem.detailsReviews : [],
+    detailsReviews_ru: existingItem && Array.isArray(existingItem.detailsReviews_ru) ? existingItem.detailsReviews_ru : [],
     actionType,
     popular,
     order: parseInt(document.getElementById('pOrder').value, 10) || 0
