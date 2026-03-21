@@ -75,7 +75,8 @@
         <li><a href="#testimonials" data-i18n="nav.testimonials">Отзывы</a></li>
         <li><a href="#contact" data-i18n="nav.contact">Контакты</a></li>
         <li class="mobile-nav-buttons">
-          <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')" data-i18n="nav.login">Войти</button>
+          <button class="btn btn-outline btn-sm" onclick="openModal('loginModal'); switchTab('login')" data-i18n="nav.login">Войти</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('loginModal'); switchTab('register')" data-i18n="nav.register">Регистрация</button>
           <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="nav.consult">Начать</button>
         </li>
       </ul>
@@ -87,7 +88,8 @@
         <button class="btn-lang" id="langToggle" onclick="toggleLanguage()" title="Switch language" style="display:none">
           <span class="lang-flag" id="langFlag">RU</span>
         </button>
-        <button class="btn btn-outline btn-sm" id="loginBtn" onclick="openModal('loginModal')" data-i18n="nav.login">Войти</button>
+        <button class="btn btn-outline btn-sm" id="loginBtn" onclick="openModal('loginModal'); switchTab('login')" data-i18n="nav.login">Войти</button>
+        <button class="btn btn-primary btn-sm" id="registerBtn" onclick="openModal('loginModal'); switchTab('register')" data-i18n="nav.register">Регистрация</button>
         <button class="btn btn-primary btn-sm nav-cta" onclick="openModal('consultModal')" data-i18n="nav.consult">Начать</button>
         <div class="user-menu" id="userMenu" style="display:none">
           <button class="user-menu-toggle" onclick="toggleUserMenu()">
@@ -334,12 +336,6 @@
                   <span data-i18n="testimonials.t4.role">Маркетолог</span>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-        <button class="testimonials-nav next" type="button" onclick="shiftTestimonialsCarousel(1)" aria-label="Next testimonials">&#8594;</button>
-      </div>
-      <div class="testimonials-dots" aria-label="Testimonials slider dots"></div>
             </div>
           </div>
         </div>
