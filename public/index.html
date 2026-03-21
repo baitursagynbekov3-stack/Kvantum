@@ -51,7 +51,7 @@
       if(localStorage.getItem('quantum_cookies')==='accepted')return;
       var b=document.createElement('div');
       b.className='cookie-banner';
-      b.innerHTML='<span>We use essential cookies for site functionality. No tracking. Got it?</span><button id="cookieAccept">Accept</button>';
+      b.innerHTML='<span>Мы используем необходимые cookies для работы сайта. Без отслеживания.</span><button id="cookieAccept">Принять</button>';
       document.body.appendChild(b);
       document.getElementById('cookieAccept').addEventListener('click',function(){
         localStorage.setItem('quantum_cookies','accepted');
@@ -65,18 +65,18 @@
   <nav class="navbar" id="navbar">
     <div class="container nav-container">
       <a href="#hero" class="logo">
-        <span class="logo-icon" data-i18n="logo.icon">Q</span>
-        <span class="logo-text" data-i18n="logo.text">QUANTUM</span>
+        <span class="logo-icon" data-i18n="logo.icon">К</span>
+        <span class="logo-text" data-i18n="logo.text">КВАНТУМ</span>
       </a>
       <ul class="nav-links" id="navLinks">
-        <li><a href="#about" data-i18n="nav.about">About</a></li>
-        <li><a href="#services" data-i18n="nav.services">Services</a></li>
-        <li><a href="#programs" data-i18n="nav.programs">Programs</a></li>
-        <li><a href="#testimonials" data-i18n="nav.testimonials">Testimonials</a></li>
-        <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
+        <li><a href="#about" data-i18n="nav.about">О нас</a></li>
+        <li><a href="#services" data-i18n="nav.services">Услуги</a></li>
+        <li><a href="#programs" data-i18n="nav.programs">Программы</a></li>
+        <li><a href="#testimonials" data-i18n="nav.testimonials">Отзывы</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">Контакты</a></li>
         <li class="mobile-nav-buttons">
-          <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')" data-i18n="nav.login">Login</button>
-          <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="nav.consult">Get Started</button>
+          <button class="btn btn-outline btn-sm" onclick="openModal('loginModal')" data-i18n="nav.login">Войти</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="nav.consult">Начать</button>
         </li>
       </ul>
       <div class="nav-actions">
@@ -87,19 +87,19 @@
         <button class="btn-lang" id="langToggle" onclick="toggleLanguage()" title="Switch language" style="display:none">
           <span class="lang-flag" id="langFlag">RU</span>
         </button>
-        <button class="btn btn-outline btn-sm" id="loginBtn" onclick="openModal('loginModal')" data-i18n="nav.login">Login</button>
-        <button class="btn btn-primary btn-sm nav-cta" onclick="openModal('consultModal')" data-i18n="nav.consult">Get Started</button>
+        <button class="btn btn-outline btn-sm" id="loginBtn" onclick="openModal('loginModal')" data-i18n="nav.login">Войти</button>
+        <button class="btn btn-primary btn-sm nav-cta" onclick="openModal('consultModal')" data-i18n="nav.consult">Начать</button>
         <div class="user-menu" id="userMenu" style="display:none">
           <button class="user-menu-toggle" onclick="toggleUserMenu()">
             <span id="userInitials">U</span>
           </button>
           <div class="user-dropdown" id="userDropdown" style="display:none">
-            <p class="user-greeting" data-i18n-html="user.greeting">Hello, <strong id="userName">User</strong></p>
-            <a href="#" onclick="showProfile()" data-i18n="user.profile">My Profile</a>
-            <a href="#" onclick="showPurchases()" data-i18n="user.purchases">My Purchases</a>
-            <a href="#" id="adminDashboardLink" onclick="openAdminDashboard()" data-i18n="user.admin" style="display:none">Admin Dashboard</a>
+            <p class="user-greeting" data-i18n-html="user.greeting">Привет, <strong id="userName">Пользователь</strong></p>
+            <a href="#" onclick="showProfile()" data-i18n="user.profile">Мой профиль</a>
+            <a href="#" onclick="showPurchases()" data-i18n="user.purchases">Мои покупки</a>
+            <a href="#" id="adminDashboardLink" onclick="openAdminDashboard()" data-i18n="user.admin" style="display:none">Админ панель</a>
             <a href="./admin.html" id="adminLink" style="display:none">Edit Content</a>
-            <a href="#" onclick="handleLogout()" data-i18n="user.logout">Logout</a>
+            <a href="#" onclick="handleLogout()" data-i18n="user.logout">Выйти</a>
           </div>
         </div>
         <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()">
@@ -117,16 +117,16 @@
       <div class="hero-grid-pattern"></div>
     </div>
     <div class="container hero-content">
-      <div class="hero-badge anim-fade-up" data-i18n="hero.badge">Subconscious &amp; Quantum Field Work</div>
+      <div class="hero-badge anim-fade-up" data-i18n="hero.badge">Работа с подсознанием и квантовым полем</div>
       <h1 class="hero-title anim-fade-up anim-delay-1">
-        <span data-i18n-html="hero.title">Transform Your<br><span class="text-gradient">Inner Reality</span><br>Build Your Dream Life</span>
+        <span data-i18n-html="hero.title">Трансформируйте<br><span class="text-gradient">Внутреннюю Реальность</span><br>Постройте Жизнь Мечты</span>
       </h1>
       <p class="hero-description anim-fade-up anim-delay-2" data-i18n="hero.description">
-        QUANTUM by Altynai Eshinbekova &mdash; specialist in subconscious and quantum field work. NLP Master. Transform your thoughts, feelings, and state to transform your life, relationships, and finances.
+        КВАНТУМ от Алтынай Эшинбековой &mdash; специалист по работе с подсознанием и квантовым полем. Мастер НЛП. Трансформируйте мысли, чувства и состояние &mdash; трансформируйте жизнь, отношения и финансы.
       </p>
       <div class="hero-buttons anim-fade-up anim-delay-3">
-        <button class="btn btn-primary btn-lg" onclick="openModal('consultModal')" data-i18n="hero.cta">Book Free Consultation</button>
-        <a href="#programs" class="btn btn-ghost btn-lg" data-i18n="hero.programs">Explore Programs</a>
+        <button class="btn btn-primary btn-lg" onclick="openModal('consultModal')" data-i18n="hero.cta">Записаться на консультацию</button>
+        <a href="#programs" class="btn btn-ghost btn-lg" data-i18n="hero.programs">Смотреть программы</a>
       </div>
     </div>
     <div class="scroll-indicator anim-fade-up anim-delay-4">
@@ -141,17 +141,17 @@
       <div class="stats-grid">
         <div class="stat-item anim-fade-up">
           <span class="stat-number" data-count="5000">0</span><span class="stat-plus">+</span>
-          <span class="stat-label" data-i18n="stats.clients">Clients Transformed</span>
+          <span class="stat-label" data-i18n="stats.clients">Клиентов трансформировано</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item anim-fade-up anim-delay-1">
           <span class="stat-number" data-count="99">0</span><span class="stat-plus">%</span>
-          <span class="stat-label" data-i18n="stats.satisfaction">Client Satisfaction</span>
+          <span class="stat-label" data-i18n="stats.satisfaction">Удовлетворённость клиентов</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item anim-fade-up anim-delay-2">
           <span class="stat-number" data-count="8">0</span><span class="stat-plus">+</span>
-          <span class="stat-label" data-i18n="stats.years">Years of Experience</span>
+          <span class="stat-label" data-i18n="stats.years">Лет опыта</span>
         </div>
       </div>
     </div>
@@ -170,27 +170,27 @@
           </div>
         </div>
         <div class="about-right anim-fade-left">
-          <div class="section-label" data-i18n="about.label">About the Founder</div>
-          <h2 class="section-title" data-i18n-html="about.title">Altynai Eshinbekova &mdash; <span class="text-gradient">Guiding Your Transformation</span></h2>
-          <p class="about-text" data-i18n="about.text">I work deeply, ecologically, and deliver real results. I personally accompany each client to their goal. My approach combines subconscious work, energy field alignment, and leader state development.</p>
+          <div class="section-label" data-i18n="about.label">Об основателе</div>
+          <h2 class="section-title" data-i18n-html="about.title">Алтынай Эшинбекова &mdash; <span class="text-gradient">Ваш проводник к трансформации</span></h2>
+          <p class="about-text" data-i18n="about.text">Я работаю глубоко, экологично и с реальным результатом. Я лично сопровождаю каждого клиента к его цели. Мой подход сочетает работу с подсознанием, выравнивание энергетического поля и развитие состояния лидера.</p>
           <div class="about-credentials">
             <button class="credential credential-btn" onclick="openCredModal(1)">
               <div class="credential-check">&#10003;</div>
-              <span data-i18n="about.cred1.title">Subconscious &amp; Quantum Field Specialist</span>
+              <span data-i18n="about.cred1.title">Специалист по подсознанию и квантовому полю</span>
               <span class="credential-arrow">&#8594;</span>
             </button>
             <button class="credential credential-btn" onclick="openCredModal(2)">
               <div class="credential-check">&#10003;</div>
-              <span data-i18n="about.cred2.title">NLP Master</span>
+              <span data-i18n="about.cred2.title">Мастер НЛП</span>
               <span class="credential-arrow">&#8594;</span>
             </button>
             <button class="credential credential-btn" onclick="openCredModal(3)">
               <div class="credential-check">&#10003;</div>
-              <span data-i18n="about.cred3.title">Master of Deep Analysis Sessions</span>
+              <span data-i18n="about.cred3.title">Мастер глубинных разборов</span>
               <span class="credential-arrow">&#8594;</span>
             </button>
           </div>
-          <blockquote class="about-quote" data-i18n="about.quote">"You are in the right place at the right time."</blockquote>
+          <blockquote class="about-quote" data-i18n="about.quote">«Вы в нужном месте и в нужное время.»</blockquote>
         </div>
       </div>
     </div>
@@ -200,33 +200,33 @@
   <section class="section services" id="services">
     <div class="container">
       <div class="section-header anim-fade-up">
-        <div class="section-label" data-i18n="work.label">What We Do</div>
-        <h2 class="section-title" data-i18n-html="work.title">How We <span class="text-gradient">Work</span></h2>
-        <p class="section-subtitle" data-i18n="work.subtitle">Work individually or in groups &mdash; deeply, ecologically, with real results</p>
+        <div class="section-label" data-i18n="work.label">Что мы делаем</div>
+        <h2 class="section-title" data-i18n-html="work.title">Как мы <span class="text-gradient">работаем</span></h2>
+        <p class="section-subtitle" data-i18n="work.subtitle">Работаем индивидуально и в группе &mdash; глубоко, экологично, с реальным результатом</p>
       </div>
       <div class="services-grid">
         <div class="service-card anim-fade-up">
           <div class="service-number">01</div>
-          <h3 data-i18n="work.card1.title">Subconscious</h3>
-          <p data-i18n="work.card1.desc">Deep work with subconscious patterns, beliefs, and mental blocks that hold you back</p>
+          <h3 data-i18n="work.card1.title">Подсознание</h3>
+          <p data-i18n="work.card1.desc">Глубокая работа с паттернами подсознания, убеждениями и ментальными блоками</p>
           <div class="service-arrow">&rarr;</div>
         </div>
         <div class="service-card anim-fade-up anim-delay-1">
           <div class="service-number">02</div>
-          <h3 data-i18n="work.card2.title">Energy Field</h3>
-          <p data-i18n="work.card2.desc">Alignment and strengthening of your energy field for attracting desired outcomes</p>
+          <h3 data-i18n="work.card2.title">Энергетическое поле</h3>
+          <p data-i18n="work.card2.desc">Выравнивание и усиление вашего энергетического поля для привлечения желаемого</p>
           <div class="service-arrow">&rarr;</div>
         </div>
         <div class="service-card anim-fade-up anim-delay-2">
           <div class="service-number">03</div>
-          <h3 data-i18n="work.card3.title">Leader State</h3>
-          <p data-i18n="work.card3.desc">Developing the internal state of a leader for business growth and personal mastery</p>
+          <h3 data-i18n="work.card3.title">Состояние лидера</h3>
+          <p data-i18n="work.card3.desc">Развитие внутреннего состояния лидера для роста бизнеса и личного мастерства</p>
           <div class="service-arrow">&rarr;</div>
         </div>
         <div class="service-card anim-fade-up anim-delay-3">
           <div class="service-number">04</div>
-          <h3 data-i18n="work.card4.title">Guided to Results</h3>
-          <p data-i18n="work.card4.desc">Personal accompaniment until you achieve your goals &mdash; we don't just teach, we walk with you</p>
+          <h3 data-i18n="work.card4.title">Сопровождаем до результата</h3>
+          <p data-i18n="work.card4.desc">Личное сопровождение до достижения ваших целей &mdash; мы не просто учим, мы идём с вами</p>
           <div class="service-arrow">&rarr;</div>
         </div>
       </div>
@@ -234,32 +234,32 @@
       <!-- Individual Services -->
       <div class="individual-services">
         <div class="section-header anim-fade-up">
-          <h3 class="subsection-title" data-i18n="services.title">Individual Services</h3>
+          <h3 class="subsection-title" data-i18n="services.title">Индивидуальная работа</h3>
         </div>
         <div class="individual-grid">
           <div class="individual-card anim-fade-up">
             <div class="individual-card-icon">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
             </div>
-            <h4 data-i18n="services.s1.title">Consultations</h4>
-            <p data-i18n="services.s1.desc">One-on-one sessions to diagnose your current state and define your path forward</p>
-            <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Book Now</button>
+            <h4 data-i18n="services.s1.title">Консультации</h4>
+            <p data-i18n="services.s1.desc">Индивидуальные сессии для диагностики текущего состояния и определения пути вперёд</p>
+            <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Записаться</button>
           </div>
           <div class="individual-card anim-fade-up anim-delay-1">
             <div class="individual-card-icon">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             </div>
-            <h4 data-i18n="services.s2.title">Transformation Sessions</h4>
-            <p data-i18n="services.s2.desc">Deep transformational work with thoughts, feelings, and internal states</p>
-            <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Book Now</button>
+            <h4 data-i18n="services.s2.title">Трансформационные сессии</h4>
+            <p data-i18n="services.s2.desc">Глубокая трансформационная работа с мыслями, чувствами и внутренними состояниями</p>
+            <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Записаться</button>
           </div>
           <div class="individual-card anim-fade-up anim-delay-2">
             <div class="individual-card-icon">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
-            <h4 data-i18n="services.s3.title">Goal Accompaniment</h4>
-            <p data-i18n="services.s3.desc">Individual support and guidance as you work towards your personal or business goals</p>
-            <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Book Now</button>
+            <h4 data-i18n="services.s3.title">Сопровождение к цели</h4>
+            <p data-i18n="services.s3.desc">Индивидуальная поддержка на пути к вашим личным или бизнес-целям</p>
+            <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Записаться</button>
           </div>
         </div>
       </div>
@@ -270,9 +270,9 @@
   <section class="section programs" id="programs">
     <div class="container">
       <div class="section-header anim-fade-up">
-        <div class="section-label" data-i18n="programs.label">Our Programs</div>
-        <h2 class="section-title" data-i18n-html="programs.title">Choose Your Path to <span class="text-gradient">Transformation</span></h2>
-        <p class="section-subtitle" data-i18n="programs.subtitle">From entry-level to elite mentorship &mdash; find the right program for you</p>
+        <div class="section-label" data-i18n="programs.label">Наши программы</div>
+        <h2 class="section-title" data-i18n-html="programs.title">Выберите путь к <span class="text-gradient">трансформации</span></h2>
+        <p class="section-subtitle" data-i18n="programs.subtitle">От начального уровня до элитного наставничества &mdash; найдите свою программу</p>
       </div>
       <div class="pricing-grid">
         <!-- Live programs are rendered from /api/content/programs (Admin Panel) -->
@@ -284,51 +284,51 @@
   <section class="section testimonials" id="testimonials">
     <div class="container">
       <div class="section-header anim-fade-up">
-        <div class="section-label" data-i18n="testimonials.label">Testimonials</div>
-        <h2 class="section-title" data-i18n-html="testimonials.title">What Our Clients <span class="text-gradient">Say</span></h2>
+        <div class="section-label" data-i18n="testimonials.label">Отзывы</div>
+        <h2 class="section-title" data-i18n-html="testimonials.title">Что говорят наши <span class="text-gradient">клиенты</span></h2>
       </div>
       <div class="testimonials-grid">
         <div class="testimonial-card anim-fade-up">
           <div class="testimonial-quote">&ldquo;</div>
-          <p data-i18n="testimonials.t1.text">"After just 21 days of Brain Charge, my entire perspective on life shifted. My income grew 2x in the following month."</p>
+          <p data-i18n="testimonials.t1.text">«Всего за 21 день Зарядки мозга мой взгляд на жизнь полностью изменился. Мой доход вырос в 2 раза в следующем месяце.»</p>
           <div class="testimonial-author">
             <div class="author-avatar">A</div>
             <div class="author-info">
               <strong>Aisuluu K.</strong>
-              <span data-i18n="testimonials.t1.role">Entrepreneur</span>
+              <span data-i18n="testimonials.t1.role">Предприниматель</span>
             </div>
           </div>
         </div>
         <div class="testimonial-card anim-fade-up anim-delay-1">
           <div class="testimonial-quote">&ldquo;</div>
-          <p data-i18n="testimonials.t2.text">"The REBOOT program completely transformed how I handle relationships and finances. I finally feel in control of my life."</p>
+          <p data-i18n="testimonials.t2.text">«Программа ПЕРЕЗАГРУЗКА полностью изменила то, как я справляюсь с отношениями и финансами. Я наконец чувствую контроль над своей жизнью.»</p>
           <div class="testimonial-author">
             <div class="author-avatar">M</div>
             <div class="author-info">
               <strong>Marat B.</strong>
-              <span data-i18n="testimonials.t2.role">Business Owner</span>
+              <span data-i18n="testimonials.t2.role">Владелец бизнеса</span>
             </div>
           </div>
         </div>
         <div class="testimonial-card anim-fade-up anim-delay-2">
           <div class="testimonial-quote">&ldquo;</div>
-          <p data-i18n="testimonials.t3.text">"Working with Altynai through the mentorship program gave me tools I use every day. My business grew 3x in 6 months."</p>
+          <p data-i18n="testimonials.t3.text">«Работа с Алтынай через программу наставничества дала мне инструменты, которые я использую каждый день. Мой бизнес вырос в 3 раза за 6 месяцев.»</p>
           <div class="testimonial-author">
             <div class="author-avatar">N</div>
             <div class="author-info">
               <strong>Nuriza T.</strong>
-              <span data-i18n="testimonials.t3.role">Consultant</span>
+              <span data-i18n="testimonials.t3.role">Консультант</span>
             </div>
           </div>
         </div>
         <div class="testimonial-card anim-fade-up anim-delay-3">
           <div class="testimonial-quote">&ldquo;</div>
-          <p data-i18n="testimonials.t4.text">"Before coming to KVANTUM, I was constantly anxious and doubted every decision. After working with Altynai, I became calm, clear, and finally moved into action. I launched my own project and my income became stable."</p>
+          <p data-i18n="testimonials.t4.text">«До КВАНТУМ я жила в постоянной тревоге и сомнениях. После работы с Алтынай появилось внутреннее спокойствие, ясность и уверенность. Я запустила свой проект и вышла на стабильный доход.»</p>
           <div class="testimonial-author">
             <div class="author-avatar">B</div>
             <div class="author-info">
               <strong>Begimai S.</strong>
-              <span data-i18n="testimonials.t4.role">Marketing Specialist</span>
+              <span data-i18n="testimonials.t4.role">Маркетолог</span>
             </div>
           </div>
         </div>
@@ -336,7 +336,7 @@
 
       <!-- Video Reviews -->
       <div class="video-reviews-wrap anim-fade-up">
-        <h3 class="video-reviews-title" data-i18n="testimonials.videoTitle">Video Reviews</h3>
+        <h3 class="video-reviews-title" data-i18n="testimonials.videoTitle">Видео отзывы</h3>
         <div class="video-reviews-grid">
 
           <div class="video-review-card anim-fade-up"
@@ -419,9 +419,9 @@
   <section class="cta-banner">
     <div class="container">
       <div class="cta-content anim-fade-up">
-        <h2 data-i18n="cta.title">Ready to Transform Your Reality?</h2>
-        <p data-i18n="cta.desc">Book a free consultation and discover the right path for your transformation journey.</p>
-        <button class="btn btn-white btn-lg" onclick="openModal('consultModal')" data-i18n="cta.btn">Book Free Consultation</button>
+        <h2 data-i18n="cta.title">Готовы трансформировать реальность?</h2>
+        <p data-i18n="cta.desc">Запишитесь на бесплатную консультацию и найдите свой путь к трансформации.</p>
+        <button class="btn btn-white btn-lg" onclick="openModal('consultModal')" data-i18n="cta.btn">Бесплатная консультация</button>
       </div>
     </div>
   </section>
@@ -430,13 +430,13 @@
   <section class="section contact" id="contact">
     <div class="container">
       <div class="section-header anim-fade-up">
-        <div class="section-label" data-i18n="contact.label">Contact</div>
-        <h2 class="section-title" data-i18n-html="contact.title">Get in <span class="text-gradient">Touch</span></h2>
-        <p class="section-subtitle" data-i18n="contact.subtitle">Ready to start your transformation? Book a free consultation today.</p>
+        <div class="section-label" data-i18n="contact.label">Контакты</div>
+        <h2 class="section-title" data-i18n-html="contact.title">Свяжитесь <span class="text-gradient">с нами</span></h2>
+        <p class="section-subtitle" data-i18n="contact.subtitle">Готовы начать трансформацию? Запишитесь на бесплатную консультацию.</p>
       </div>
       <div class="contact-grid">
         <div class="contact-info anim-fade-right">
-          <h3 data-i18n="contact.connect">Connect With Us</h3>
+          <h3 data-i18n="contact.connect">Свяжитесь с нами</h3>
           <div class="social-links">
             <a href="#" class="social-link whatsapp" onclick="openWhatsApp()">
               <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -456,22 +456,22 @@
             </a>
           </div>
           <div class="contact-note">
-            <h4 data-i18n="contact.entry.title">Entry Conditions</h4>
-            <p data-i18n-html="contact.entry.text">Entry to individual work is after a <strong>free consultation</strong>. Not everyone is accepted &mdash; we ensure the right fit for both sides.</p>
+            <h4 data-i18n="contact.entry.title">Условия входа</h4>
+            <p data-i18n-html="contact.entry.text">Вход в индивидуальную работу после <strong>бесплатной консультации</strong>. Беру не всех &mdash; мы обеспечиваем правильный подбор для обеих сторон.</p>
           </div>
         </div>
         <div class="contact-form-wrapper anim-fade-left">
           <form id="contactForm" onsubmit="handleContact(event)">
             <div class="form-group">
-              <label data-i18n="contact.form.name">Your Name</label>
-              <input type="text" name="name" data-i18n-placeholder="contact.form.name_ph" placeholder="Enter your name" required>
+              <label data-i18n="contact.form.name">Ваше имя</label>
+              <input type="text" name="name" data-i18n-placeholder="contact.form.name_ph" placeholder="Введите ваше имя" required>
             </div>
             <div class="form-group">
               <label>Email</label>
               <input type="email" name="email" placeholder="your@email.com" required>
             </div>
             <div class="form-group">
-              <label data-i18n="contact.form.phone">Phone (WhatsApp)</label>
+              <label data-i18n="contact.form.phone">Телефон (WhatsApp)</label>
               <div class="phone-input-group">
                 <select class="country-code-select" name="countryCode">
                   <option value="+996">+996 KG</option>
@@ -494,24 +494,24 @@
               </div>
             </div>
             <div class="form-group">
-              <label data-i18n="contact.form.interest">Interested In</label>
+              <label data-i18n="contact.form.interest">Интересует</label>
               <select name="service">
-                <option value="consultation" data-i18n="contact.form.opt1">Free Consultation</option>
-                <option value="brain-charge" data-i18n="contact.form.opt2">Brain Charge</option>
-                <option value="resources-club" data-i18n="contact.form.opt3">Club "Resources"</option>
-                <option value="intensive" data-i18n="contact.form.opt4">Intensive "Mom &amp; Dad"</option>
+                <option value="consultation" data-i18n="contact.form.opt1">Бесплатная консультация</option>
+                <option value="brain-charge" data-i18n="contact.form.opt2">Зарядка мозга</option>
+                <option value="resources-club" data-i18n="contact.form.opt3">Клуб «Ресурсы»</option>
+                <option value="intensive" data-i18n="contact.form.opt4">Интенсив «Папа, Мама»</option>
                 <option value="reboot">REBOOT</option>
-                <option value="mentorship" data-i18n="contact.form.opt6">Mentorship</option>
+                <option value="mentorship" data-i18n="contact.form.opt6">Наставничество</option>
               </select>
             </div>
             <div class="form-group">
-              <label data-i18n="contact.form.message">Message (optional)</label>
-              <textarea name="message" data-i18n-placeholder="contact.form.message_ph" placeholder="Tell us about your goals..." rows="3"></textarea>
+              <label data-i18n="contact.form.message">Сообщение (необязательно)</label>
+              <textarea name="message" data-i18n-placeholder="contact.form.message_ph" placeholder="Расскажите о ваших целях..." rows="3"></textarea>
             </div>
             <div class="form-group turnstile-group" data-turnstile-container>
               <div class="turnstile-widget" data-turnstile-widget></div>
             </div>
-            <button type="submit" class="btn btn-primary btn-block btn-lg" data-i18n="contact.form.submit">Send Request</button>
+            <button type="submit" class="btn btn-primary btn-block btn-lg" data-i18n="contact.form.submit">Отправить заявку</button>
           </form>
         </div>
       </div>
@@ -524,31 +524,31 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="logo">
-            <span class="logo-icon" data-i18n="logo.icon">Q</span>
-            <span class="logo-text" data-i18n="logo.text">QUANTUM</span>
+            <span class="logo-icon" data-i18n="logo.icon">К</span>
+            <span class="logo-text" data-i18n="logo.text">КВАНТУМ</span>
           </div>
-          <p data-i18n="footer.desc">Transition to Dream Reality. Transform your life through subconscious work, NLP, and quantum field mastery.</p>
+          <p data-i18n="footer.desc">Переход в реальность мечты. Трансформируйте жизнь через работу с подсознанием, НЛП и мастерство квантового поля.</p>
         </div>
         <div class="footer-links">
-          <h4 data-i18n="footer.quick">Quick Links</h4>
-          <a href="#about" data-i18n="nav.about">About</a>
-          <a href="#services" data-i18n="nav.services">Services</a>
-          <a href="#programs" data-i18n="nav.programs">Programs</a>
-          <a href="#contact" data-i18n="nav.contact">Contact</a>
+          <h4 data-i18n="footer.quick">Быстрые ссылки</h4>
+          <a href="#about" data-i18n="nav.about">О нас</a>
+          <a href="#services" data-i18n="nav.services">Услуги</a>
+          <a href="#programs" data-i18n="nav.programs">Программы</a>
+          <a href="#contact" data-i18n="nav.contact">Контакты</a>
           <a href="/privacy">Политика конфиденциальности</a>
           <a href="/terms">Условия использования</a>
           <a href="/refund">Политика возврата</a>
         </div>
         <div class="footer-links">
-          <h4 data-i18n="nav.programs">Programs</h4>
-          <a href="#programs" data-i18n="programs.bc.name">Brain Charge</a>
-          <a href="#programs" data-i18n="bonuses.b2.name">Club "Resources"</a>
-          <a href="#programs" data-i18n="footer.intensive">Intensive</a>
+          <h4 data-i18n="nav.programs">Программы</h4>
+          <a href="#programs" data-i18n="programs.bc.name">Зарядка мозга</a>
+          <a href="#programs" data-i18n="bonuses.b2.name">Клуб «Ресурсы»</a>
+          <a href="#programs" data-i18n="footer.intensive">Интенсив</a>
           <a href="#programs">REBOOT</a>
-          <a href="#programs" data-i18n="programs.ms.name">Mentorship</a>
+          <a href="#programs" data-i18n="programs.ms.name">Наставничество</a>
         </div>
         <div class="footer-links">
-          <h4 data-i18n="contact.connect">Connect</h4>
+          <h4 data-i18n="contact.connect">Свяжитесь с нами</h4>
           <a href="#" onclick="openWhatsApp()">WhatsApp</a>
           <a href="#" onclick="openTelegram()">Telegram</a>
           <a href="https://www.instagram.com/altynai_transformator/" target="_blank" rel="noopener noreferrer">Instagram</a>
@@ -556,7 +556,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p data-i18n="footer.copy">&copy; 2025 QUANTUM by Altynai Eshinbekova. All rights reserved.</p>
+        <p data-i18n="footer.copy">&copy; 2025 КВАНТУМ Алтынай Эшинбекова. Все права защищены.</p>
       </div>
     </div>
   </footer>
@@ -566,41 +566,41 @@
     <div class="modal">
       <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
       <div class="modal-tabs">
-        <button class="tab-btn active" onclick="switchTab('login')" data-i18n="modal.login">Login</button>
-        <button class="tab-btn" onclick="switchTab('register')" data-i18n="modal.register">Register</button>
+        <button class="tab-btn active" onclick="switchTab('login')" data-i18n="modal.login">Войти</button>
+        <button class="tab-btn" onclick="switchTab('register')" data-i18n="modal.register">Регистрация</button>
       </div>
       <form id="loginForm" class="modal-form" onsubmit="handleLogin(event)">
-        <h2 data-i18n="modal.welcome">Welcome Back</h2>
+        <h2 data-i18n="modal.welcome">С возвращением</h2>
         <div class="form-group">
           <label>Email</label>
           <input type="email" name="email" placeholder="your@email.com" required>
         </div>
         <div class="form-group">
-          <label data-i18n="modal.password">Password</label>
-          <input type="password" name="password" data-i18n-placeholder="modal.pass_ph" placeholder="Enter password" required>
+          <label data-i18n="modal.password">Пароль</label>
+          <input type="password" name="password" data-i18n-placeholder="modal.pass_ph" placeholder="Введите пароль" required>
         </div>
         <div class="form-group remember-me-group">
           <label class="remember-me-label">
             <input type="checkbox" name="rememberMe">
-            <span data-i18n="modal.remember_me">Remember me</span>
+            <span data-i18n="modal.remember_me">Запомнить меня</span>
           </label>
         </div>
-        <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.login">Login</button>
-        <p class="form-note"><a href="#" onclick="openResetModal(); return false;" data-i18n="modal.forgot">Forgot password?</a></p>
-        <p class="form-note" data-i18n-html="modal.no_account">Don't have an account? <a href="#" onclick="switchTab('register')">Register here</a></p>
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.login">Войти</button>
+        <p class="form-note"><a href="#" onclick="openResetModal(); return false;" data-i18n="modal.forgot">Забыли пароль?</a></p>
+        <p class="form-note" data-i18n-html="modal.no_account">Нет аккаунта? <a href="#" onclick="switchTab('register')">Зарегистрируйтесь</a></p>
       </form>
       <form id="registerForm" class="modal-form" style="display:none" onsubmit="handleRegister(event)">
-        <h2 data-i18n="modal.create">Create Account</h2>
+        <h2 data-i18n="modal.create">Создать аккаунт</h2>
         <div class="form-group">
-          <label data-i18n="modal.fullname">Full Name</label>
-          <input type="text" name="name" data-i18n-placeholder="modal.fullname_ph" placeholder="Your full name" required>
+          <label data-i18n="modal.fullname">Полное имя</label>
+          <input type="text" name="name" data-i18n-placeholder="modal.fullname_ph" placeholder="Ваше полное имя" required>
         </div>
         <div class="form-group">
           <label>Email</label>
           <input type="email" name="email" placeholder="your@email.com" required>
         </div>
         <div class="form-group">
-          <label data-i18n="contact.form.phone">Phone (WhatsApp)</label>
+          <label data-i18n="contact.form.phone">Телефон (WhatsApp)</label>
           <div class="phone-input-group">
             <select class="country-code-select" name="countryCode">
               <option value="+996">+996 KG</option>
@@ -623,17 +623,17 @@
           </div>
         </div>
         <div class="form-group">
-          <label data-i18n="modal.password">Password</label>
-          <input type="password" name="password" data-i18n-placeholder="modal.create_pass_ph" placeholder="Create a password" required minlength="8">
+          <label data-i18n="modal.password">Пароль</label>
+          <input type="password" name="password" data-i18n-placeholder="modal.create_pass_ph" placeholder="Придумайте пароль" required minlength="8">
         </div>
         <div class="form-group remember-me-group">
           <label class="remember-me-label">
             <input type="checkbox" name="rememberMe">
-            <span data-i18n="modal.remember_me">Remember me</span>
+            <span data-i18n="modal.remember_me">Запомнить меня</span>
           </label>
         </div>
-        <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.register">Register</button>
-        <p class="form-note" data-i18n-html="modal.has_account">Already have an account? <a href="#" onclick="switchTab('login')">Login here</a></p>
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="modal.register">Регистрация</button>
+        <p class="form-note" data-i18n-html="modal.has_account">Уже есть аккаунт? <a href="#" onclick="switchTab('login')">Войдите</a></p>
       </form>
     </div>
   </div>
@@ -643,14 +643,14 @@
     <div class="modal">
       <button class="modal-close" onclick="closeModal('resetModal')">&times;</button>
       <form id="resetForm" class="modal-form" onsubmit="handlePasswordReset(event)">
-        <h2 data-i18n="reset.title">Password Recovery</h2>
-        <p class="modal-description" data-i18n="reset.desc">Enter your registration email and phone. We will set a new password.</p>
+        <h2 data-i18n="reset.title">Восстановление пароля</h2>
+        <p class="modal-description" data-i18n="reset.desc">Введите email и телефон из регистрации. Мы установим новый пароль.</p>
         <div class="form-group">
           <label data-i18n="reset.email">Email</label>
           <input type="email" name="email" placeholder="your@email.com" required>
         </div>
         <div class="form-group">
-          <label data-i18n="reset.phone">Phone from registration</label>
+          <label data-i18n="reset.phone">Телефон из регистрации</label>
           <div class="phone-input-group">
             <select class="country-code-select" name="countryCode">
               <option value="+996">+996 KG</option>
@@ -680,15 +680,15 @@
           </div>
         </div>
         <div class="form-group">
-          <label data-i18n="reset.new_password">New password</label>
-          <input type="password" name="newPassword" data-i18n-placeholder="reset.new_password_ph" placeholder="Minimum 8 characters" minlength="8" required>
+          <label data-i18n="reset.new_password">Новый пароль</label>
+          <input type="password" name="newPassword" data-i18n-placeholder="reset.new_password_ph" placeholder="Минимум 8 символов" minlength="8" required>
         </div>
         <div class="form-group">
-          <label data-i18n="reset.confirm_password">Confirm new password</label>
-          <input type="password" name="confirmPassword" data-i18n-placeholder="reset.confirm_password_ph" placeholder="Repeat password" minlength="8" required>
+          <label data-i18n="reset.confirm_password">Повторите новый пароль</label>
+          <input type="password" name="confirmPassword" data-i18n-placeholder="reset.confirm_password_ph" placeholder="Повторите пароль" minlength="8" required>
         </div>
-        <button type="submit" class="btn btn-primary btn-block" data-i18n="reset.submit">Reset Password</button>
-        <p class="form-note"><a href="#" onclick="closeModal('resetModal'); openModal('loginModal'); switchTab('login'); return false;" data-i18n="reset.back_login">Back to login</a></p>
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="reset.submit">Сбросить пароль</button>
+        <p class="form-note"><a href="#" onclick="closeModal('resetModal'); openModal('loginModal'); switchTab('login'); return false;" data-i18n="reset.back_login">Назад ко входу</a></p>
       </form>
     </div>
   </div>
@@ -698,9 +698,9 @@
     <div class="modal cred-modal">
       <button class="modal-close" onclick="closeModal('credModal1')">&times;</button>
       <div class="cred-modal-tag">01</div>
-      <h2 class="cred-modal-title" id="credModalTitle1">Subconscious &amp; Quantum Field Specialist</h2>
+      <h2 class="cred-modal-title" id="credModalTitle1">Специалист по подсознанию и квантовому полю</h2>
       <div class="cred-modal-divider"></div>
-      <p class="cred-modal-body" id="credModalBody1">Altynai works at the deepest level of human psychology — where the subconscious mind and the quantum energy field intersect. Her approach goes beyond surface-level coaching by targeting the root cause of what holds people back: the invisible programs running silently beneath conscious awareness. Through her signature "Brain Charge" method, she guides clients to reprogram their thoughts, feelings, and internal states — because when those shift, everything in life follows. Relationships improve, finances open up, and life direction becomes clear. She works through the subconscious, the energetic field, and the state of a leader — and stays with clients until real results appear.</p>
+      <p class="cred-modal-body" id="credModalBody1">Алтынай работает на самом глубоком уровне человеческой психологии — там, где подсознание и квантовое энергетическое поле пересекаются. Её подход выходит за рамки поверхностного коучинга: она работает с первопричиной того, что мешает людям двигаться вперёд — с невидимыми программами, которые тихо работают ниже уровня сознания. С помощью авторского метода «Brain Charge» она помогает клиентам перепрограммировать мысли, чувства и внутренние состояния — потому что когда они меняются, меняется всё. Улучшаются отношения, открываются финансы, появляется ясность в направлении жизни. Она работает через подсознание, энергетическое поле и состояние лидера — и сопровождает клиентов до появления реальных результатов.</p>
     </div>
   </div>
 
@@ -709,9 +709,9 @@
     <div class="modal cred-modal">
       <button class="modal-close" onclick="closeModal('credModal2')">&times;</button>
       <div class="cred-modal-tag">02</div>
-      <h2 class="cred-modal-title" id="credModalTitle2">NLP Master</h2>
+      <h2 class="cred-modal-title" id="credModalTitle2">Мастер НЛП</h2>
       <div class="cred-modal-divider"></div>
-      <p class="cred-modal-body" id="credModalBody2">As a certified Master of NLP, Altynai brings over 30 NLP practices into her work with entrepreneurs and her mentorship program. She uses the tools of Neuro-Linguistic Programming not as theory but as live, hands-on techniques — applied directly in sessions to break limiting patterns, rewire language-based beliefs, and create fast, measurable shifts in how clients think and behave. Her NLP mastery forms the backbone of her deep analysis sessions and is passed on to students in her mentorship track, where she trains others to read emotional fields, clear subconscious blocks, and facilitate transformation professionally.</p>
+      <p class="cred-modal-body" id="credModalBody2">Как сертифицированный Мастер НЛП, Алтынай привносит более 30 практик нейролингвистического программирования в работу с предпринимателями и в свою программу наставничества. Она использует инструменты НЛП не как теорию, а как живые, практические техники — применяемые непосредственно в сессиях для разрушения ограничивающих паттернов, перепрограммирования убеждений на уровне языка и создания быстрых, измеримых изменений в мышлении и поведении клиентов. Мастерство НЛП лежит в основе её глубинных разборов и передаётся студентам в программе наставничества, где она обучает других читать эмоциональные поля, очищать подсознательные блоки и профессионально сопровождать трансформацию.</p>
     </div>
   </div>
 
@@ -720,9 +720,9 @@
     <div class="modal cred-modal">
       <button class="modal-close" onclick="closeModal('credModal3')">&times;</button>
       <div class="cred-modal-tag">03</div>
-      <h2 class="cred-modal-title" id="credModalTitle3">Master of Deep Analysis Sessions</h2>
+      <h2 class="cred-modal-title" id="credModalTitle3">Мастер глубинных разборов</h2>
       <div class="cred-modal-divider"></div>
-      <p class="cred-modal-body" id="credModalBody3">Altynai's deep analysis sessions are her most powerful one-on-one format — not standard coaching conversations, but precise, structured dives into the root causes behind a person's stuck patterns. Drawing on her expertise in the subconscious, quantum field work, and NLP, she rapidly identifies where a client's inner blocks originate — whether in childhood programming, family system dynamics, or inherited generational scenarios. Her intensives work directly with separation from parental patterns, release of foreign life scripts, restoration of healthy hierarchy, and removal of childhood blocks. Clients don't just gain insight — they leave with a fundamentally different internal state and a clear path forward. She works only with entrepreneurs, and only after a free consultation to ensure the right fit.</p>
+      <p class="cred-modal-body" id="credModalBody3">Глубинные разборы Алтынай — её самый мощный формат индивидуальной работы. Это не стандартные коучинговые беседы, а точные, структурированные погружения в первопричины застревания человека. Опираясь на экспертизу в области подсознания, работы с квантовым полем и НЛП, она быстро определяет, откуда берутся внутренние блоки клиента — будь то детское программирование, динамика семейной системы или унаследованные родовые сценарии. Её интенсивы работают напрямую с отделением от родительских паттернов, освобождением от чужих жизненных сценариев, восстановлением здоровой иерархии и снятием детских блоков. Клиенты уходят не просто с осознанием — они выходят с принципиально другим внутренним состоянием и чётким путём вперёд. Она работает только с предпринимателями и только после бесплатной консультации, чтобы убедиться в правильном подборе.</p>
     </div>
   </div>
 
@@ -731,18 +731,18 @@
     <div class="modal">
       <button class="modal-close" onclick="closeModal('consultModal')">&times;</button>
       <form id="consultForm" class="modal-form" onsubmit="handleConsultation(event)">
-        <h2 data-i18n="consult.title">Book Free Consultation</h2>
-        <p class="modal-description" data-i18n="consult.desc">Fill in your details and we'll contact you via WhatsApp or Telegram to schedule your free consultation.</p>
+        <h2 data-i18n="consult.title">Записаться на бесплатную консультацию</h2>
+        <p class="modal-description" data-i18n="consult.desc">Заполните данные, и мы свяжемся с вами через WhatsApp или Telegram.</p>
         <div class="form-group">
-          <label data-i18n="modal.fullname">Full Name</label>
-          <input type="text" name="name" data-i18n-placeholder="modal.fullname_ph" placeholder="Your full name" required>
+          <label data-i18n="modal.fullname">Полное имя</label>
+          <input type="text" name="name" data-i18n-placeholder="modal.fullname_ph" placeholder="Ваше полное имя" required>
         </div>
         <div class="form-group">
           <label>Email</label>
           <input type="email" name="email" placeholder="your@email.com" required>
         </div>
         <div class="form-group">
-          <label data-i18n="consult.phone">Phone (WhatsApp/Telegram)</label>
+          <label data-i18n="consult.phone">Телефон (WhatsApp/Telegram)</label>
           <div class="phone-input-group">
             <select class="country-code-select" name="countryCode">
               <option value="+996">+996 KG</option>
@@ -765,18 +765,18 @@
           </div>
         </div>
         <div class="form-group">
-          <label data-i18n="contact.form.interest">Interested In</label>
+          <label data-i18n="contact.form.interest">Интересует</label>
           <select name="service">
-            <option value="consultation" data-i18n="consult.opt1">General Consultation</option>
-            <option value="brain-charge" data-i18n="contact.form.opt2">Brain Charge</option>
-            <option value="resources-club" data-i18n="contact.form.opt3">Club "Resources"</option>
-            <option value="intensive" data-i18n="contact.form.opt4">Intensive "Mom &amp; Dad"</option>
+            <option value="consultation" data-i18n="consult.opt1">Общая консультация</option>
+            <option value="brain-charge" data-i18n="contact.form.opt2">Зарядка мозга</option>
+            <option value="resources-club" data-i18n="contact.form.opt3">Клуб «Ресурсы»</option>
+            <option value="intensive" data-i18n="contact.form.opt4">Интенсив «Папа, Мама»</option>
             <option value="reboot">REBOOT</option>
-            <option value="mentorship" data-i18n="contact.form.opt6">Mentorship</option>
+            <option value="mentorship" data-i18n="contact.form.opt6">Наставничество</option>
           </select>
         </div>
         <div class="form-group">
-          <label data-i18n="consult.preferred">Preferred Contact</label>
+          <label data-i18n="consult.preferred">Предпочтительный способ связи</label>
           <div class="radio-group">
             <label><input type="radio" name="contact_method" value="whatsapp" checked> WhatsApp</label>
             <label><input type="radio" name="contact_method" value="telegram"> Telegram</label>
@@ -785,7 +785,7 @@
         <div class="form-group turnstile-group" data-turnstile-container>
           <div class="turnstile-widget" data-turnstile-widget></div>
         </div>
-        <button type="submit" class="btn btn-primary btn-block btn-lg" data-i18n="consult.submit">Book Subconscious Diagnostics</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" data-i18n="consult.submit">Записаться на консультацию</button>
       </form>
     </div>
   </div>
@@ -802,17 +802,17 @@
         </div>
       </div>
       <form id="profileForm" class="modal-form" onsubmit="handleProfileSave(event)">
-        <h3 class="profile-section-title" data-i18n="profile.edit_title">Edit Information</h3>
+        <h3 class="profile-section-title" data-i18n="profile.edit_title">Редактировать данные</h3>
         <div class="form-group">
-          <label data-i18n="modal.fullname">Full Name</label>
-          <input type="text" name="name" data-i18n-placeholder="modal.fullname_ph" placeholder="Your full name" required>
+          <label data-i18n="modal.fullname">Полное имя</label>
+          <input type="text" name="name" data-i18n-placeholder="modal.fullname_ph" placeholder="Ваше полное имя" required>
         </div>
         <div class="form-group">
           <label>Email</label>
           <input type="email" name="email" placeholder="your@email.com" required>
         </div>
         <div class="form-group">
-          <label data-i18n="consult.phone">Phone (WhatsApp/Telegram)</label>
+          <label data-i18n="consult.phone">Телефон (WhatsApp/Telegram)</label>
           <div class="phone-input-group">
             <select class="country-code-select" name="countryCode">
               <option value="+996">+996 KG</option>
@@ -834,11 +834,11 @@
             <input type="tel" name="phone" placeholder="555 123 456" required>
           </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-block" data-i18n="profile.save">Save Changes</button>
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="profile.save">Сохранить</button>
       </form>
-      <p class="profile-password-note" data-i18n-html="profile.password_note">To change your password, use <a href="#" onclick="closeModal('profileModal'); openModal('loginModal');">Forgot Password</a> on the login screen.</p>
+      <p class="profile-password-note" data-i18n-html="profile.password_note">Чтобы сменить пароль, используйте <a href="#" onclick="closeModal('profileModal'); openModal('loginModal');">Забыли пароль</a> на экране входа.</p>
       <div class="profile-bookings-section">
-        <h3 class="profile-section-title" data-i18n="profile.bookings_title">My Bookings</h3>
+        <h3 class="profile-section-title" data-i18n="profile.bookings_title">Мои записи</h3>
         <div id="profileBookingsList" class="profile-bookings-list"></div>
       </div>
     </div>
@@ -849,15 +849,15 @@
     <div class="modal">
       <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
       <form id="paymentForm" class="modal-form" onsubmit="handlePayment(event)">
-        <h2 data-i18n="payment.title">Complete Payment</h2>
+        <h2 data-i18n="payment.title">Завершить оплату</h2>
         <div class="payment-summary" id="paymentSummary"></div>
         <div class="form-group">
-          <label data-i18n="payment.card">Card Number</label>
+          <label data-i18n="payment.card">Номер карты</label>
           <input type="text" name="cardNumber" placeholder="4242 4242 4242 4242" maxlength="19" required>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label data-i18n="payment.expiry">Expiry</label>
+            <label data-i18n="payment.expiry">Срок</label>
             <input type="text" name="expiry" placeholder="MM/YY" maxlength="5" required>
           </div>
           <div class="form-group">
@@ -866,19 +866,19 @@
           </div>
         </div>
         <div class="form-group">
-          <label data-i18n="payment.name">Name on Card</label>
+          <label data-i18n="payment.name">Имя на карте</label>
           <input type="text" name="cardName" placeholder="ALTYNAI ESHINBEKOVA" required>
         </div>
         <div class="notification-select">
-          <label data-i18n="payment.confirm_via">Send confirmation via:</label>
+          <label data-i18n="payment.confirm_via">Отправить подтверждение через:</label>
           <div class="radio-group">
             <label><input type="radio" name="notify" value="whatsapp" checked> WhatsApp</label>
             <label><input type="radio" name="notify" value="telegram"> Telegram</label>
-            <label><input type="radio" name="notify" value="both" data-i18n="payment.both"> Both</label>
+            <label><input type="radio" name="notify" value="both" data-i18n="payment.both"> Оба</label>
           </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-block btn-lg" id="payBtn" data-i18n="payment.pay">Pay Now</button>
-        <p class="payment-secure" data-i18n="payment.secure">&#128274; Secure payment &mdash; Demo mode</p>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="payBtn" data-i18n="payment.pay">Оплатить</button>
+        <p class="payment-secure" data-i18n="payment.secure">&#128274; Безопасная оплата &mdash; Демо режим</p>
       </form>
     </div>
   </div>
@@ -889,7 +889,7 @@
       <div class="success-icon">&#10003;</div>
       <h2 id="successTitle">Success!</h2>
       <p id="successMessage">Your request has been processed successfully.</p>
-      <button class="btn btn-primary" onclick="closeModal('successModal')" data-i18n="modal.continue">Continue</button>
+      <button class="btn btn-primary" onclick="closeModal('successModal')" data-i18n="modal.continue">Продолжить</button>
     </div>
   </div>
 
@@ -897,15 +897,15 @@
   <div class="modal-overlay" id="adminModal">
     <div class="modal admin-modal">
       <button class="modal-close" onclick="closeModal('adminModal')">&times;</button>
-      <h2 data-i18n="admin.title">Admin Dashboard</h2>
-      <p class="modal-description" data-i18n="admin.desc">Latest registrations, consultations, and payments.</p>
+      <h2 data-i18n="admin.title">Админ панель</h2>
+      <p class="modal-description" data-i18n="admin.desc">Последние регистрации, консультации и платежи.</p>
       <div id="adminPanelBody" class="admin-panel-body">
-        <p class="admin-empty" data-i18n="admin.loading">Loading data...</p>
+        <p class="admin-empty" data-i18n="admin.loading">Загрузка данных...</p>
       </div>
     </div>
   </div>
 
-  <button id="mobileStickyCta" class="mobile-sticky-cta" onclick="openModal('consultModal')" data-i18n="sticky.consult">Book Subconscious Diagnostics</button>
+  <button id="mobileStickyCta" class="mobile-sticky-cta" onclick="openModal('consultModal')" data-i18n="sticky.consult">Записаться на диагностику подсознания</button>
 
   <!-- AI Chatbot Widget -->
   <div class="chatbot-widget" id="chatbot">
@@ -918,8 +918,8 @@
         <div class="chatbot-header-info">
           <div class="chatbot-avatar">AI</div>
           <div>
-            <strong data-i18n="chat.name">QUANTUM Assistant</strong>
-            <span class="chatbot-status" data-i18n="chat.online">Online</span>
+            <strong data-i18n="chat.name">Ассистент КВАНТУМ</strong>
+            <span class="chatbot-status" data-i18n="chat.online">В сети</span>
           </div>
         </div>
         <button class="chatbot-minimize" onclick="toggleChatbot()">&minus;</button>
@@ -927,31 +927,25 @@
       <div class="chatbot-messages" id="chatbotMessages">
         <div class="chat-message bot">
           <div class="message-bubble" data-i18n-html="chat.welcome">
-            Welcome to QUANTUM! I'm your AI assistant. I can help you with:
-            <br><br>
-            &#8226; Program information &amp; pricing<br>
-            &#8226; Booking a free consultation<br>
-            &#8226; Learning about our services<br>
-            <br>
-            How can I help you today?
+            Добро пожаловать в КВАНТУМ! Я ваш AI-ассистент. Я могу помочь с:<br><br>&#8226; Информация о программах и ценах<br>&#8226; Запись на бесплатную консультацию<br>&#8226; Узнать об услугах<br><br>Чем могу помочь?
           </div>
         </div>
       </div>
       <div class="chatbot-quick-replies">
-        <button onclick="sendQuickReply('What are the prices?')" data-i18n="chat.qr1">Prices</button>
-        <button onclick="sendQuickReply('Tell me about Brain Charge')" data-i18n="chat.qr2">Brain Charge</button>
-        <button onclick="sendQuickReply('I want to book a consultation')" data-i18n="chat.qr3">Book Consultation</button>
+        <button onclick="sendQuickReply('What are the prices?')" data-i18n="chat.qr1">Цены</button>
+        <button onclick="sendQuickReply('Tell me about Brain Charge')" data-i18n="chat.qr2">Зарядка мозга</button>
+        <button onclick="sendQuickReply('I want to book a consultation')" data-i18n="chat.qr3">Записаться</button>
       </div>
       <form class="chatbot-input" onsubmit="sendChatMessage(event)">
-        <input type="text" id="chatInput" data-i18n-placeholder="chat.placeholder" placeholder="Type your message..." autocomplete="off">
+        <input type="text" id="chatInput" data-i18n-placeholder="chat.placeholder" placeholder="Введите сообщение..." autocomplete="off">
         <button type="submit">&#10148;</button>
       </form>
     </div>
   </div>
 
-  <script src="./config.js?v=20260318-8"></script>
-  <script src="./program-defaults.js?v=20260318-8"></script>
-  <script src="./app.js?v=20260318-8"></script>
+  <script src="./config.js?v=20260321-1"></script>
+  <script src="./program-defaults.js?v=20260321-1"></script>
+  <script src="./app.js?v=20260321-1"></script>
 
   <script>
     // Video Reviews Modal
