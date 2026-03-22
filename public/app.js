@@ -1903,7 +1903,7 @@ function buildProgramDetailsVideosHtml(videos, lang) {
       : '';
     const interactiveClass = src ? ' is-playable' : '';
     const previewHtml = src
-      ? `<video class="program-detail-video-preview" autoplay muted loop playsinline preload="metadata"${poster ? ` poster="${escapeHtml(poster)}"` : ''}>
+      ? `<video class="program-detail-video-preview" muted playsinline preload="metadata"${poster ? ` poster="${escapeHtml(poster)}"` : ''}>
            <source src="${escapeHtml(src)}" type="${escapeHtml(getVideoMimeType(src))}">
          </video>`
       : '';
@@ -1988,11 +1988,6 @@ function openProgramDetailsModal(programId) {
   requestAnimationFrame(() => {
     initializeProgramDetailCarousels();
     updateProgramDetailsCarousel(modalDetailsId);
-    document.querySelectorAll('.program-detail-video-preview').forEach((video) => {
-      if (video && typeof video.play === 'function') {
-        video.play().catch(() => {});
-      }
-    });
   });
 }
 
