@@ -2875,9 +2875,72 @@ function renderProfileBookings(bookings) {
   }).join('');
 }
 
-function showPurchases() {
-  showToast('Purchases page coming soon!', 'info');
+async function showPurchases() {
   document.getElementById('userDropdown').style.display = 'none';
+
+  try {
+    const res = await apiFetch('/api/my-purchases');
+    if (!res.ok) throw new Error('Failed to load');
+    const purchases = await res.json();
+
+    const isRu = currentLang === 'ru';
+    const title = isRu ? 'Мои покупки' : 'My Purchases';
+    const emptyMsg = isRu ? 'У вас пока нет покупок.' : 'No purchases yet.';
+    const statusLabels = {
+      completed: isRu ? 'Оплачено' : 'Completed',
+      pending: isRu ? 'Ожидает' : 'Pending',
+      cancelled: isRu ? 'Отменено' : 'Cancelled'
+    };
+
+    let html = '<h2>' + escapeHtml(title) + '</h2>';
+
+    if (!purchases.length) {
+      html += '<p class="profile-no-bookings">' + escapeHtml(emptyMsg) + '</p>';
+    } else {
+      html += '<div class="profile-bookings-list">';
+      purchases.forEach(p => {
+        const date = new Date(p.createdAt);
+        const dateStr = date.toLocaleDateString(isRu ? 'ru-RU' : 'en-US', {
+          year: 'numeric', month: 'long', day: 'numeric'
+        });
+        const timeStr = date.toLocaleTimeString(isRu ? 'ru-RU' : 'en-US', {
+          hour: '2-digit', minute: '2-digit'
+        });
+        const symbols = { USD: '$', EUR: '€', RUB: '₽', UAH: '₴', KGS: '' };
+        const sym = symbols[p.currency] || '';
+        const suffix = p.currency === 'KGS' ? ' сом' : (sym ? '' : ' ' + p.currency);
+        const priceStr = sym + Number(p.amount).toLocaleString('ru-RU') + suffix;
+        const statusText = statusLabels[p.status] || p.status;
+
+        html += '<div class="profile-booking-card">' +
+          '<div class="booking-card-header">' +
+            '<strong>' + escapeHtml(p.productName || (isRu ? 'Покупка' : 'Purchase')) + '</strong>' +
+            '<span class="booking-status status-' + escapeHtml(p.status) + '">' + escapeHtml(statusText) + '</span>' +
+          '</div>' +
+          '<div class="booking-card-details">' +
+            '<span>' + escapeHtml(priceStr) + '</span>' +
+            '<span>' + escapeHtml(dateStr) + ', ' + escapeHtml(timeStr) + '</span>' +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+
+    // Use purchases modal (create if needed)
+    let modal = document.getElementById('purchasesModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.id = 'purchasesModal';
+      modal.innerHTML = '<div class="modal profile-modal"><button class="modal-close" onclick="closeModal(\'purchasesModal\')">&times;</button><div id="purchasesBody"></div></div>';
+      document.body.appendChild(modal);
+    }
+    document.getElementById('purchasesBody').innerHTML = html;
+    openModal('purchasesModal');
+
+  } catch (err) {
+    showToast(currentLang === 'ru' ? 'Ошибка загрузки покупок.' : 'Failed to load purchases.', 'error');
+  }
 }
 
 function formatAdminDate(value) {

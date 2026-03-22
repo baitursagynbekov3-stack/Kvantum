@@ -1793,6 +1793,28 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
   }
 });
 
+// User purchases
+app.get('/api/my-purchases', authenticateToken, async (req, res) => {
+  try {
+    const purchases = await prisma.payment.findMany({
+      where: { userId: req.user.id, status: 'completed' },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      select: {
+        id: true,
+        productName: true,
+        amount: true,
+        currency: true,
+        status: true,
+        createdAt: true
+      }
+    });
+    res.json(purchases);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Update user profile
 app.patch('/api/profile', authenticateToken, async (req, res) => {
   try {
