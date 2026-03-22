@@ -3648,6 +3648,7 @@ async function handleConsultation(e) {
         contact_method: contactMethod
       });
 
+      closeModal('consultModal');
       showSuccessModal(
         'Consultation Booked!',
         'Thank you, ' + data.name + '! We will contact you via ' +
@@ -3734,7 +3735,16 @@ async function handleContact(e) {
 }
 
 // ===== Payment =====
+// Programs that should open consultation modal instead of direct checkout
+const CONSULT_PROGRAMS = new Set(['Club "Resources"', 'Intensive "Mom & Dad"']);
+
 async function handlePurchase(productId, productName, amount, currency) {
+  // Open consultation modal for specific programs
+  if (CONSULT_PROGRAMS.has(productName)) {
+    openModal('consultModal');
+    return;
+  }
+
   if (!currentUser) {
     showToast('Please login or register first to make a purchase.', 'info');
     openModal('loginModal');

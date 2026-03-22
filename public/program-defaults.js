@@ -22,8 +22,8 @@
       popular: false,
       priceAmount: '1 000',
       priceAmount_ru: '1 000',
-      priceCurrency: 'KGS / RUB',
-      priceCurrency_ru: 'сом / рублей',
+      priceCurrency: 'KGS / month',
+      priceCurrency_ru: 'сом / мес',
       priceNumeric: 1000,
       purchaseCurrency: 'KGS',
       features: [

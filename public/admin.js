@@ -13,7 +13,6 @@ try {
 
 let leads = [];
 let chats = [];
-let payments = [];
 let allLeads = [];
 let allChats = [];
 let activeChat = null;
@@ -28,14 +27,8 @@ let chatFilters = {
   status: 'all'
 };
 
-let paymentFilters = {
-  search: '',
-  status: 'all'
-};
-
 let leadSearchTimer = null;
 let chatSearchTimer = null;
-let paymentSearchTimer = null;
 
 // ===== Dashboard load coordinator =====
 // Prevents stats from flickering when leads and chats load at different speeds.
@@ -80,7 +73,6 @@ function getCacheSavedAt(key) {
 
 const BOOKING_STATUSES = ['pending', 'new', 'in_progress', 'done', 'cancelled'];
 const CHAT_STATUSES = ['open', 'collecting', 'booked', 'closed', 'spam'];
-const PAYMENT_STATUSES = ['completed', 'pending', 'failed', 'refunded', 'cancelled'];
 
 // ===== API helpers (reused from app.js pattern) =====
 function buildApiUrl(path) {
@@ -144,47 +136,6 @@ function demoAdminApi(path, options) {
     return createApiResponse(200, { isAdmin: true });
   }
 
-  if (path.startsWith('/api/admin/overview') && method === 'GET') {
-    const role = getDemoUserRole();
-    if (role !== 'admin') return createApiResponse(403, { error: 'Admin access required' });
-
-    const users = getStorageArray('quantum_demo_users')
-      .map((user) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone || '',
-        role: user.role || 'user',
-        createdAt: user.createdAt || new Date().toISOString()
-      }))
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    const bookings = getStorageArray('quantum_demo_bookings')
-      .slice()
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    const payments = getStorageArray('quantum_demo_payments')
-      .map((payment) => {
-        const user = users.find((item) => Number(item.id) === Number(payment.userId));
-        return {
-          ...payment,
-          user: user ? { id: user.id, name: user.name, email: user.email } : null
-        };
-      })
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    return createApiResponse(200, {
-      totals: {
-        users: users.length,
-        bookings: bookings.length,
-        payments: payments.length
-      },
-      users: users.slice(0, 500),
-      bookings: bookings.slice(0, 500),
-      payments: payments.slice(0, 500)
-    });
-  }
-
   // Match /api/admin/{type} or /api/admin/{type}/{id}
   const match = path.match(/^\/api\/admin\/(testimonials|programs|services)(?:\/(.+))?$/);
   if (match) {
@@ -199,8 +150,7 @@ function demoAdminApi(path, options) {
     if (!id) {
       if (method === 'GET') return createApiResponse(200, items);
       if (method === 'POST') {
-        const requestedOrder = Number.isFinite(Number(body.order)) ? Number(body.order) : items.length + 1;
-        const item = { _id: 'd' + Date.now(), ...body, order: requestedOrder };
+        const item = { _id: 'd' + Date.now(), ...body, order: items.length + 1 };
         items.push(item);
         setStorageArray(storageKey, items);
         return createApiResponse(201, item);
@@ -252,8 +202,7 @@ function demoAdminApi(path, options) {
     const role = getDemoUserRole();
     if (role !== 'admin') return createApiResponse(403, { error: 'Admin access required' });
     let items = getStorageArray(keyMap.services);
-    const requestedOrder = Number.isFinite(Number(body.order)) ? Number(body.order) : items.length + 1;
-    const item = { _id: 'ds' + Date.now(), ...body, order: requestedOrder };
+    const item = { _id: 'ds' + Date.now(), ...body };
     items.push(item);
     setStorageArray(keyMap.services, items);
     return createApiResponse(201, { message: 'Service created', service: item });
@@ -434,23 +383,15 @@ function showToast(message, type) {
 }
 
 // ===== Section switching =====
-let currentSection = 'testimonials';
+let currentSection = 'dashboard';
 
 function switchSection(section, e) {
   if (e) e.preventDefault();
   currentSection = section;
-
-  document.querySelectorAll('.sidebar-nav a').forEach((a) => a.classList.remove('active'));
-  const activeLink = document.querySelector(`[data-section="${section}"]`);
-  if (activeLink) activeLink.classList.add('active');
-
-  document.querySelectorAll('[id^="section-"]').forEach((el) => { el.style.display = 'none'; });
-  const sectionEl = document.getElementById('section-' + section);
-  if (sectionEl) sectionEl.style.display = 'block';
-
-  if (section === 'payments' && !payments.length) {
-    loadPayments(false);
-  }
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  document.querySelector(`[data-section="${section}"]`).classList.add('active');
+  document.querySelectorAll('[id^="section-"]').forEach(el => el.style.display = 'none');
+  document.getElementById('section-' + section).style.display = 'block';
 }
 
 // ===== Modals =====
@@ -504,73 +445,6 @@ function withQuery(path, params) {
   return queryString ? `${path}?${queryString}` : path;
 }
 
-function parseOrder(value, fallback) {
-  const numeric = Number.parseInt(value, 10);
-  return Number.isFinite(numeric) ? numeric : fallback;
-}
-
-function sortContentItems(items, labelResolver) {
-  const getLabel = typeof labelResolver === 'function' ? labelResolver : (item) => item && item.name;
-  return [...(Array.isArray(items) ? items : [])].sort((a, b) => {
-    const orderA = parseOrder(a && a.order, Number.MAX_SAFE_INTEGER);
-    const orderB = parseOrder(b && b.order, Number.MAX_SAFE_INTEGER);
-    if (orderA !== orderB) return orderA - orderB;
-
-    const labelA = String(getLabel(a) || '').toLowerCase();
-    const labelB = String(getLabel(b) || '').toLowerCase();
-    return labelA.localeCompare(labelB);
-  });
-}
-
-function buildReorderPayload(item, nextOrder) {
-  const payload = { ...(item || {}), order: parseOrder(nextOrder, 0) };
-  delete payload._id;
-  return payload;
-}
-
-async function moveContentItem(config) {
-  const settings = config || {};
-  const ordered = sortContentItems(settings.items, settings.labelResolver);
-  const id = String(settings.id || '');
-  const index = ordered.findIndex((item) => String(item && item._id) === id);
-  if (index === -1) return;
-
-  const targetIndex = index + Number(settings.direction || 0);
-  if (targetIndex < 0 || targetIndex >= ordered.length) return;
-
-  const current = ordered[index];
-  const target = ordered[targetIndex];
-  const currentOrder = parseOrder(current.order, index + 1);
-  const targetOrder = parseOrder(target.order, targetIndex + 1);
-
-  try {
-    const [aRes, bRes] = await Promise.all([
-      adminFetch(`${settings.endpointPrefix}/${current._id}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify(buildReorderPayload(current, targetOrder))
-      }),
-      adminFetch(`${settings.endpointPrefix}/${target._id}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify(buildReorderPayload(target, currentOrder))
-      })
-    ]);
-
-    if (!aRes.ok || !bRes.ok) {
-      showToast(`Failed to reorder ${settings.entityName || 'items'}`, 'error');
-      return;
-    }
-
-    if (typeof settings.reload === 'function') {
-      await settings.reload();
-    }
-    showToast(`${settings.entityName || 'Content'} order updated`, 'success');
-  } catch (e) {
-    showToast(`Failed to reorder ${settings.entityName || 'items'}`, 'error');
-  }
-}
-
 // ================================================================
 // TESTIMONIALS
 // ================================================================
@@ -580,7 +454,7 @@ async function loadTestimonials() {
   try {
     const res = await adminFetch('/api/admin/testimonials', { headers: authHeaders() });
     if (res.ok) {
-      testimonials = sortContentItems(await res.json(), (item) => item.authorName || '');
+      testimonials = await res.json();
       renderTestimonialCards();
     }
   } catch (e) {
@@ -590,34 +464,25 @@ async function loadTestimonials() {
 
 function renderTestimonialCards() {
   const el = document.getElementById('testimonialsList');
-  const ordered = sortContentItems(testimonials, (item) => item.authorName || '');
-  testimonials = ordered;
-
-  if (!ordered.length) {
+  if (!testimonials.length) {
     el.innerHTML = `<div class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       <p>No testimonials yet. Add your first one!</p>
     </div>`;
     return;
   }
-
-  el.innerHTML = ordered.map((t, index) => {
-    const orderValue = parseOrder(t.order, index + 1);
-    return `
+  el.innerHTML = testimonials.map(t => `
     <div class="admin-card">
-      <div class="card-badge">Order: ${orderValue}</div>
+      <div class="card-badge">Order: ${t.order || 0}</div>
       <h3>${esc(t.authorName)}</h3>
-      <p title="${esc(t.text || '')}">"${esc(truncateText(t.text, 220))}"</p>
+      <p>"${esc(t.text)}"</p>
       ${t.role ? `<div class="card-meta">${esc(t.role)}</div>` : ''}
       <div class="card-actions">
-        <button class="btn btn-secondary btn-sm" onclick="moveTestimonial('${t._id}', -1)" ${index === 0 ? 'disabled' : ''} title="Move up">↑</button>
-        <button class="btn btn-secondary btn-sm" onclick="moveTestimonial('${t._id}', 1)" ${index === ordered.length - 1 ? 'disabled' : ''} title="Move down">↓</button>
         <button class="btn btn-secondary btn-sm" onclick="editTestimonial('${t._id}')">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="deleteTestimonial('${t._id}')">Delete</button>
       </div>
     </div>
-  `;
-  }).join('');
+  `).join('');
 }
 
 function openTestimonialForm(item) {
@@ -638,18 +503,6 @@ function editTestimonial(id) {
   if (item) openTestimonialForm(item);
 }
 
-async function moveTestimonial(id, direction) {
-  await moveContentItem({
-    items: testimonials,
-    id,
-    direction,
-    endpointPrefix: '/api/admin/testimonials',
-    reload: loadTestimonials,
-    entityName: 'testimonial',
-    labelResolver: (item) => item.authorName || ''
-  });
-}
-
 async function saveTestimonial(e) {
   e.preventDefault();
   const id = document.getElementById('testimonialId').value;
@@ -660,7 +513,7 @@ async function saveTestimonial(e) {
     authorInitial: document.getElementById('tInitial').value || document.getElementById('tAuthor').value.charAt(0),
     role: document.getElementById('tRole').value,
     role_ru: document.getElementById('tRoleRu').value,
-    order: parseInt(document.getElementById('tOrder').value, 10) || 0
+    order: parseInt(document.getElementById('tOrder').value) || 0
   };
 
   try {
@@ -696,38 +549,13 @@ async function deleteTestimonial(id) {
 // ================================================================
 // PROGRAMS
 // ================================================================
-function getDefaultPrograms() {
-  const defaults = window.QUANTUM_DEFAULT_PROGRAMS;
-  return Array.isArray(defaults)
-    ? defaults.map((item) => JSON.parse(JSON.stringify(item)))
-    : [];
-}
-
-function getProgramPriceDefaults(price, currency) {
-  if (price > 0) {
-    return {
-      priceAmount: currency === 'USD' ? '$' + price.toLocaleString() : price.toLocaleString(),
-      priceCurrency: currency === 'USD' ? '' : currency,
-      priceAmountRu: currency === 'USD' ? '$' + price.toLocaleString() : price.toLocaleString(),
-      priceCurrencyRu: currency === 'USD' ? '' : currency
-    };
-  }
-
-  return {
-    priceAmount: '',
-    priceCurrency: '',
-    priceAmountRu: '',
-    priceCurrencyRu: ''
-  };
-}
-
 let programs = [];
 
 async function loadPrograms() {
   try {
     const res = await adminFetch('/api/admin/programs', { headers: authHeaders() });
     if (res.ok) {
-      programs = sortContentItems(await res.json(), (item) => item.name || '');
+      programs = await res.json();
       renderProgramCards();
     }
   } catch (e) {
@@ -737,33 +565,25 @@ async function loadPrograms() {
 
 function renderProgramCards() {
   const el = document.getElementById('programsList');
-  const ordered = sortContentItems(programs, (item) => item.name || '');
-  programs = ordered;
-
-  if (!ordered.length) {
+  if (!programs.length) {
     el.innerHTML = `<div class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-      <p>No programs yet. Restore the standard program set or add your first one manually.</p>
-      <button class="btn btn-primary" onclick="restoreDefaultPrograms()">Restore default programs</button>
+      <p>No programs yet. Add your first one!</p>
     </div>`;
     return;
   }
-
-  el.innerHTML = ordered.map((p, index) => {
-    const priceText = [p.priceAmount || '', p.priceCurrency || ''].filter(Boolean).join(' ').trim() || 'Contact for price';
-    const allFeatures = Array.isArray(p.features) ? p.features : [];
-    const features = allFeatures.slice(0, 3);
-    const orderValue = parseOrder(p.order, index + 1);
-
+  el.innerHTML = programs.map(p => {
+    const price = p.priceNumeric || 0;
+    const cur = p.purchaseCurrency || 'KGS';
+    const priceText = price > 0 ? (cur === 'USD' ? '$' + price.toLocaleString() : price.toLocaleString() + ' ' + cur) : 'Contact for price';
+    const features = (p.features || []).slice(0, 3);
     return `<div class="admin-card">
-      <div class="card-badge">Order: ${orderValue}${p.popular ? ' · Featured' : ''}</div>
-      <h3 title="${esc(p.name || '')}">${esc(truncateText(p.name, 100))}</h3>
-      <p title="${esc(p.tagline || '')}">${esc(truncateText(p.tagline, 160))}</p>
-      <div class="card-meta">${esc(priceText)} · ${p.actionType === 'purchase' ? 'Buy Now' : 'Contact Us'}</div>
-      ${features.length ? `<div class="features-preview">${features.map((f) => `<span title="${esc(f)}">${esc(truncateText(f, 50))}</span>`).join('')}${allFeatures.length > 3 ? `<span>+${allFeatures.length - 3} more</span>` : ''}</div>` : ''}
+      ${p.popular ? '<div class="card-badge">Featured</div>' : ''}
+      <h3>${esc(p.name)}</h3>
+      <p>${esc(p.tagline || '')}</p>
+      <div class="card-meta">${priceText} · ${p.actionType === 'purchase' ? 'Buy Now' : 'Contact Us'}</div>
+      ${features.length ? `<div class="features-preview">${features.map(f => `<span>${esc(f)}</span>`).join('')}${(p.features || []).length > 3 ? `<span>+${(p.features || []).length - 3} more</span>` : ''}</div>` : ''}
       <div class="card-actions">
-        <button class="btn btn-secondary btn-sm" onclick="moveProgram('${p._id}', -1)" ${index === 0 ? 'disabled' : ''} title="Move up">↑</button>
-        <button class="btn btn-secondary btn-sm" onclick="moveProgram('${p._id}', 1)" ${index === ordered.length - 1 ? 'disabled' : ''} title="Move down">↓</button>
         <button class="btn btn-secondary btn-sm" onclick="editProgram('${p._id}')">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="deleteProgram('${p._id}')">Delete</button>
       </div>
@@ -772,32 +592,17 @@ function renderProgramCards() {
 }
 
 function openProgramForm(item) {
-  const basePrice = item ? (item.priceNumeric || 0) : 0;
-  const baseCurrency = item ? item.purchaseCurrency || 'KGS' : 'KGS';
-  const priceDefaults = getProgramPriceDefaults(basePrice, baseCurrency);
-  const defaultActionType = item ? item.actionType || 'purchase' : 'purchase';
-
   document.getElementById('programModalTitle').textContent = item ? 'Edit Program' : 'Add Program';
   document.getElementById('pId').value = item ? item._id : '';
   document.getElementById('pName').value = item ? item.name : '';
   document.getElementById('pNameRu').value = item ? item.name_ru || '' : '';
   document.getElementById('pTagline').value = item ? item.tagline || '' : '';
-  document.getElementById('pTaglineRu').value = item ? item.tagline_ru || '' : '';
-  document.getElementById('pTierLabel').value = item ? item.tierLabel || '' : '';
-  document.getElementById('pTierLabelRu').value = item ? item.tierLabel_ru || '' : '';
-  document.getElementById('pPriceNumeric').value = basePrice;
-  document.getElementById('pPurchaseCurrency').value = baseCurrency;
-  document.getElementById('pPriceAmount').value = item ? item.priceAmount || '' : priceDefaults.priceAmount;
-  document.getElementById('pPriceCurrency').value = item ? item.priceCurrency || '' : priceDefaults.priceCurrency;
-  document.getElementById('pPriceAmountRu').value = item ? item.priceAmount_ru || '' : priceDefaults.priceAmountRu;
-  document.getElementById('pPriceCurrencyRu').value = item ? item.priceCurrency_ru || '' : priceDefaults.priceCurrencyRu;
+  document.getElementById('pPriceNumeric').value = item ? item.priceNumeric || 0 : 0;
+  document.getElementById('pPurchaseCurrency').value = item ? item.purchaseCurrency || 'KGS' : 'KGS';
   document.getElementById('pFeatures').value = item ? (item.features || []).join('\n') : '';
   document.getElementById('pFeaturesRu').value = item ? (item.features_ru || []).join('\n') : '';
-  document.getElementById('pActionType').value = defaultActionType;
+  document.getElementById('pActionType').value = item ? item.actionType || 'purchase' : 'purchase';
   document.getElementById('pPopular').value = item ? String(item.popular || false) : 'false';
-  document.getElementById('pButtonText').value = item ? item.buttonText || '' : (defaultActionType === 'purchase' ? 'Get Started' : 'Contact Us');
-  document.getElementById('pButtonTextRu').value = item ? item.buttonText_ru || '' : (defaultActionType === 'purchase' ? 'Начать' : 'Связаться');
-  document.getElementById('pOrder').value = item ? parseOrder(item.order, 0) : programs.length + 1;
   openAdminModal('programModal');
 }
 
@@ -806,59 +611,38 @@ function editProgram(id) {
   if (item) openProgramForm(item);
 }
 
-async function moveProgram(id, direction) {
-  await moveContentItem({
-    items: programs,
-    id,
-    direction,
-    endpointPrefix: '/api/admin/programs',
-    reload: loadPrograms,
-    entityName: 'program',
-    labelResolver: (item) => item.name || ''
-  });
-}
-
 async function saveProgram(e) {
   e.preventDefault();
   const id = document.getElementById('pId').value;
-  const existingItem = id ? programs.find((item) => item._id === id) : null;
   const price = parseFloat(document.getElementById('pPriceNumeric').value) || 0;
   const currency = document.getElementById('pPurchaseCurrency').value;
   const popular = document.getElementById('pPopular').value === 'true';
   const actionType = document.getElementById('pActionType').value;
-  const priceDefaults = getProgramPriceDefaults(price, currency);
+
+  // Auto-derive display fields from simplified inputs
+  const priceDisplay = price > 0 ? (currency === 'USD' ? '$' + price.toLocaleString() : price.toLocaleString()) : '';
+  const currencyLabel = currency === 'USD' ? '' : currency;
 
   const data = {
     name: document.getElementById('pName').value,
     name_ru: document.getElementById('pNameRu').value,
     tagline: document.getElementById('pTagline').value,
-    tagline_ru: document.getElementById('pTaglineRu').value,
-    tier: popular ? 'popular' : (existingItem && existingItem.tier ? existingItem.tier : 'standard'),
+    tagline_ru: '',
+    tier: popular ? 'popular' : 'standard',
     cssClass: popular ? 'popular' : '',
-    tierLabel: document.getElementById('pTierLabel').value,
-    tierLabel_ru: document.getElementById('pTierLabelRu').value,
-    priceAmount: document.getElementById('pPriceAmount').value || priceDefaults.priceAmount,
-    priceAmount_ru: document.getElementById('pPriceAmountRu').value || priceDefaults.priceAmountRu,
-    priceCurrency: document.getElementById('pPriceCurrency').value || priceDefaults.priceCurrency,
-    priceCurrency_ru: document.getElementById('pPriceCurrencyRu').value || priceDefaults.priceCurrencyRu,
+    tierLabel: '',
+    tierLabel_ru: '',
+    priceAmount: priceDisplay,
+    priceCurrency: currencyLabel,
     priceNumeric: price,
     purchaseCurrency: currency,
     features: document.getElementById('pFeatures').value.split('\n').map(s => s.trim()).filter(Boolean),
     features_ru: document.getElementById('pFeaturesRu').value.split('\n').map(s => s.trim()).filter(Boolean),
-    buttonText: document.getElementById('pButtonText').value || (actionType === 'purchase' ? 'Get Started' : 'Contact Us'),
-    buttonText_ru: document.getElementById('pButtonTextRu').value || (actionType === 'purchase' ? 'Начать' : 'Связаться'),
-    detailsButton: existingItem && existingItem.detailsButton ? existingItem.detailsButton : '',
-    detailsButton_ru: existingItem && existingItem.detailsButton_ru ? existingItem.detailsButton_ru : '',
-    detailsText: existingItem && existingItem.detailsText ? existingItem.detailsText : '',
-    detailsText_ru: existingItem && existingItem.detailsText_ru ? existingItem.detailsText_ru : '',
-    detailsPrimaryAction: !!(existingItem && existingItem.detailsPrimaryAction),
-    detailsVideos: existingItem && Array.isArray(existingItem.detailsVideos) ? existingItem.detailsVideos : [],
-    detailsVideos_ru: existingItem && Array.isArray(existingItem.detailsVideos_ru) ? existingItem.detailsVideos_ru : [],
-    detailsReviews: existingItem && Array.isArray(existingItem.detailsReviews) ? existingItem.detailsReviews : [],
-    detailsReviews_ru: existingItem && Array.isArray(existingItem.detailsReviews_ru) ? existingItem.detailsReviews_ru : [],
+    buttonText: actionType === 'purchase' ? 'Get Started' : 'Contact Us',
+    buttonText_ru: actionType === 'purchase' ? 'Начать' : 'Связаться',
     actionType,
     popular,
-    order: parseInt(document.getElementById('pOrder').value, 10) || 0
+    order: id ? (programs.find(p => p._id === id) || {}).order || 0 : programs.length + 1
   };
 
   try {
@@ -891,46 +675,6 @@ async function deleteProgram(id) {
   }
 }
 
-async function restoreDefaultPrograms() {
-  const defaults = getDefaultPrograms();
-
-  if (!defaults.length) {
-    showToast('Default programs are not available', 'error');
-    return;
-  }
-
-  if (!confirm('Replace the current programs with the standard set?')) return;
-
-  try {
-    const currentPrograms = Array.isArray(programs) ? [...programs] : [];
-
-    for (const item of currentPrograms) {
-      await adminFetch('/api/admin/programs/' + item._id, {
-        method: 'DELETE',
-        headers: authHeaders()
-      });
-    }
-
-    for (const item of defaults) {
-      const res = await adminFetch('/api/admin/programs', {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(item)
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Failed to create a default program');
-      }
-    }
-
-    showToast('Default programs restored', 'success');
-    await loadPrograms();
-  } catch (e) {
-    showToast(e && e.message ? e.message : 'Restore failed', 'error');
-  }
-}
-
 // ================================================================
 // SERVICES
 // ================================================================
@@ -941,7 +685,7 @@ async function loadServices() {
     // Admin services route returns all (including unavailable)
     const res = await adminFetch('/api/admin/services', { headers: authHeaders() });
     if (res.ok) {
-      services = sortContentItems(await res.json(), (item) => item.title || '');
+      services = await res.json();
       renderServiceCards();
     }
   } catch (e) {
@@ -951,36 +695,25 @@ async function loadServices() {
 
 function renderServiceCards() {
   const el = document.getElementById('servicesList');
-  const ordered = sortContentItems(services, (item) => item.title || '');
-  services = ordered;
-
-  if (!ordered.length) {
+  if (!services.length) {
     el.innerHTML = `<div class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33"/></svg>
       <p>No services yet. Add your first one!</p>
     </div>`;
     return;
   }
-
-  el.innerHTML = ordered.map((s, index) => {
-    const orderValue = parseOrder(s.order, index + 1);
-    const priceText = s.price != null ? `${Number(s.price || 0).toLocaleString()} ${s.currency || 'KGS'}` : '';
-    const badgeText = `Order: ${orderValue} · ${s.currency || 'KGS'} · ${s.availability !== false ? 'Available' : 'Unavailable'}`;
-    return `
+  el.innerHTML = services.map(s => `
     <div class="admin-card">
-      <div class="card-badge">${esc(badgeText)}</div>
-      <h3 title="${esc(s.title || '')}">${esc(truncateText(s.title, 110))}</h3>
-      <p title="${esc(s.description || '')}">${esc(truncateText(s.description, 200))}</p>
-      <div class="card-meta">${esc(priceText)}${s.duration ? ' · ' + esc(truncateText(s.duration, 80)) : ''}</div>
+      <div class="card-badge">${esc(s.currency || 'KGS')} | ${s.availability !== false ? 'Available' : 'Unavailable'}</div>
+      <h3>${esc(s.title)}</h3>
+      <p>${esc(s.description || '')}</p>
+      <div class="card-meta">${s.price != null ? s.price.toLocaleString() + ' ' + (s.currency || 'KGS') : ''}${s.duration ? ' | ' + esc(s.duration) : ''}</div>
       <div class="card-actions">
-        <button class="btn btn-secondary btn-sm" onclick="moveService('${s._id}', -1)" ${index === 0 ? 'disabled' : ''} title="Move up">↑</button>
-        <button class="btn btn-secondary btn-sm" onclick="moveService('${s._id}', 1)" ${index === ordered.length - 1 ? 'disabled' : ''} title="Move down">↓</button>
         <button class="btn btn-secondary btn-sm" onclick="editService('${s._id}')">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="deleteService('${s._id}')">Delete</button>
       </div>
     </div>
-  `;
-  }).join('');
+  `).join('');
 }
 
 function openServiceForm(item) {
@@ -992,25 +725,12 @@ function openServiceForm(item) {
   document.getElementById('sCurrency').value = item ? item.currency || 'KGS' : 'KGS';
   document.getElementById('sDuration').value = item ? item.duration || '' : '';
   document.getElementById('sAvailability').value = item ? String(item.availability !== false) : 'true';
-  document.getElementById('sOrder').value = item ? parseOrder(item.order, 0) : services.length + 1;
   openAdminModal('serviceModal');
 }
 
 function editService(id) {
   const item = services.find(s => s._id === id);
   if (item) openServiceForm(item);
-}
-
-async function moveService(id, direction) {
-  await moveContentItem({
-    items: services,
-    id,
-    direction,
-    endpointPrefix: '/api/admin/services',
-    reload: loadServices,
-    entityName: 'service',
-    labelResolver: (item) => item.title || ''
-  });
 }
 
 async function saveService(e) {
@@ -1022,12 +742,11 @@ async function saveService(e) {
     price: parseFloat(document.getElementById('sPrice').value) || 0,
     currency: document.getElementById('sCurrency').value,
     duration: document.getElementById('sDuration').value,
-    availability: document.getElementById('sAvailability').value === 'true',
-    order: parseInt(document.getElementById('sOrder').value, 10) || 0
+    availability: document.getElementById('sAvailability').value === 'true'
   };
 
   try {
-    const url = id ? '/api/admin/services/' + id : '/api/admin/services';
+    const url = id ? '/api/services/' + id : '/api/services';
     const method = id ? 'PUT' : 'POST';
     const res = await adminFetch(url, { method, headers: authHeaders(), body: JSON.stringify(data) });
     if (res.ok) {
@@ -1046,7 +765,7 @@ async function saveService(e) {
 async function deleteService(id) {
   if (!confirm('Delete this service?')) return;
   try {
-    const res = await adminFetch('/api/admin/services/' + id, { method: 'DELETE', headers: authHeaders() });
+    const res = await adminFetch('/api/services/' + id, { method: 'DELETE', headers: authHeaders() });
     if (res.ok) {
       showToast('Service deleted', 'success');
       loadServices();
@@ -1079,8 +798,6 @@ async function loadLeads(force) {
       return;
     }
 
-    leads = Array.isArray(data.leads) ? data.leads : [];
-    renderLeads();
     allLeads = Array.isArray(data.leads) ? data.leads : [];
     saveAdminCache('leads', allLeads);
     applyLeadFilters(true);
@@ -1133,18 +850,21 @@ function renderLeads() {
       .map((status) => `<option value="${esc(status)}" ${status === lead.status ? 'selected' : ''}>${esc(status)}</option>`)
       .join('');
 
+    const contactParts = [lead.email, lead.phone].filter(Boolean).map(esc).join(' · ');
+
     return `
       <div class="admin-list-item">
         <div class="admin-list-head">
-          <strong>${esc(lead.name || '-')}</strong>
+          <div>
+            <div class="lead-name">${esc(lead.name || '-')}</div>
+            <div class="lead-contact">${contactParts || '—'}</div>
+          </div>
           ${statusPill(lead.status)}
         </div>
-        <div class="admin-meta">${esc(lead.email || '-')}
-${esc(lead.phone || '-')}
-Service: ${esc(lead.service || '-')}
-Created: ${esc(formatDateTime(lead.createdAt))}</div>
-        ${lead.message ? `<div class="admin-meta">${esc(truncateText(lead.message, 320))}</div>` : ''}
-        <div class="admin-toolbar" style="margin-bottom:0;">
+        ${lead.service ? `<span class="lead-service-badge">${esc(lead.service)}</span>` : ''}
+        ${lead.message ? `<div class="lead-message-preview">"${esc(truncateText(lead.message, 240))}"</div>` : ''}
+        <div class="lead-status-row">
+          <span class="lead-date">Created: ${esc(formatDateTime(lead.createdAt))}</span>
           <select onchange="updateLeadStatus(${Number(lead.id)}, this.value)">${statusOptions}</select>
         </div>
       </div>
@@ -1197,8 +917,6 @@ async function loadChats(force) {
       return;
     }
 
-    chats = Array.isArray(data.chats) ? data.chats : [];
-    renderChats();
     allChats = Array.isArray(data.chats) ? data.chats : [];
     saveAdminCache('chats', allChats);
 
@@ -1257,26 +975,26 @@ function renderChats() {
       .map((status) => `<option value="${esc(status)}" ${status === chat.leadStatus ? 'selected' : ''}>${esc(status)}</option>`)
       .join('');
 
-    const leadMeta = [
-      chat.lead && chat.lead.name ? `Lead: ${chat.lead.name}` : '',
-      chat.lead && chat.lead.email ? chat.lead.email : '',
-      chat.lead && chat.lead.phone ? chat.lead.phone : '',
-      chat.lead && chat.lead.service ? `Service: ${chat.lead.service}` : ''
-    ].filter(Boolean).join('\n');
-
-    const lastMessage = chat.lastMessage && chat.lastMessage.content ? truncateText(chat.lastMessage.content, 220) : '';
+    const name = (chat.lead && chat.lead.name) || '';
+    const email = (chat.lead && chat.lead.email) || '';
+    const phone = (chat.lead && chat.lead.phone) || '';
+    const service = (chat.lead && chat.lead.service) || '';
+    const contactParts = [email, phone].filter(Boolean).map(esc).join(' · ');
+    const lastMessage = chat.lastMessage && chat.lastMessage.content ? truncateText(chat.lastMessage.content, 200) : '';
 
     return `
       <div class="admin-list-item">
         <div class="admin-list-head">
-          <strong>Session ${esc(chat.sessionId || String(chat.id))}</strong>
+          <div>
+            <div class="lead-name">${name ? esc(name) : 'Session ' + esc(chat.sessionId || String(chat.id))}</div>
+            <div class="lead-contact">${contactParts || '—'}</div>
+          </div>
           ${statusPill(chat.leadStatus)}
         </div>
-        <div class="admin-meta">${esc(leadMeta || 'No lead data yet')}
-Messages: ${esc(String(chat.messageCount || 0))}
-Updated: ${esc(formatDateTime(chat.updatedAt))}</div>
-        ${lastMessage ? `<div class="admin-meta">Last: ${esc(lastMessage)}</div>` : ''}
-        <div class="admin-toolbar" style="margin-bottom:0;">
+        ${service ? `<span class="lead-service-badge">${esc(service)}</span>` : ''}
+        ${lastMessage ? `<div class="lead-message-preview">${esc(lastMessage)}</div>` : ''}
+        <div class="lead-status-row">
+          <span class="lead-date">${esc(String(chat.messageCount || 0))} msgs · Updated: ${esc(formatDateTime(chat.updatedAt))}</span>
           <select id="chat-status-${Number(chat.id)}">${statusOptions}</select>
           <button class="btn btn-secondary btn-sm" onclick="saveInlineChatStatus(${Number(chat.id)})">Save</button>
           <button class="btn btn-primary btn-sm" onclick="openChatViewer(${Number(chat.id)})">Open Chat</button>
@@ -1404,131 +1122,6 @@ async function saveActiveChatStatus() {
     const updated = chats.find((item) => Number(item.id) === Number(activeChat.id));
     if (updated) activeChat = updated;
   }
-}
-
-
-// ================================================================
-// PAYMENTS
-// ================================================================
-async function loadPayments(force) {
-  try {
-    const res = await adminFetch('/api/admin/overview?limit=500', { headers: authHeaders() });
-    const data = await res.json();
-
-    if (!res.ok) {
-      showToast(data.error || 'Failed to load payments', 'error');
-      return;
-    }
-
-    payments = Array.isArray(data.payments) ? data.payments : [];
-    renderPaymentStatusOptions();
-    renderPayments();
-
-    if (force) showToast('Payments refreshed', 'info');
-  } catch (e) {
-    showToast('Failed to load payments', 'error');
-  }
-}
-
-function renderPaymentStatusOptions() {
-  const select = document.getElementById('paymentStatusFilter');
-  if (!select) return;
-
-  const discoveredStatuses = Array.from(new Set(
-    payments
-      .map((payment) => String(payment.status || 'completed').trim().toLowerCase())
-      .filter(Boolean)
-  ));
-
-  const ordered = [
-    ...PAYMENT_STATUSES.filter((status) => discoveredStatuses.includes(status)),
-    ...discoveredStatuses.filter((status) => !PAYMENT_STATUSES.includes(status))
-  ];
-
-  const optionsHtml = ['<option value="all">All statuses</option>']
-    .concat(ordered.map((status) => `<option value="${esc(status)}">${esc(status)}</option>`))
-    .join('');
-
-  select.innerHTML = optionsHtml;
-
-  if (!ordered.includes(paymentFilters.status)) {
-    paymentFilters.status = 'all';
-  }
-  select.value = paymentFilters.status;
-}
-
-function onPaymentFiltersChanged() {
-  const searchInput = document.getElementById('paymentSearchInput');
-  const statusSelect = document.getElementById('paymentStatusFilter');
-
-  paymentFilters.search = searchInput ? searchInput.value.trim() : '';
-  paymentFilters.status = statusSelect ? statusSelect.value : 'all';
-
-  clearTimeout(paymentSearchTimer);
-  paymentSearchTimer = setTimeout(() => renderPayments(), 150);
-}
-
-function formatMoney(amount, currency) {
-  const value = Number(amount);
-  const normalizedCurrency = String(currency || '').trim().toUpperCase();
-
-  if (!Number.isFinite(value)) {
-    return `${String(amount || '-')}${normalizedCurrency ? ' ' + normalizedCurrency : ''}`.trim();
-  }
-
-  return `${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}${normalizedCurrency ? ' ' + normalizedCurrency : ''}`;
-}
-
-function renderPayments() {
-  const root = document.getElementById('paymentsList');
-  if (!root) return;
-
-  const search = paymentFilters.search.toLowerCase();
-  const status = String(paymentFilters.status || 'all').toLowerCase();
-
-  const filtered = payments.filter((payment) => {
-    const paymentStatus = String(payment.status || '').toLowerCase();
-    if (status !== 'all' && paymentStatus !== status) return false;
-
-    if (!search) return true;
-
-    const haystack = [
-      payment.id,
-      payment.productName,
-      payment.productId,
-      payment.currency,
-      payment.status,
-      payment.user && payment.user.name,
-      payment.user && payment.user.email
-    ]
-      .map((value) => String(value || '').toLowerCase())
-      .join(' ');
-
-    return haystack.includes(search);
-  });
-
-  if (!filtered.length) {
-    root.innerHTML = '<div class="empty-state"><p>No payments found for current filters.</p></div>';
-    return;
-  }
-
-  root.innerHTML = filtered.map((payment) => {
-    const clientName = payment.user && payment.user.name ? payment.user.name : '-';
-    const clientEmail = payment.user && payment.user.email ? payment.user.email : '-';
-
-    return `
-      <div class="admin-list-item">
-        <div class="admin-list-head">
-          <strong>${esc(payment.productName || payment.productId || payment.id || 'Payment')}</strong>
-          ${statusPill(payment.status || 'completed')}
-        </div>
-        <div class="admin-meta">ID: ${esc(payment.id || '-')}
-Client: ${esc(clientName)} (${esc(clientEmail)})
-Amount: ${esc(formatMoney(payment.amount, payment.currency))}
-Date: ${esc(formatDateTime(payment.createdAt))}</div>
-      </div>
-    `;
-  }).join('');
 }
 
 // ================================================================
@@ -1744,10 +1337,8 @@ async function initAdmin() {
   // Initialize filter UI state
   const leadStatusSelect = document.getElementById('leadStatusFilter');
   const chatStatusSelect = document.getElementById('chatStatusFilter');
-  const paymentStatusSelect = document.getElementById('paymentStatusFilter');
   if (leadStatusSelect) leadStatusSelect.value = leadFilters.status;
   if (chatStatusSelect) chatStatusSelect.value = chatFilters.status;
-  if (paymentStatusSelect) paymentStatusSelect.value = paymentFilters.status;
 
   // Load all data — coordinator ensures dashboard renders once both leads+chats are ready
   resetDashboardReady();
@@ -1756,7 +1347,6 @@ async function initAdmin() {
   loadServices();
   loadLeads(false);
   loadChats(false);
-  loadPayments(false);
   loadChatbotKnowledge(false);
   loadUsers(false);
 }
