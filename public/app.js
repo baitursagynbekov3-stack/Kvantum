@@ -1842,6 +1842,14 @@ function goToProgramDetailsSlide(detailsId, index) {
   updateProgramDetailsCarousel(detailsId);
 }
 
+function getVideoMimeType(src) {
+  const cleanSrc = String(src || '').split('?')[0];
+  const ext = cleanSrc.split('.').pop().toLowerCase();
+  if (ext === 'mov') return 'video/quicktime';
+  if (ext === 'webm') return 'video/webm';
+  return 'video/mp4';
+}
+
 function buildProgramDetailsCarouselHtml(reviews, detailsId, lang) {
   if (!Array.isArray(reviews) || !reviews.length) return '';
 
@@ -1894,8 +1902,14 @@ function buildProgramDetailsVideosHtml(videos, lang) {
       ? ` data-type="local" data-src="${escapeHtml(src)}" data-poster="${escapeHtml(poster)}" onclick="openVideoReview(this)"`
       : '';
     const interactiveClass = src ? ' is-playable' : '';
+    const previewHtml = src
+      ? `<video class="program-detail-video-preview" autoplay muted loop playsinline preload="metadata"${poster ? ` poster="${escapeHtml(poster)}"` : ''}>
+           <source src="${escapeHtml(src)}" type="${escapeHtml(getVideoMimeType(src))}">
+         </video>`
+      : '';
 
     return `<article class="program-detail-video-card ${variant}${interactiveClass}"${styleAttr}${videoAttrs}>
+      ${previewHtml}
       <div class="program-detail-video-overlay">
         <span class="program-detail-video-pill">${lang === 'ru' ? 'Видео отзыв' : 'Video review'}</span>
         <div class="program-detail-video-play">
@@ -1974,6 +1988,11 @@ function openProgramDetailsModal(programId) {
   requestAnimationFrame(() => {
     initializeProgramDetailCarousels();
     updateProgramDetailsCarousel(modalDetailsId);
+    document.querySelectorAll('.program-detail-video-preview').forEach((video) => {
+      if (video && typeof video.play === 'function') {
+        video.play().catch(() => {});
+      }
+    });
   });
 }
 
@@ -3326,6 +3345,10 @@ function closeModal(id) {
 
   if (prefersReducedMotion()) {
     overlay.classList.remove('active', 'is-closing');
+    if (id === 'programDetailsModal') {
+      const body = document.getElementById('programDetailsBody');
+      if (body) body.innerHTML = '';
+    }
     syncBodyScrollLock();
     if (typeof window.syncMobileStickyCta === 'function') window.syncMobileStickyCta();
     return;
@@ -3336,6 +3359,10 @@ function closeModal(id) {
   const timerId = setTimeout(() => {
     overlay.classList.remove('active', 'is-closing');
     overlay.dataset.closeTimer = '';
+    if (id === 'programDetailsModal') {
+      const body = document.getElementById('programDetailsBody');
+      if (body) body.innerHTML = '';
+    }
     syncBodyScrollLock();
     if (typeof window.syncMobileStickyCta === 'function') window.syncMobileStickyCta();
   }, MODAL_CLOSE_DURATION_MS);

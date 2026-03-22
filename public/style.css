@@ -1318,6 +1318,15 @@ input[type="checkbox"]:focus {
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 22px 42px rgba(17, 17, 17, 0.12);
 }
+.program-detail-video-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #0f1117;
+}
 .program-detail-video-card.is-playable {
   cursor: pointer;
 }
@@ -1339,6 +1348,7 @@ input[type="checkbox"]:focus {
   justify-content: space-between;
   padding: 20px;
   color: var(--white);
+  background: linear-gradient(180deg, rgba(10,12,16,0.08) 0%, rgba(10,12,16,0.72) 100%);
 }
 .program-detail-video-pill {
   display: inline-flex;
