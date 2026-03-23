@@ -212,25 +212,25 @@
         <p class="section-subtitle" data-i18n="work.subtitle">Работаем индивидуально и в группе &mdash; глубоко, экологично, с реальным результатом</p>
       </div>
       <div class="services-grid">
-        <div class="service-card anim-fade-up">
+        <div class="service-card anim-fade-up" onclick="openServiceDetail(1)">
           <div class="service-number">01</div>
           <h3 data-i18n="work.card1.title">Подсознание</h3>
           <p data-i18n="work.card1.desc">Глубокая работа с паттернами подсознания, убеждениями и ментальными блоками</p>
           <div class="service-arrow">&rarr;</div>
         </div>
-        <div class="service-card anim-fade-up anim-delay-1">
+        <div class="service-card anim-fade-up anim-delay-1" onclick="openServiceDetail(2)">
           <div class="service-number">02</div>
           <h3 data-i18n="work.card2.title">Энергетическое поле</h3>
           <p data-i18n="work.card2.desc">Выравнивание и усиление вашего энергетического поля для привлечения желаемого</p>
           <div class="service-arrow">&rarr;</div>
         </div>
-        <div class="service-card anim-fade-up anim-delay-2">
+        <div class="service-card anim-fade-up anim-delay-2" onclick="openServiceDetail(3)">
           <div class="service-number">03</div>
           <h3 data-i18n="work.card3.title">Состояние лидера</h3>
           <p data-i18n="work.card3.desc">Развитие внутреннего состояния лидера для роста бизнеса и личного мастерства</p>
           <div class="service-arrow">&rarr;</div>
         </div>
-        <div class="service-card anim-fade-up anim-delay-3">
+        <div class="service-card anim-fade-up anim-delay-3" onclick="openServiceDetail(4)">
           <div class="service-number">04</div>
           <h3 data-i18n="work.card4.title">Сопровождаем до результата</h3>
           <p data-i18n="work.card4.desc">Личное сопровождение до достижения ваших целей &mdash; мы не просто учим, мы идём с вами</p>
@@ -832,6 +832,20 @@
       <h2 class="cred-modal-title" id="credModalTitle3">Мастер глубинных разборов</h2>
       <div class="cred-modal-divider"></div>
       <p class="cred-modal-body" id="credModalBody3">Глубинные разборы Алтынай — её самый мощный формат индивидуальной работы. Это не стандартные коучинговые беседы, а точные, структурированные погружения в первопричины застревания человека. Опираясь на экспертизу в области подсознания, работы с квантовым полем и НЛП, она быстро определяет, откуда берутся внутренние блоки клиента — будь то детское программирование, динамика семейной системы или унаследованные родовые сценарии. Её интенсивы работают напрямую с отделением от родительских паттернов, освобождением от чужих жизненных сценариев, восстановлением здоровой иерархии и снятием детских блоков. Клиенты уходят не просто с осознанием — они выходят с принципиально другим внутренним состоянием и чётким путём вперёд. Она работает только с предпринимателями и только после бесплатной консультации, чтобы убедиться в правильном подборе.</p>
+    </div>
+  </div>
+
+  <!-- Service Detail Modal -->
+  <div class="modal-overlay" id="serviceDetailModal">
+    <div class="modal cred-modal service-detail-modal">
+      <button class="modal-close" onclick="closeModal('serviceDetailModal')">&times;</button>
+      <div class="cred-modal-tag" id="serviceDetailTag">01</div>
+      <h2 class="cred-modal-title" id="serviceDetailTitle"></h2>
+      <div class="cred-modal-divider"></div>
+      <div class="cred-modal-body" id="serviceDetailBody"></div>
+      <div class="service-detail-cta">
+        <button class="btn btn-primary btn-sm" onclick="closeModal('serviceDetailModal'); openModal('consultModal')" data-i18n="services.book">Записаться</button>
+      </div>
     </div>
   </div>
 

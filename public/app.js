@@ -3601,6 +3601,61 @@ function syncBodyScrollLock() {
   }
 }
 
+// ===== Service Detail Modal =====
+var serviceDetails = {
+  1: {
+    ru: {
+      title: 'Подсознание',
+      body: 'Мы работаем напрямую с вашим подсознанием — находим глубинные убеждения, страхи и паттерны, которые мешают вам двигаться вперёд. Через мягкие, но точные техники мы помогаем перепрограммировать внутренние установки, чтобы вы начали действовать из состояния уверенности, а не тревоги. Это не гипноз — это осознанная работа с собой.'
+    },
+    en: {
+      title: 'Subconscious',
+      body: 'We work directly with your subconscious — uncovering deep-rooted beliefs, fears, and patterns that hold you back. Through gentle yet precise techniques, we help reprogram your inner wiring so you start acting from a place of confidence, not anxiety. This isn\'t hypnosis — it\'s conscious inner work.'
+    }
+  },
+  2: {
+    ru: {
+      title: 'Энергетическое поле',
+      body: 'Ваше энергетическое поле влияет на то, что вы притягиваете в жизнь — людей, возможности, события. Мы помогаем выровнять и усилить вашу энергию, убрать утечки и блоки. В результате вы чувствуете больше сил, ясности и лёгкости в повседневной жизни. Многие клиенты замечают перемены уже после первой сессии.'
+    },
+    en: {
+      title: 'Energy Field',
+      body: 'Your energy field shapes what you attract into your life — people, opportunities, events. We help align and strengthen your energy, clearing blockages and leaks. As a result, you feel more vitality, clarity, and lightness in daily life. Many clients notice shifts after the very first session.'
+    }
+  },
+  3: {
+    ru: {
+      title: 'Состояние лидера',
+      body: 'Лидерство — это не про контроль, а про внутреннее состояние. Мы помогаем вам выстроить ту внутреннюю опору, которая позволяет принимать решения уверенно, вести за собой и расти — в бизнесе и в жизни. Вы учитесь управлять своей энергией, эмоциями и фокусом на новом уровне.'
+    },
+    en: {
+      title: 'Leader State',
+      body: 'Leadership isn\'t about control — it\'s about inner state. We help you build the inner foundation that lets you make decisions with confidence, inspire others, and grow — in business and in life. You learn to manage your energy, emotions, and focus on a whole new level.'
+    }
+  },
+  4: {
+    ru: {
+      title: 'Сопровождаем до результата',
+      body: 'Мы не оставляем вас одних после сессии. Наша команда сопровождает вас на каждом шаге — от постановки цели до её достижения. Регулярная поддержка, обратная связь и корректировка курса. Мы не просто учим — мы идём рядом с вами, пока вы не увидите реальные изменения в своей жизни.'
+    },
+    en: {
+      title: 'Guided to Results',
+      body: 'We don\'t leave you on your own after a session. Our team walks with you every step of the way — from setting your goal to reaching it. Regular support, feedback, and course corrections. We don\'t just teach — we stay by your side until you see real changes in your life.'
+    }
+  }
+};
+
+function openServiceDetail(num) {
+  var lang = (typeof currentLang !== 'undefined' && currentLang === 'en') ? 'en' : 'ru';
+  var detail = serviceDetails[num];
+  if (!detail) return;
+  var content = detail[lang];
+  document.getElementById('serviceDetailTag').textContent = '0' + num;
+  document.getElementById('serviceDetailTitle').textContent = content.title;
+  document.getElementById('serviceDetailBody').textContent = content.body;
+  openModal('serviceDetailModal');
+}
+
 function openModal(id) {
   const overlay = document.getElementById(id);
   if (!overlay) return;

@@ -900,6 +900,13 @@ input[type="checkbox"]:focus {
   }
 }
 
+/* Service detail modal */
+.service-detail-modal { max-width: 520px; }
+.service-detail-cta { margin-top: 28px; }
+.dark-mode .cred-modal-tag { color: var(--primary); }
+.dark-mode .cred-modal-title { color: #dedede; }
+.dark-mode .cred-modal-body { color: #bbb; }
+
 .about-quote {
   font-family: var(--font-display);
   font-style: italic;
@@ -925,6 +932,7 @@ input[type="checkbox"]:focus {
   position: relative;
   overflow: hidden;
   border: 1px solid #f0f0f0;
+  cursor: pointer;
 }
 .service-card:hover {
   transform: translateY(-6px) scale(1.02);
@@ -957,8 +965,8 @@ input[type="checkbox"]:focus {
 .service-arrow {
   font-size: 1.5rem;
   color: var(--primary);
-  opacity: 0;
-  transform: translateX(-10px);
+  opacity: 0.35;
+  transform: translateX(-6px);
   transition: var(--transition);
 }
 
