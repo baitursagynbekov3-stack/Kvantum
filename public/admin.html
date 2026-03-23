@@ -190,9 +190,29 @@
     }
     .program-feature-item {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto auto 1fr auto;
       gap: 10px;
       align-items: center;
+    }
+    .program-feature-item.is-dragging {
+      opacity: 0.55;
+    }
+    .program-feature-handle {
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #101722;
+      color: #96a0b2;
+      cursor: grab;
+      font-size: 18px;
+      user-select: none;
+    }
+    .program-feature-handle:active {
+      cursor: grabbing;
     }
     .program-feature-number {
       min-width: 34px;
@@ -865,7 +885,7 @@
 
   <script src="./config.js?v=20260318-7"></script>
   <script src="./program-defaults.js?v=20260323-2"></script>
-  <script src="./admin.js?v=20260323-5"></script>
+  <script src="./admin.js?v=20260323-6"></script>
   <script src="./favicon-aurora.js?v=20260318-7"></script>
 </body>
 </html>

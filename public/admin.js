@@ -550,6 +550,7 @@ async function deleteTestimonial(id) {
 // PROGRAMS
 // ================================================================
 let programs = [];
+let draggedProgramFeatureRow = null;
 const PROGRAM_FEATURE_PLACEHOLDERS = [
   'Например: Программа 21 день',
   'Например: 15 минут в день',
@@ -578,17 +579,64 @@ function refreshProgramFeatureRows() {
   });
 }
 
+function onProgramFeatureDragStart(event) {
+  draggedProgramFeatureRow = event.currentTarget;
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', '');
+  }
+  draggedProgramFeatureRow.classList.add('is-dragging');
+}
+
+function onProgramFeatureDragOver(event) {
+  event.preventDefault();
+  const targetRow = event.currentTarget;
+  const list = document.getElementById('programFeatureList');
+  if (!list || !draggedProgramFeatureRow || targetRow === draggedProgramFeatureRow) return;
+
+  const rect = targetRow.getBoundingClientRect();
+  const insertAfter = event.clientY > rect.top + rect.height / 2;
+  if (insertAfter) {
+    if (targetRow.nextSibling !== draggedProgramFeatureRow) {
+      list.insertBefore(draggedProgramFeatureRow, targetRow.nextSibling);
+    }
+  } else if (targetRow !== draggedProgramFeatureRow.nextSibling) {
+    list.insertBefore(draggedProgramFeatureRow, targetRow);
+  }
+
+  refreshProgramFeatureRows();
+}
+
+function onProgramFeatureDrop(event) {
+  event.preventDefault();
+  refreshProgramFeatureRows();
+}
+
+function onProgramFeatureDragEnd(event) {
+  if (event.currentTarget) {
+    event.currentTarget.classList.remove('is-dragging');
+  }
+  draggedProgramFeatureRow = null;
+  refreshProgramFeatureRows();
+}
+
 function addProgramFeatureRow(value) {
   const list = document.getElementById('programFeatureList');
   if (!list) return;
 
   const row = document.createElement('div');
   row.className = 'program-feature-item';
+  row.draggable = true;
   row.innerHTML = `
+    <span class="program-feature-handle" title="Перетащите, чтобы поменять порядок">⋮⋮</span>
     <span class="program-feature-number">1</span>
     <input type="text" class="program-feature-input" value="${esc(value || '')}" placeholder="Введите пункт программы">
     <button type="button" class="program-feature-remove" onclick="removeProgramFeatureRow(this)" aria-label="Удалить строку">&times;</button>
   `;
+  row.addEventListener('dragstart', onProgramFeatureDragStart);
+  row.addEventListener('dragover', onProgramFeatureDragOver);
+  row.addEventListener('drop', onProgramFeatureDrop);
+  row.addEventListener('dragend', onProgramFeatureDragEnd);
 
   list.appendChild(row);
   refreshProgramFeatureRows();
