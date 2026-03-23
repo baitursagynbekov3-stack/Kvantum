@@ -205,6 +205,9 @@
       ],
       buttonText: 'Sign Up',
       buttonText_ru: 'Записаться',
+      detailsPrimaryAction: true,
+      detailsText: 'Intensive "Mom & Dad — My Two Wings" is a deep transformational program where you work through ancestral patterns, remove inner blocks, and reclaim your energy. You build inner support, heal deficits of love and acceptance, and start shaping relationships, money, and your life from a state of strength rather than lack.',
+      detailsText_ru: 'Интенсив «Папа, мама — мои два крыла» — это глубокая трансформационная программа, где ты прорабатываешь родовые сценарии, убираешь внутренние блоки и возвращаешь свою энергию. Ты выстраиваешь внутреннюю опору, закрываешь дефициты любви и принятия, и начинаешь по-другому строить отношения, деньги и свою жизнь — из состояния силы, а не нехватки.',
       actionType: 'purchase',
       order: 3
     },
