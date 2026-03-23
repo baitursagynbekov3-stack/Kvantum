@@ -1364,6 +1364,9 @@ const translations = {
     'contact.connect': 'Свяжитесь с нами',
     'contact.entry.title': 'Условия входа',
     'contact.entry.text': 'Вход в индивидуальную работу после <strong>бесплатной консультации</strong>. Беру не всех — мы обеспечиваем правильный подбор для обеих сторон.',
+    'faq.label': 'FAQ',
+    'faq.title': 'Часто задаваемые <span class="text-gradient">вопросы</span>',
+    'faq.subtitle': 'Ответы на самые популярные вопросы о наших программах и услугах',
     'footer.desc': 'Переход в реальность мечты. Трансформируйте жизнь через работу с подсознанием, НЛП и мастерство квантового поля.',
     'footer.quick': 'Быстрые ссылки',
     'footer.intensive': 'Интенсив',
@@ -1514,6 +1517,9 @@ const translations = {
     'contact.connect': 'Connect With Us',
     'contact.entry.title': 'Entry Conditions',
     'contact.entry.text': 'Entry to individual work is after a <strong>free consultation</strong>. Not everyone is accepted — we ensure the right fit for both sides.',
+    'faq.label': 'FAQ',
+    'faq.title': 'Frequently Asked <span class="text-gradient">Questions</span>',
+    'faq.subtitle': 'Answers to the most common questions about our programs and services',
     'footer.desc': 'Transition to Dream Reality. Transform your life through subconscious work, NLP, and quantum field mastery.',
     'footer.quick': 'Quick Links',
     'footer.intensive': 'Intensive',
@@ -1663,6 +1669,7 @@ function toggleLanguage() {
   updateLangButton();
   if (cachedTestimonials) renderTestimonials(cachedTestimonials);
   if (cachedPrograms) renderPrograms(cachedPrograms);
+  if (cachedFaq) renderFaq(cachedFaq);
 }
 
 function updateLangButton() {
@@ -1673,6 +1680,7 @@ function updateLangButton() {
 // ===== Dynamic Content =====
 let cachedTestimonials = null;
 let cachedPrograms = null;
+let cachedFaq = null;
 
 function getDefaultPrograms() {
   const defaults = window.QUANTUM_DEFAULT_PROGRAMS;
@@ -1681,12 +1689,14 @@ function getDefaultPrograms() {
 
 async function loadSiteContent() {
   try {
-    const [tRes, pRes] = await Promise.all([
+    const [tRes, pRes, fRes] = await Promise.all([
       apiFetch('/api/content/testimonials'),
-      apiFetch('/api/content/programs')
+      apiFetch('/api/content/programs'),
+      apiFetch('/api/content/faq')
     ]);
     const testimonials = await tRes.json();
     const programs = await pRes.json();
+    const faqItems = await fRes.json();
 
     if (Array.isArray(testimonials) && testimonials.length > 0) {
       cachedTestimonials = testimonials;
@@ -1700,10 +1710,44 @@ async function loadSiteContent() {
       cachedPrograms = getDefaultPrograms();
       renderPrograms(cachedPrograms);
     }
+
+    if (Array.isArray(faqItems) && faqItems.length > 0) {
+      cachedFaq = faqItems;
+      renderFaq(faqItems);
+    }
   } catch (err) {
     cachedPrograms = getDefaultPrograms();
     renderPrograms(cachedPrograms);
   }
+}
+
+function renderFaq(items) {
+  var container = document.getElementById('faqList');
+  if (!container || !items.length) return;
+  var lang = currentLang;
+  var sorted = [].concat(items).sort(function(a, b) { return (a.order || 0) - (b.order || 0); });
+
+  container.innerHTML = sorted.map(function(item, idx) {
+    var question = lang === 'ru' && item.question_ru ? item.question_ru : item.question;
+    var answer = lang === 'ru' && item.answer_ru ? item.answer_ru : item.answer;
+    var openClass = idx === 0 ? ' open' : '';
+    return '<div class="faq-item' + openClass + '">'
+      + '<div class="faq-question" onclick="toggleFaqItem(this)">'
+      + '<span>' + escapeHtml(question || '') + '</span>'
+      + '<span class="faq-icon">+</span>'
+      + '</div>'
+      + '<div class="faq-answer"><p>' + escapeHtml(answer || '') + '</p></div>'
+      + '</div>';
+  }).join('');
+}
+
+function toggleFaqItem(el) {
+  var item = el.parentElement;
+  var wasOpen = item.classList.contains('open');
+  // Close all others (single-open accordion)
+  var siblings = item.parentElement.querySelectorAll('.faq-item.open');
+  for (var i = 0; i < siblings.length; i++) { siblings[i].classList.remove('open'); }
+  if (!wasOpen) item.classList.add('open');
 }
 
 function renderTestimonials(items) {

@@ -1887,6 +1887,82 @@ body.dark-mode .phone-input-group .country-code-select {
 .contact-note h4 { color: var(--primary); margin-bottom: 8px; font-size: 0.95rem; }
 .contact-note p { font-size: 0.9rem; color: var(--gray-500); line-height: 1.7; }
 
+/* ===== FAQ ===== */
+.faq {
+  background: linear-gradient(180deg, #0d0d0d 0%, #1a1025 50%, #0d0d0d 100%);
+  padding: 100px 0;
+  margin-top: 40px;
+}
+.faq .section-label { color: rgba(167,139,250,0.8); }
+.faq .section-title { color: #fff; }
+.faq .section-subtitle { color: rgba(255,255,255,0.5); }
+.faq-list { max-width: 780px; margin: 0 auto; display: grid; gap: 14px; }
+.faq-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.faq-item:hover {
+  border-color: rgba(167,139,250,0.35);
+  box-shadow: 0 0 20px rgba(167,139,250,0.08);
+}
+.faq-item.open {
+  border-color: rgba(167,139,250,0.4);
+  box-shadow: 0 0 30px rgba(167,139,250,0.1);
+}
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 28px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.9);
+  user-select: none;
+  transition: color 0.3s ease;
+}
+.faq-question:hover { color: #a78bfa; }
+.faq-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  font-size: 16px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1;
+}
+.faq-item.open .faq-icon {
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #a78bfa, #7c3aed);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(167,139,250,0.4);
+}
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 28px;
+}
+.faq-item.open .faq-answer {
+  max-height: 300px;
+  padding: 0 28px 24px;
+}
+.faq-answer p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.55);
+}
+
 /* ===== Footer ===== */
 .footer {
   background: var(--dark);

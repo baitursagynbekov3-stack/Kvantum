@@ -800,6 +800,96 @@ async function deleteService(id) {
 }
 
 // ================================================================
+// FAQ
+// ================================================================
+let allFaqItems = [];
+
+async function loadFaq(force) {
+  if (!force) {
+    const cached = loadAdminCache('faq');
+    if (cached) { allFaqItems = cached; renderFaqCards(); }
+  }
+  try {
+    const res = await adminFetch('/api/admin/faq', { headers: authHeaders() });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || 'Failed to load FAQ', 'error'); return; }
+    allFaqItems = Array.isArray(data) ? data : [];
+    saveAdminCache('faq', allFaqItems);
+    renderFaqCards();
+    if (force) showToast('FAQ refreshed', 'info');
+  } catch (e) { showToast('Failed to load FAQ', 'error'); }
+}
+
+function renderFaqCards() {
+  const container = document.getElementById('faqList-admin');
+  if (!container) return;
+  if (!allFaqItems.length) {
+    container.innerHTML = '<div class="empty-state"><p>No FAQ items yet.</p></div>';
+    return;
+  }
+  const sorted = [...allFaqItems].sort((a, b) => (a.order || 0) - (b.order || 0));
+  container.innerHTML = sorted.map(f => `
+    <div class="admin-card">
+      <div class="card-badge">Order: ${f.order || 0}</div>
+      <h3>${esc(f.question || f.question_ru || '')}</h3>
+      <p>${esc(f.answer_ru || f.answer || '')}</p>
+      ${f.question_ru ? `<div class="card-meta">RU: ${esc(f.question_ru)}</div>` : ''}
+      <div class="card-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openFaqForm('${f._id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteFaqItem('${f._id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openFaqForm(id) {
+  const item = id ? allFaqItems.find(f => f._id === id) : null;
+  document.getElementById('faqModalTitle').textContent = item ? 'Edit FAQ' : 'Add FAQ';
+  document.getElementById('faqId').value = item ? item._id : '';
+  document.getElementById('faqQuestion').value = item ? item.question || '' : '';
+  document.getElementById('faqQuestionRu').value = item ? item.question_ru || '' : '';
+  document.getElementById('faqAnswer').value = item ? item.answer || '' : '';
+  document.getElementById('faqAnswerRu').value = item ? item.answer_ru || '' : '';
+  document.getElementById('faqOrder').value = item ? item.order || 0 : allFaqItems.length + 1;
+  openAdminModal('faqModal');
+}
+
+async function saveFaq(e) {
+  e.preventDefault();
+  const id = document.getElementById('faqId').value;
+  const body = {
+    question: document.getElementById('faqQuestion').value,
+    question_ru: document.getElementById('faqQuestionRu').value,
+    answer: document.getElementById('faqAnswer').value,
+    answer_ru: document.getElementById('faqAnswerRu').value,
+    order: parseInt(document.getElementById('faqOrder').value, 10) || 0
+  };
+  try {
+    const url = id ? '/api/admin/faq/' + id : '/api/admin/faq';
+    const method = id ? 'PUT' : 'POST';
+    const res = await adminFetch(url, {
+      method,
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) { const d = await res.json(); showToast(d.error || 'Save failed', 'error'); return; }
+    showToast(id ? 'FAQ updated' : 'FAQ created', 'success');
+    closeAdminModal('faqModal');
+    loadFaq(true);
+  } catch (e) { showToast('Save failed', 'error'); }
+}
+
+async function deleteFaqItem(id) {
+  if (!confirm('Delete this FAQ item?')) return;
+  try {
+    const res = await adminFetch('/api/admin/faq/' + id, { method: 'DELETE', headers: authHeaders() });
+    if (!res.ok) { showToast('Delete failed', 'error'); return; }
+    showToast('FAQ deleted', 'success');
+    loadFaq(true);
+  } catch (e) { showToast('Delete failed', 'error'); }
+}
+
+// ================================================================
 // LEADS
 // ================================================================
 async function loadLeads(force) {
@@ -1408,6 +1498,7 @@ async function initAdmin() {
   loadTestimonials();
   loadPrograms();
   loadServices();
+  loadFaq(false);
   loadLeads(false);
   loadChats(false);
   loadChatbotKnowledge(false);

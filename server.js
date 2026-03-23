@@ -2268,6 +2268,18 @@ app.get('/api/content/programs', async (req, res) => {
   }
 });
 
+app.get('/api/content/faq', async (req, res) => {
+  try {
+    const items = await prisma.content.findMany({
+      where: { type: 'faq' },
+      orderBy: { sortOrder: 'asc' }
+    });
+    res.json(items.map(formatContentItem));
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Admin check
 app.get('/api/admin/check', authenticateAdmin, (req, res) => {
   res.json({ isAdmin: true });
@@ -2654,6 +2666,7 @@ function registerContentCrud(contentType, routePrefix) {
 registerContentCrud('testimonial', '/api/admin/testimonials');
 registerContentCrud('program', '/api/admin/programs');
 registerContentCrud('service', '/api/admin/services');
+registerContentCrud('faq', '/api/admin/faq');
 
 // Services also accessible via /api/services (used by admin.js for some operations)
 app.get('/api/services', async (req, res) => {
