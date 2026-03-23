@@ -1743,16 +1743,21 @@ function getFaqSessionId() {
   return faqChatSessionId;
 }
 
+function scrollFaqToBottom() {
+  var container = document.getElementById('faqChatMessages');
+  if (!container) return;
+  setTimeout(function() { container.scrollTop = container.scrollHeight; }, 0);
+}
+
 function addFaqMsg(text, sender) {
   var container = document.getElementById('faqChatMessages');
   if (!container) return;
   var div = document.createElement('div');
   div.className = 'faq-msg ' + sender;
-  // Preserve line breaks from bot responses
   var html = escapeHtml(text);
   div.innerHTML = '<div class="faq-msg-bubble">' + html + '</div>';
   container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+  scrollFaqToBottom();
 }
 
 function showFaqTyping() {
@@ -1763,7 +1768,7 @@ function showFaqTyping() {
   div.id = 'faq-typing-' + Date.now();
   div.innerHTML = '<div class="faq-msg-bubble"><span class="faq-typing-dot"></span><span class="faq-typing-dot"></span><span class="faq-typing-dot"></span></div>';
   container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+  scrollFaqToBottom();
   return div.id;
 }
 
@@ -4205,13 +4210,14 @@ function toggleChatbot() {
 }
 
 async function sendChatMessage(e) {
-  e.preventDefault();
+  if (e && e.preventDefault) { e.preventDefault(); e.stopPropagation(); }
   const input = document.getElementById('chatInput');
   const message = input.value.trim();
   if (!message) return;
 
   addChatMessage(message, 'user');
   input.value = '';
+  input.focus();
 
   const typingId = showTyping();
   const sessionId = getChatSessionId();
