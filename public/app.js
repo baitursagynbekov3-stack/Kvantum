@@ -1784,13 +1784,14 @@ function setFaqInputEnabled(enabled) {
   if (btn) { btn.disabled = !enabled; btn.style.opacity = enabled ? '1' : '0.4'; }
 }
 
-async function sendFaqQuestion(e) {
-  if (e) { e.preventDefault(); e.stopPropagation(); }
+function sendFaqQuestion(e) {
+  if (e) e.preventDefault();
   if (faqChatBusy) return false;
 
   var input = document.getElementById('faqInput');
+  if (!input) return false;
   var message = input.value.trim();
-  if (!message) return;
+  if (!message) return false;
 
   faqChatBusy = true;
   setFaqInputEnabled(false);
@@ -1799,36 +1800,38 @@ async function sendFaqQuestion(e) {
 
   var typingId = showFaqTyping();
 
-  try {
-    var res = await apiFetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: message, sessionId: getFaqSessionId() })
-    });
-    var result = await res.json();
+  fetch(buildApiUrl('/api/chat'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: message, sessionId: getFaqSessionId() })
+  })
+  .then(function(res) {
+    return res.json().then(function(data) { return { ok: res.ok, data: data }; });
+  })
+  .then(function(result) {
     removeFaqTyping(typingId);
-
-    if (!res.ok) {
-      addFaqMsg(result.error || 'Sorry, something went wrong. Please try again.', 'bot');
+    if (!result.ok) {
+      addFaqMsg(result.data.error || 'Sorry, something went wrong. Please try again.', 'bot');
     } else {
-      addFaqMsg(result.reply || '...', 'bot');
-
-      // Handle booking creation from chat
-      if (result.booking && result.booking.id) {
+      addFaqMsg(result.data.reply || '...', 'bot');
+      if (result.data.booking && result.data.booking.id) {
         var toastMsg = currentLang === 'ru'
-          ? 'Заявка #' + result.booking.id + ' создана. Мы скоро свяжемся с вами.'
-          : 'Booking #' + result.booking.id + ' created. We will contact you shortly.';
-        showToast(toastMsg, 'success');
+          ? 'Заявка #' + result.data.booking.id + ' создана. Мы скоро свяжемся с вами.'
+          : 'Booking #' + result.data.booking.id + ' created. We will contact you shortly.';
+        if (typeof showToast === 'function') showToast(toastMsg, 'success');
       }
     }
-  } catch (err) {
+  })
+  .catch(function() {
     removeFaqTyping(typingId);
     addFaqMsg('Sorry, I couldn\'t connect. Please try again in a moment.', 'bot');
-  }
+  })
+  .finally(function() {
+    faqChatBusy = false;
+    setFaqInputEnabled(true);
+    if (input) input.focus({ preventScroll: true });
+  });
 
-  faqChatBusy = false;
-  setFaqInputEnabled(true);
-  input.focus({ preventScroll: true });
   return false;
 }
 
