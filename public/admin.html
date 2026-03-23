@@ -177,6 +177,64 @@
       margin-top: 4px;
       padding-top: 4px;
     }
+    .program-form-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .program-feature-list {
+      display: grid;
+      gap: 12px;
+    }
+    .program-feature-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .program-feature-number {
+      min-width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(167,139,250,0.14);
+      color: #d8cbff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .program-feature-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #0f141d;
+      color: #e0e0e0;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .program-feature-input:focus {
+      border-color: #a78bfa;
+    }
+    .program-feature-remove {
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(239,68,68,0.24);
+      border-radius: 10px;
+      background: rgba(239,68,68,0.08);
+      color: #f87171;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .program-feature-remove:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
 
     /* Toast */
     .admin-toast {
@@ -679,6 +737,15 @@
           </div>
         </div>
 
+        <div class="program-form-section">
+          <div class="program-form-section-head">
+            <h3>Что входит в программу</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addProgramFeatureRow()">+ Добавить строку</button>
+          </div>
+          <p>Каждая строка станет отдельным пунктом в списке на карточке программы.</p>
+          <div id="programFeatureList" class="program-feature-list"></div>
+        </div>
+
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" onclick="closeAdminModal('programModal')">Отмена</button>
           <button type="submit" class="btn btn-primary" style="padding:10px 24px;">Сохранить</button>
@@ -798,7 +865,7 @@
 
   <script src="./config.js?v=20260318-7"></script>
   <script src="./program-defaults.js?v=20260323-2"></script>
-  <script src="./admin.js?v=20260323-4"></script>
+  <script src="./admin.js?v=20260323-5"></script>
   <script src="./favicon-aurora.js?v=20260318-7"></script>
 </body>
 </html>

@@ -550,6 +550,78 @@ async function deleteTestimonial(id) {
 // PROGRAMS
 // ================================================================
 let programs = [];
+const PROGRAM_FEATURE_PLACEHOLDERS = [
+  'Например: Программа 21 день',
+  'Например: 15 минут в день',
+  'Например: Сессии в 6:00 утра (КР)',
+  'Например: Работа с мыслями и чувствами',
+  'Например: Трансформация состояния',
+  'Например: Изменения в жизни, отношениях и финансах'
+];
+
+function getProgramFeaturePlaceholder(index) {
+  return PROGRAM_FEATURE_PLACEHOLDERS[index] || 'Введите следующий пункт программы';
+}
+
+function refreshProgramFeatureRows() {
+  const list = document.getElementById('programFeatureList');
+  if (!list) return;
+  const rows = Array.from(list.querySelectorAll('.program-feature-item'));
+
+  rows.forEach((row, index) => {
+    const number = row.querySelector('.program-feature-number');
+    const input = row.querySelector('.program-feature-input');
+    const removeBtn = row.querySelector('.program-feature-remove');
+    if (number) number.textContent = String(index + 1);
+    if (input) input.placeholder = getProgramFeaturePlaceholder(index);
+    if (removeBtn) removeBtn.disabled = rows.length === 1;
+  });
+}
+
+function addProgramFeatureRow(value) {
+  const list = document.getElementById('programFeatureList');
+  if (!list) return;
+
+  const row = document.createElement('div');
+  row.className = 'program-feature-item';
+  row.innerHTML = `
+    <span class="program-feature-number">1</span>
+    <input type="text" class="program-feature-input" value="${esc(value || '')}" placeholder="Введите пункт программы">
+    <button type="button" class="program-feature-remove" onclick="removeProgramFeatureRow(this)" aria-label="Удалить строку">&times;</button>
+  `;
+
+  list.appendChild(row);
+  refreshProgramFeatureRows();
+
+  const input = row.querySelector('.program-feature-input');
+  if ((value || '') === '' && input) input.focus();
+}
+
+function removeProgramFeatureRow(button) {
+  const row = button && button.closest ? button.closest('.program-feature-item') : null;
+  const list = document.getElementById('programFeatureList');
+  if (!row || !list) return;
+  row.remove();
+  if (!list.children.length) addProgramFeatureRow('');
+  refreshProgramFeatureRows();
+}
+
+function setProgramFeatureList(values) {
+  const list = document.getElementById('programFeatureList');
+  if (!list) return;
+  list.innerHTML = '';
+  const safeValues = Array.isArray(values) && values.length ? values : [''];
+  safeValues.forEach((value) => addProgramFeatureRow(value));
+  refreshProgramFeatureRows();
+}
+
+function collectProgramFeatureLines() {
+  const list = document.getElementById('programFeatureList');
+  if (!list) return [];
+  return Array.from(list.querySelectorAll('.program-feature-input'))
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
 
 async function loadPrograms() {
   try {
@@ -603,6 +675,10 @@ function openProgramForm(item) {
   document.getElementById('pTierLabel').value = item ? item.tierLabel_ru || item.tierLabel || '' : '';
   document.getElementById('pPriceNumeric').value = item ? item.priceNumeric || 0 : 0;
   document.getElementById('pPurchaseCurrency').value = item ? item.purchaseCurrency || 'KGS' : 'KGS';
+  const featureLines = item
+    ? ((item.features_ru && item.features_ru.length) ? item.features_ru : (item.features || []))
+    : [];
+  setProgramFeatureList(featureLines);
   openAdminModal('programModal');
 }
 
@@ -620,6 +696,7 @@ async function saveProgram(e) {
   const tierLabel = document.getElementById('pTierLabel').value.trim();
   const price = parseFloat(document.getElementById('pPriceNumeric').value) || 0;
   const currency = document.getElementById('pPurchaseCurrency').value;
+  const featureLines = collectProgramFeatureLines();
   const actionType = existing ? existing.actionType || (price > 0 ? 'purchase' : 'consult') : (price > 0 ? 'purchase' : 'consult');
   const order = existing ? existing.order || 0 : programs.length + 1;
   const currentPopular = existing ? !!existing.popular : false;
@@ -661,8 +738,8 @@ async function saveProgram(e) {
     priceCurrency_ru: priceCurrency,
     priceNumeric: price,
     purchaseCurrency: currency,
-    features: existing ? (existing.features || []) : [],
-    features_ru: existing ? ((existing.features_ru && existing.features_ru.length) ? existing.features_ru : (existing.features || [])) : [],
+    features: featureLines,
+    features_ru: featureLines,
     buttonText: existing ? (existing.buttonText || (actionType === 'purchase' ? 'Начать' : 'Связаться')) : (actionType === 'purchase' ? 'Начать' : 'Связаться'),
     buttonText_ru: existing ? (existing.buttonText_ru || existing.buttonText || (actionType === 'purchase' ? 'Начать' : 'Связаться')) : (actionType === 'purchase' ? 'Начать' : 'Связаться'),
     actionType,
