@@ -5,3 +5,6 @@ node_modules/
 .env.*
 !.env.example
 .vercel
+
+# Backup originals from video compression
+*-original.*

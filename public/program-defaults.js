@@ -67,7 +67,7 @@
         {
           title: 'Shift in state and focus',
           subtitle: 'Video review · Coming soon',
-          src: '/videos/brain-charge-extra-2.mov',
+          src: '/videos/brain-charge-extra-2.mp4',
           poster: '',
           isPrimary: false
         }
@@ -90,7 +90,7 @@
         {
           title: 'Сдвиг в состоянии и фокусе',
           subtitle: 'Видео отзыв · скоро здесь',
-          src: '/videos/brain-charge-extra-2.mov',
+          src: '/videos/brain-charge-extra-2.mp4',
           poster: '',
           isPrimary: false
         }

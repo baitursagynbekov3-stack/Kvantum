@@ -56,7 +56,12 @@
     ctx.stroke();
   }
 
+  let lastFrame = 0;
+  const FRAME_INTERVAL = 100; // ~10fps — plenty for a tiny favicon
+
   function render(ts) {
+    if (ts - lastFrame < FRAME_INTERVAL) { requestAnimationFrame(render); return; }
+    lastFrame = ts;
     const t = ts / 1000;
 
     ctx.clearRect(0, 0, SIZE, SIZE);
