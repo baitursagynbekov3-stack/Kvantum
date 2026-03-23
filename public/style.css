@@ -92,7 +92,10 @@ body.dark-mode .modal-tabs { border-bottom-color: #2a2a2a; }
 body.dark-mode .payment-summary { background: #222; }
 body.dark-mode .contact-note { background: #1a1a1a; }
 body.dark-mode .user-dropdown { background: #1a1a1a; }
-body.dark-mode .user-greeting { border-bottom-color: #2a2a2a; }
+body.dark-mode .user-greeting { border-bottom-color: #2a2a2a; color: #dedede; }
+body.dark-mode .user-dropdown a { color: #bbb; }
+body.dark-mode .user-dropdown a:hover { color: var(--primary); }
+body.dark-mode .modal-close { color: #dedede; }
 body.dark-mode .toast { background: #1a1a1a; }
 body.dark-mode .chatbot-window { background: #1a1a1a; }
 body.dark-mode .chat-message.bot .message-bubble { background: #222; }
@@ -227,17 +230,17 @@ input[type="checkbox"]:focus {
   transition-delay: calc(var(--anim-delay, 0ms) + var(--reveal-delay, 0ms));
 }
 .anim-fade-up {
-  transform: translate3d(0, var(--motion-distance-y), 0);
+  transform: translate3d(0, var(--motion-distance-y), 0) scale(0.97);
 }
 .anim-fade-right {
-  transform: translate3d(calc(var(--motion-distance-x) * -1), 0, 0);
+  transform: translate3d(calc(var(--motion-distance-x) * -1), 0, 0) scale(0.97);
 }
 .anim-fade-left {
-  transform: translate3d(var(--motion-distance-x), 0, 0);
+  transform: translate3d(var(--motion-distance-x), 0, 0) scale(0.97);
 }
 .anim-visible {
   opacity: 1 !important;
-  transform: translate3d(0, 0, 0) !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
   will-change: auto;
 }
 .anim-delay-1 { --anim-delay: calc(var(--motion-stagger-step) * 1); }
@@ -270,6 +273,13 @@ input[type="checkbox"]:focus {
   .mobile-sticky-cta,
   .mobile-sticky-cta.is-visible {
     transform: none;
+    filter: none;
+  }
+  .service-card:hover,
+  .individual-card:hover,
+  .pricing-card:hover,
+  .testimonial-card:hover {
+    transform: none;
   }
 }
 
@@ -291,10 +301,12 @@ input[type="checkbox"]:focus {
     box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
     background-color var(--motion-duration-fast) var(--motion-ease-standard),
     color var(--motion-duration-fast) var(--motion-ease-standard),
-    border-color var(--motion-duration-fast) var(--motion-ease-standard);
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    filter var(--motion-duration-fast) var(--motion-ease-standard);
 }
-.btn:hover { transform: translateY(-1px); }
-.btn:active { transform: translateY(0) scale(0.985); }
+.btn { cursor: pointer; }
+.btn:hover { transform: translateY(-2px) scale(1.03); filter: brightness(1.08); }
+.btn:active { transform: translateY(0) scale(0.97); filter: brightness(0.95); }
 .btn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(196,30,30,0.22);
@@ -310,8 +322,8 @@ input[type="checkbox"]:focus {
 .btn-primary:hover {
   background: var(--primary-dark);
   border-color: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(196,30,30,0.25);
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 10px 28px rgba(196,30,30,0.3);
 }
 .btn-outline {
   background: transparent;
@@ -338,8 +350,8 @@ input[type="checkbox"]:focus {
   border-color: var(--white);
 }
 .btn-white:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.25);
 }
 
 /* ===== Navbar ===== */
@@ -843,8 +855,8 @@ input[type="checkbox"]:focus {
   border: 1px solid #f0f0f0;
 }
 .service-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--shadow-xl);
   border-color: transparent;
 }
 .service-card:hover .service-number { color: var(--primary); }
@@ -893,8 +905,8 @@ input[type="checkbox"]:focus {
   transition: var(--transition);
 }
 .individual-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: var(--shadow-xl);
   border-color: transparent;
 }
 .individual-card-icon {
@@ -967,8 +979,8 @@ input[type="checkbox"]:focus {
   grid-column: span 2;
 }
 .pricing-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-5px) scale(1.03);
+  box-shadow: var(--shadow-xl);
   border-color: transparent;
 }
 .pricing-card.popular {
@@ -1518,8 +1530,8 @@ input[type="checkbox"]:focus {
   height: 100%;
 }
 .testimonial-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-xl);
   border-color: transparent;
 }
 .testimonial-quote {
@@ -1583,7 +1595,7 @@ input[type="checkbox"]:focus {
 .video-reviews-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 .video-review-card {
   background: var(--white);
@@ -2474,7 +2486,7 @@ body.dark-mode .phone-input-group .country-code-select {
   .pricing-grid > .pricing-card:nth-child(4):nth-last-child(2),
   .pricing-grid > .pricing-card:nth-child(5):last-child { grid-column: auto; }
   .testimonials-grid { grid-auto-columns: calc((100% - 28px) / 2); }
-  .video-reviews-grid { grid-template-columns: repeat(2, 1fr); }
+  .video-reviews-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
   .contact-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .stats-grid { flex-wrap: wrap; gap: 24px; }
@@ -2711,9 +2723,11 @@ body.dark-mode .phone-input-group .country-code-select {
   .modal-overlay { padding: 12px; }
   .modal { padding: 24px 16px; max-height: 92vh; }
   .chatbot-window { width: calc(100vw - 24px); right: -2px; bottom: 62px; }
+  .video-reviews-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
 }
 
 @media (max-width: 480px) {
+  .video-reviews-grid { gap: 10px; }
   .user-dropdown { min-width: 180px; max-width: calc(100vw - 24px); }
   .nav-actions { gap: 6px; }
   .dark-toggle,
@@ -2850,3 +2864,43 @@ body.dark-mode .phone-input-group .country-code-select {
 .booking-status--in_progress { background: #dbeafe; color: #1e40af; }
 .booking-status--done { background: #d1fae5; color: #065f46; }
 .booking-status--cancelled { background: #f3f4f6; color: #6b7280; }
+
+/* ===== Purchases card (showPurchases modal) ===== */
+.profile-booking-card {
+  padding: 14px 16px;
+  background: var(--gray-100);
+  border-radius: var(--radius);
+}
+.booking-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.booking-card-header strong {
+  font-size: 0.9rem;
+  color: var(--dark);
+}
+.booking-card-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: var(--gray-500);
+}
+.status-completed { background: #d1fae5; color: #065f46; }
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-cancelled { background: #f3f4f6; color: #6b7280; }
+
+/* ===== Profile dark mode fixes ===== */
+.dark-mode .profile-modal h2,
+.dark-mode .profile-modal h3 { color: #dedede; }
+.dark-mode .profile-modal .form-group label { color: #ccc; }
+.dark-mode .profile-modal .profile-password-note { color: #999; }
+.dark-mode .profile-booking-card { background: #222; }
+.dark-mode .booking-card-header strong { color: #dedede; }
+.dark-mode .booking-card-details { color: #999; }
+.dark-mode .profile-booking-date { color: #999; }
+.dark-mode .profile-no-bookings { color: #999; }

@@ -2205,10 +2205,60 @@ function applyDisplayCurrency() {
   });
 }
 
+function detectCurrencyFromTimezone() {
+  try {
+    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    // Map timezone regions to currencies available in the selector
+    var tzCurrencyMap = {
+      // Kyrgyzstan
+      'Asia/Bishkek': 'KGS',
+      // Russia
+      'Europe/Moscow': 'RUB', 'Europe/Kaliningrad': 'RUB', 'Europe/Samara': 'RUB',
+      'Asia/Yekaterinburg': 'RUB', 'Asia/Omsk': 'RUB', 'Asia/Novosibirsk': 'RUB',
+      'Asia/Krasnoyarsk': 'RUB', 'Asia/Irkutsk': 'RUB', 'Asia/Yakutsk': 'RUB',
+      'Asia/Vladivostok': 'RUB', 'Asia/Magadan': 'RUB', 'Asia/Kamchatka': 'RUB',
+      'Europe/Volgograd': 'RUB', 'Asia/Novokuznetsk': 'RUB', 'Asia/Tomsk': 'RUB',
+      'Asia/Barnaul': 'RUB', 'Europe/Saratov': 'RUB', 'Europe/Astrakhan': 'RUB',
+      'Europe/Kirov': 'RUB', 'Asia/Chita': 'RUB', 'Asia/Sakhalin': 'RUB',
+      'Asia/Srednekolymsk': 'RUB', 'Asia/Anadyr': 'RUB', 'Europe/Ulyanovsk': 'RUB',
+      // Ukraine
+      'Europe/Kiev': 'UAH', 'Europe/Kyiv': 'UAH', 'Europe/Zaporozhye': 'UAH',
+      'Europe/Uzhgorod': 'UAH',
+      // Kazakhstan
+      'Asia/Almaty': 'KGS', 'Asia/Aqtobe': 'KGS', 'Asia/Aqtau': 'KGS',
+      'Asia/Atyrau': 'KGS', 'Asia/Oral': 'KGS', 'Asia/Qostanay': 'KGS',
+      'Asia/Qyzylorda': 'KGS',
+      // Uzbekistan
+      'Asia/Tashkent': 'KGS', 'Asia/Samarkand': 'KGS',
+      // Europe (EUR zone)
+      'Europe/Berlin': 'EUR', 'Europe/Paris': 'EUR', 'Europe/Rome': 'EUR',
+      'Europe/Madrid': 'EUR', 'Europe/Amsterdam': 'EUR', 'Europe/Brussels': 'EUR',
+      'Europe/Vienna': 'EUR', 'Europe/Helsinki': 'EUR', 'Europe/Athens': 'EUR',
+      'Europe/Lisbon': 'EUR', 'Europe/Dublin': 'EUR', 'Europe/Luxembourg': 'EUR',
+      'Europe/Tallinn': 'EUR', 'Europe/Riga': 'EUR', 'Europe/Vilnius': 'EUR',
+      'Europe/Bratislava': 'EUR', 'Europe/Ljubljana': 'EUR', 'Europe/Zagreb': 'EUR',
+      'Europe/Bucharest': 'EUR', 'Europe/Sofia': 'EUR', 'Europe/Warsaw': 'EUR',
+      'Europe/Prague': 'EUR', 'Europe/Budapest': 'EUR', 'Europe/Belgrade': 'EUR',
+    };
+    if (tzCurrencyMap[tz]) return tzCurrencyMap[tz];
+    // Fallback: check broad region prefix
+    if (tz.startsWith('America/')) return 'USD';
+    if (tz.startsWith('US/')) return 'USD';
+    if (tz.startsWith('Europe/')) return 'EUR';
+    return 'USD';
+  } catch (e) {
+    return 'USD';
+  }
+}
+
 function initCurrencySelector() {
   const select = document.getElementById('displayCurrency');
   if (!select) return;
-  const saved = localStorage.getItem('quantum_display_currency') || 'USD';
+  var saved = localStorage.getItem('quantum_display_currency');
+  // If no saved preference, auto-detect from timezone
+  if (!saved) {
+    saved = detectCurrencyFromTimezone();
+  }
   select.value = saved;
   selectedDisplayCurrency = saved;
 
@@ -3798,6 +3848,9 @@ async function handleContact(e) {
 const CONSULT_PROGRAMS = new Set(['Club "Resources"', 'Intensive "Mom & Dad"']);
 
 async function handlePurchase(productId, productName, amount, currency) {
+  // Lazy-load Stripe SDK on first purchase interaction
+  if (typeof window.loadStripeIfNeeded === 'function') window.loadStripeIfNeeded();
+
   // Open consultation modal for specific programs
   if (CONSULT_PROGRAMS.has(productName)) {
     openModal('consultModal');

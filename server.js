@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcryptjs');
@@ -194,21 +195,25 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 
         // Notify n8n of new purchase for Telegram notification
         if (process.env.N8N_PURCHASE_WEBHOOK_URL) {
-          fetch(process.env.N8N_PURCHASE_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              customerName: user.name,
-              customerEmail: user.email,
-              productName: productName || 'Unknown product',
-              productId: productId || null,
-              amount: Number.isFinite(normalizedOriginalAmount) && normalizedOriginalAmount > 0
-                ? normalizedOriginalAmount
-                : session.amount_total / 100,
-              currency: normalizedOriginalCurrency || session.currency.toUpperCase(),
-              timestamp: new Date().toISOString()
-            })
-          }).catch(err => console.error('[n8n purchase webhook] failed:', err.message));
+          try {
+            await fetch(process.env.N8N_PURCHASE_WEBHOOK_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                customerName: user.name,
+                customerEmail: user.email,
+                productName: productName || 'Unknown product',
+                productId: productId || null,
+                amount: Number.isFinite(normalizedOriginalAmount) && normalizedOriginalAmount > 0
+                  ? normalizedOriginalAmount
+                  : session.amount_total / 100,
+                currency: normalizedOriginalCurrency || session.currency.toUpperCase(),
+                timestamp: new Date().toISOString()
+              })
+            });
+          } catch (err) {
+            console.error('[n8n purchase webhook] failed:', err.message);
+          }
         }
       }
     } catch (err) {
@@ -218,10 +223,25 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
   res.json({ received: true });
 });
 
+app.use(compression());
 app.use(express.json());
 
 if (SERVE_STATIC) {
-  app.use(express.static(path.join(__dirname, 'public')));
+  // Immutable assets (versioned via ?v= query string) — cache 30 days
+  app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '30d',
+    immutable: true,
+    setHeaders(res, filePath) {
+      // Videos & images: cache 7 days
+      if (/\.(mp4|mov|webm|jpg|jpeg|png|gif|webp|svg|ico)$/i.test(filePath)) {
+        res.setHeader('Cache-Control', 'public, max-age=604800');
+      }
+      // HTML: no cache (always fresh)
+      if (/\.html$/i.test(filePath)) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    }
+  }));
 }
 
 // ===== Exchange Rates (display-only, cached 1 hour) =====
@@ -1576,20 +1596,22 @@ app.post('/api/register', authRateLimiter, async (req, res) => {
     const token = buildAuthToken(user, role);
 
     // Notify n8n of new registration (awaited so Vercel doesn't kill it before it fires)
-    try {
-      await fetch(process.env.N8N_REGISTRATION_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          userRole: 'customer',
-          timestamp: new Date().toISOString()
-        })
-      });
-    } catch (err) {
-      console.error('[n8n webhook] failed:', err.message);
+    if (process.env.N8N_REGISTRATION_WEBHOOK_URL) {
+      try {
+        await fetch(process.env.N8N_REGISTRATION_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            userRole: 'customer',
+            timestamp: new Date().toISOString()
+          })
+        });
+      } catch (err) {
+        console.error('[n8n registration webhook] failed:', err.message);
+      }
     }
 
     res.json({
@@ -1909,22 +1931,26 @@ app.post('/api/book-consultation', bookingRateLimiter, async (req, res) => {
 
     // Fire n8n consultation workflow (skip if Google Sheets webhook falls back to the same URL)
     if (N8N_CONSULTATION_WEBHOOK_URL && N8N_CONSULTATION_WEBHOOK_URL !== GOOGLE_SHEETS_WEBHOOK_URL) {
-      await fetch(N8N_CONSULTATION_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bookingId: String(booking.id),
-          name: booking.name,
-          email: booking.email,
-          phone: booking.phone,
-          service: booking.service,
-          message: booking.message,
-          contactMethod,
-          source: 'website-form',
-          timestamp: new Date().toISOString(),
-          ...attribution
-        })
-      }).catch(err => console.error('[n8n consultation webhook] failed:', err.message));
+      try {
+        await fetch(N8N_CONSULTATION_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookingId: String(booking.id),
+            name: booking.name,
+            email: booking.email,
+            phone: booking.phone,
+            service: booking.service,
+            message: booking.message,
+            contactMethod,
+            source: 'website-form',
+            timestamp: new Date().toISOString(),
+            ...attribution
+          })
+        });
+      } catch (err) {
+        console.error('[n8n consultation webhook] failed:', err.message);
+      }
     }
 
     // Send confirmation email to the client

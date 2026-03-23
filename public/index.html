@@ -25,9 +25,11 @@
   <meta name="twitter:image" content="https://kvantum.us/images/review-3-poster.jpg">
   <meta name="theme-color" content="#c41e1e">
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="./style.css?v=20260321-5">
+  <link rel="stylesheet" href="./style.css?v=20260323">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&amp;display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@700;800;900&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@700;800;900&amp;display=swap" rel="stylesheet"></noscript>
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -408,6 +410,27 @@
             <div class="video-review-thumb">
               <video class="video-review-poster" muted preload="none" playsinline poster="/images/review-3-poster.jpg" data-lazy-video="1">
                 <source data-src="/videos/review-3.mp4" type="video/mp4">
+              </video>
+              <div class="video-play-overlay">
+                <div class="play-circle">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="video-review-info">
+              <strong>Client Review</strong>
+              <span>Video &bull; Client</span>
+            </div>
+          </div>
+
+          <div class="video-review-card anim-fade-up anim-delay-3"
+               data-type="local"
+               data-src="/videos/review-4.mp4"
+               data-poster=""
+               onclick="openVideoReview(this)">
+            <div class="video-review-thumb">
+              <video class="video-review-poster" muted preload="none" playsinline data-lazy-video="1">
+                <source data-src="/videos/review-4.mp4" type="video/mp4">
               </video>
               <div class="video-play-overlay">
                 <div class="play-circle">
@@ -970,9 +993,9 @@
     </div>
   </div>
 
-  <script src="./config.js?v=20260321-8"></script>
-  <script src="./program-defaults.js?v=20260321-8"></script>
-  <script src="./app.js?v=20260321-8"></script>
+  <script src="./config.js?v=20260323" defer></script>
+  <script src="./program-defaults.js?v=20260323" defer></script>
+  <script src="./app.js?v=20260323" defer></script>
 
   <script>
     // Video Reviews Modal
@@ -1024,26 +1047,45 @@
     });
   </script>
 
-  <!-- Stripe.js -->
-  <script src="https://js.stripe.com/v3/"></script>
+  <!-- Stripe.js — loaded only on payment return or when first purchase is triggered -->
   <script>
-    // Handle Stripe Checkout return
     (function() {
       var params = new URLSearchParams(window.location.search);
-      if (params.get('payment') === 'success') {
-        if (window.handleStripeReturnStatus) {
-          window.handleStripeReturnStatus('success', params.get('sid'));
-        } else if (window.trackAnalyticsEvent) {
-          window.trackAnalyticsEvent('payment_success', { source: 'stripe_return' });
+      var isPaymentReturn = params.get('payment') === 'success' || params.get('payment') === 'cancelled';
+
+      function handleReturn() {
+        if (params.get('payment') === 'success') {
+          if (window.handleStripeReturnStatus) {
+            window.handleStripeReturnStatus('success', params.get('sid'));
+          } else if (window.trackAnalyticsEvent) {
+            window.trackAnalyticsEvent('payment_success', { source: 'stripe_return' });
+          }
+          window.history.replaceState({}, '', window.location.pathname);
+          setTimeout(function() { showToast('Payment successful! Thank you for your purchase.', 'success'); }, 500);
+        } else if (params.get('payment') === 'cancelled') {
+          if (window.handleStripeReturnStatus) {
+            window.handleStripeReturnStatus('cancelled', '');
+          }
+          window.history.replaceState({}, '', window.location.pathname);
+          setTimeout(function() { showToast('Payment cancelled. You can try again anytime.', 'info'); }, 500);
         }
-        window.history.replaceState({}, '', window.location.pathname);
-        setTimeout(function() { showToast('Payment successful! Thank you for your purchase.', 'success'); }, 500);
-      } else if (params.get('payment') === 'cancelled') {
-        if (window.handleStripeReturnStatus) {
-          window.handleStripeReturnStatus('cancelled', '');
-        }
-        window.history.replaceState({}, '', window.location.pathname);
-        setTimeout(function() { showToast('Payment cancelled. You can try again anytime.', 'info'); }, 500);
+      }
+
+      // Load Stripe on payment return immediately; otherwise load lazily on first interaction
+      if (isPaymentReturn) {
+        var s = document.createElement('script');
+        s.src = 'https://js.stripe.com/v3/';
+        s.onload = handleReturn;
+        document.head.appendChild(s);
+      } else {
+        window._stripeLoaded = false;
+        window.loadStripeIfNeeded = function() {
+          if (window._stripeLoaded || window.Stripe) return;
+          window._stripeLoaded = true;
+          var s = document.createElement('script');
+          s.src = 'https://js.stripe.com/v3/';
+          document.head.appendChild(s);
+        };
       }
     })();
   </script>
