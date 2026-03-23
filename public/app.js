@@ -1366,7 +1366,7 @@ const translations = {
     'contact.entry.text': 'Вход в индивидуальную работу после <strong>бесплатной консультации</strong>. Беру не всех — мы обеспечиваем правильный подбор для обеих сторон.',
     'faq.label': 'FAQ',
     'faq.title': 'Часто задаваемые <span class="text-gradient">вопросы</span>',
-    'faq.subtitle': 'Ответы на самые популярные вопросы о наших программах и услугах',
+    'faq.subtitle': 'Задайте любой вопрос — наш ассистент ответит мгновенно',
     'faq.q1': 'Что такое НЛП и зачем оно мне?',
     'faq.a1': 'Это набор практических техник, которые помогают управлять мышлением, состоянием и поведением, улучшать коммуникацию и быстрее достигать целей.',
     'faq.q2': 'Какие результаты я получу?',
@@ -1529,7 +1529,7 @@ const translations = {
     'contact.entry.text': 'Entry to individual work is after a <strong>free consultation</strong>. Not everyone is accepted — we ensure the right fit for both sides.',
     'faq.label': 'FAQ',
     'faq.title': 'Frequently Asked <span class="text-gradient">Questions</span>',
-    'faq.subtitle': 'Answers to the most common questions about our programs and services',
+    'faq.subtitle': 'Ask any question — our assistant will answer instantly',
     'faq.q1': 'What is NLP and why do I need it?',
     'faq.a1': 'It is a set of practical techniques that help you manage your thinking, state, and behavior, improve communication, and achieve your goals faster.',
     'faq.q2': 'What results will I get?',
@@ -1732,13 +1732,73 @@ async function loadSiteContent() {
   }
 }
 
-function toggleFaqItem(el) {
-  var item = el.parentElement;
-  var wasOpen = item.classList.contains('open');
-  // Close all others (single-open accordion)
-  var siblings = item.parentElement.querySelectorAll('.faq-item.open');
-  for (var i = 0; i < siblings.length; i++) { siblings[i].classList.remove('open'); }
-  if (!wasOpen) item.classList.add('open');
+// ===== FAQ Chat =====
+var faqChatSessionId = null;
+
+function getFaqSessionId() {
+  if (!faqChatSessionId) {
+    faqChatSessionId = 'faq-' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+  return faqChatSessionId;
+}
+
+function addFaqMsg(text, sender) {
+  var container = document.getElementById('faqChatMessages');
+  if (!container) return;
+  var div = document.createElement('div');
+  div.className = 'faq-msg ' + sender;
+  div.innerHTML = '<div class="faq-msg-bubble">' + escapeHtml(text) + '</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showFaqTyping() {
+  var container = document.getElementById('faqChatMessages');
+  if (!container) return null;
+  var div = document.createElement('div');
+  div.className = 'faq-msg bot faq-typing';
+  div.id = 'faq-typing-' + Date.now();
+  div.innerHTML = '<div class="faq-msg-bubble"><span class="faq-typing-dot"></span><span class="faq-typing-dot"></span><span class="faq-typing-dot"></span></div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div.id;
+}
+
+function removeFaqTyping(id) {
+  var el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+async function sendFaqQuestion(e) {
+  e.preventDefault();
+  var input = document.getElementById('faqInput');
+  var message = input.value.trim();
+  if (!message) return;
+
+  addFaqMsg(message, 'user');
+  input.value = '';
+
+  var typingId = showFaqTyping();
+
+  try {
+    var res = await apiFetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message, sessionId: getFaqSessionId() })
+    });
+    var result = await res.json();
+    removeFaqTyping(typingId);
+
+    if (!res.ok) {
+      addFaqMsg(result.error || 'Sorry, something went wrong. Please try again.', 'bot');
+      return;
+    }
+
+    addFaqMsg(result.reply || '...', 'bot');
+  } catch (err) {
+    removeFaqTyping(typingId);
+    addFaqMsg('Sorry, I couldn\'t connect. Please try again in a moment.', 'bot');
+  }
 }
 
 function renderTestimonials(items) {

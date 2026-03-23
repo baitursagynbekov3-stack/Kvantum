@@ -563,66 +563,26 @@
     </div>
   </section>
 
-  <!-- FAQ Section -->
-  <section class="section faq" id="faq">
+  <!-- FAQ Chat Section -->
+  <section class="section faq-chat-section" id="faq">
     <div class="container">
       <div class="section-header anim-fade-up">
         <div class="section-label" data-i18n="faq.label">FAQ</div>
         <h2 class="section-title" data-i18n-html="faq.title">Часто задаваемые <span class="text-gradient">вопросы</span></h2>
-        <p class="section-subtitle" data-i18n="faq.subtitle">Ответы на самые популярные вопросы о наших программах и услугах</p>
+        <p class="section-subtitle" data-i18n="faq.subtitle">Задайте любой вопрос — наш ассистент ответит мгновенно</p>
       </div>
-      <div class="faq-list" id="faqList">
-
-        <div class="faq-item open">
-          <div class="faq-question" onclick="toggleFaqItem(this)">
-            <span data-i18n="faq.q1">Что такое НЛП и зачем оно мне?</span>
-            <span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">
-            <p data-i18n="faq.a1">Это набор практических техник, которые помогают управлять мышлением, состоянием и поведением, улучшать коммуникацию и быстрее достигать целей.</p>
+      <div class="faq-chat" id="faqChat">
+        <div class="faq-chat-messages" id="faqChatMessages">
+          <div class="faq-msg bot">
+            <div class="faq-msg-bubble">Hi! 🌟 Welcome to Quantum — I'm here to help you find exactly what you need. What can I answer for you?</div>
           </div>
         </div>
-
-        <div class="faq-item">
-          <div class="faq-question" onclick="toggleFaqItem(this)">
-            <span data-i18n="faq.q2">Какие результаты я получу?</span>
-            <span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">
-            <p data-i18n="faq.a2">Вы научитесь лучше понимать людей, уверенно общаться, управлять эмоциями и быстрее достигать желаемых результатов в жизни и работе.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-question" onclick="toggleFaqItem(this)">
-            <span data-i18n="faq.q3">Подойдёт ли мне, если у меня нет опыта?</span>
-            <span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">
-            <p data-i18n="faq.a3">Да, программа подходит для начинающих. Всё объясняется простым языком и сразу применяется на практике.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-question" onclick="toggleFaqItem(this)">
-            <span data-i18n="faq.q4">Это теория или практика?</span>
-            <span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">
-            <p data-i18n="faq.a4">Основной упор сделан на практику. Вы сразу применяете техники в реальной жизни.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-question" onclick="toggleFaqItem(this)">
-            <span data-i18n="faq.q5">Когда я увижу результат?</span>
-            <span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">
-            <p data-i18n="faq.a5">Первые изменения заметны уже в процессе обучения, а устойчивый результат формируется при регулярной практике.</p>
-          </div>
-        </div>
-
+        <div class="faq-chat-divider"></div>
+        <form class="faq-chat-input" onsubmit="sendFaqQuestion(event)">
+          <input type="text" id="faqInput" placeholder="Ask your question..." autocomplete="off">
+          <button type="submit" aria-label="Send">&#10148;</button>
+        </form>
+        <div class="faq-chat-divider"></div>
       </div>
     </div>
   </section>
