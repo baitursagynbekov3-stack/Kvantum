@@ -1087,8 +1087,23 @@ input[type="checkbox"]:focus {
   color: var(--primary);
   margin-bottom: 16px;
 }
+.pricing-card.premium,
+.pricing-card.mentorship {
+  padding-top: 78px;
+}
 .pricing-card.premium .pricing-tier,
-.pricing-card.mentorship .pricing-tier { color: var(--accent); }
+.pricing-card.mentorship .pricing-tier {
+  color: var(--accent);
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  margin-bottom: 0;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  line-height: 1;
+}
 .pricing-popular-badge {
   position: absolute;
   top: 20px;
