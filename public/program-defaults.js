@@ -208,6 +208,52 @@
       detailsPrimaryAction: true,
       detailsText: 'Intensive "Mom & Dad — My Two Wings" is a deep transformational program where you work through ancestral patterns, remove inner blocks, and reclaim your energy. You build inner support, heal deficits of love and acceptance, and start shaping relationships, money, and your life from a state of strength rather than lack.',
       detailsText_ru: 'Интенсив «Папа, мама — мои два крыла» — это глубокая трансформационная программа, где ты прорабатываешь родовые сценарии, убираешь внутренние блоки и возвращаешь свою энергию. Ты выстраиваешь внутреннюю опору, закрываешь дефициты любви и принятия, и начинаешь по-другому строить отношения, деньги и свою жизнь — из состояния силы, а не нехватки.',
+      detailsVideos: [
+        {
+          title: 'Main transformation story',
+          subtitle: 'Video review',
+          src: '/videos/mom-dad-main.mp4',
+          poster: '',
+          isPrimary: true
+        },
+        {
+          title: 'Shift in relationships and support',
+          subtitle: 'Video review',
+          src: '/videos/mom-dad-extra-1.mp4',
+          poster: '',
+          isPrimary: false
+        },
+        {
+          title: 'Inner strength and acceptance',
+          subtitle: 'Video review',
+          src: '/videos/mom-dad-extra-2.mp4',
+          poster: '',
+          isPrimary: false
+        }
+      ],
+      detailsVideos_ru: [
+        {
+          title: 'Главная история трансформации',
+          subtitle: 'Видео отзыв',
+          src: '/videos/mom-dad-main.mp4',
+          poster: '',
+          isPrimary: true
+        },
+        {
+          title: 'Сдвиг в отношениях и опоре',
+          subtitle: 'Видео отзыв',
+          src: '/videos/mom-dad-extra-1.mp4',
+          poster: '',
+          isPrimary: false
+        },
+        {
+          title: 'Внутренняя сила и принятие',
+          subtitle: 'Видео отзыв',
+          src: '/videos/mom-dad-extra-2.mp4',
+          poster: '',
+          isPrimary: false
+        }
+      ],
       actionType: 'purchase',
       order: 3
     },

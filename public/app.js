@@ -3845,7 +3845,7 @@ async function handleContact(e) {
 
 // ===== Payment =====
 // Programs that should open consultation modal instead of direct checkout
-const CONSULT_PROGRAMS = new Set(['Club "Resources"', 'Intensive "Mom & Dad"']);
+const CONSULT_PROGRAMS = new Set(['Club "Resources"']);
 
 async function handlePurchase(productId, productName, amount, currency) {
   // Lazy-load Stripe SDK on first purchase interaction
