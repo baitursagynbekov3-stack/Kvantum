@@ -573,7 +573,6 @@
       </div>
       <div class="faq-chat" id="faqChat">
         <div class="faq-chat-header">
-          <div class="faq-chat-avatar">Q</div>
           <div class="faq-chat-header-text">
             <strong>Quantum Assistant</strong>
             <span class="faq-chat-online">Online</span>
@@ -584,7 +583,7 @@
             <div class="faq-msg-bubble">Hi! 🌟 Welcome to Quantum — I'm here to help you find exactly what you need. What can I answer for you?</div>
           </div>
         </div>
-        <form class="faq-chat-input" onsubmit="sendFaqQuestion(event); return false;">
+        <form class="faq-chat-input" action="javascript:void(0)" onsubmit="sendFaqQuestion(event); return false;">
           <input type="text" id="faqInput" placeholder="Type your message..." autocomplete="off">
           <button type="submit" aria-label="Send">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>

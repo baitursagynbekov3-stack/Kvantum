@@ -1785,8 +1785,8 @@ function setFaqInputEnabled(enabled) {
 }
 
 async function sendFaqQuestion(e) {
-  if (e && e.preventDefault) e.preventDefault();
-  if (faqChatBusy) return;
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  if (faqChatBusy) return false;
 
   var input = document.getElementById('faqInput');
   var message = input.value.trim();
@@ -1828,7 +1828,8 @@ async function sendFaqQuestion(e) {
 
   faqChatBusy = false;
   setFaqInputEnabled(true);
-  input.focus();
+  input.focus({ preventScroll: true });
+  return false;
 }
 
 function renderTestimonials(items) {
