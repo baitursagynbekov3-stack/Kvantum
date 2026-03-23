@@ -1784,14 +1784,13 @@ function setFaqInputEnabled(enabled) {
   if (btn) { btn.disabled = !enabled; btn.style.opacity = enabled ? '1' : '0.4'; }
 }
 
-function sendFaqQuestion(e) {
-  if (e) e.preventDefault();
-  if (faqChatBusy) return false;
+function sendFaqQuestion() {
+  if (faqChatBusy) return;
 
   var input = document.getElementById('faqInput');
-  if (!input) return false;
+  if (!input) return;
   var message = input.value.trim();
-  if (!message) return false;
+  if (!message) return;
 
   faqChatBusy = true;
   setFaqInputEnabled(false);
@@ -1800,7 +1799,7 @@ function sendFaqQuestion(e) {
 
   var typingId = showFaqTyping();
 
-  fetch(buildApiUrl('/api/chat'), {
+  apiFetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message: message, sessionId: getFaqSessionId() })
@@ -1822,7 +1821,7 @@ function sendFaqQuestion(e) {
       }
     }
   })
-  .catch(function() {
+  .catch(function(err) {
     removeFaqTyping(typingId);
     addFaqMsg('Sorry, I couldn\'t connect. Please try again in a moment.', 'bot');
   })
@@ -1831,8 +1830,6 @@ function sendFaqQuestion(e) {
     setFaqInputEnabled(true);
     if (input) input.focus({ preventScroll: true });
   });
-
-  return false;
 }
 
 function renderTestimonials(items) {

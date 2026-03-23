@@ -2073,17 +2073,19 @@ body.dark-mode .phone-input-group .country-code-select {
 .faq-chat-input input::placeholder { color: rgba(255,255,255,0.28); }
 .faq-chat-input input:disabled { opacity: 0.5; }
 .faq-chat-input button {
-  background: none;
+  background: transparent;
   border: none;
-  color: var(--primary);
+  outline: none;
+  color: rgba(255,255,255,0.35);
   cursor: pointer;
-  padding: 14px 18px;
-  transition: opacity 0.2s, transform 0.2s;
+  padding: 12px 16px;
+  transition: color 0.2s;
   display: flex;
   align-items: center;
+  line-height: 0;
 }
-.faq-chat-input button:hover { opacity: 0.8; transform: scale(1.1); }
-.faq-chat-input button:disabled { opacity: 0.3; cursor: default; transform: none; }
+.faq-chat-input button:hover { color: rgba(255,255,255,0.7); }
+.faq-chat-input button:disabled { color: rgba(255,255,255,0.12); cursor: default; }
 
 /* Typing indicator */
 .faq-typing .faq-msg-bubble { display: flex; align-items: center; gap: 5px; padding: 14px 20px; }
