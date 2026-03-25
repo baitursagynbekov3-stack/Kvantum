@@ -44,7 +44,7 @@
 
   // Google Analytics 4 Measurement ID (example: G-XXXXXXXXXX).
   // Keep empty until GA4 property is created.
-  window.QUANTUM_GA4_MEASUREMENT_ID = '';
+  window.QUANTUM_GA4_MEASUREMENT_ID = 'G-LWNQ54B80B';
 
   // Demo admin emails — these accounts get admin access in demo mode.
   // In production, admin is determined by DB role + ADMIN_EMAILS bootstrap on backend.
