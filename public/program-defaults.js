@@ -133,8 +133,8 @@
       order: 1
     },
     {
-      name: 'Club "Resources"',
-      name_ru: 'Клуб «Ресурсы»',
+      name: 'Diagnostic',
+      name_ru: 'Диагностика',
       tagline: 'State Enhancement',
       tagline_ru: 'Усиление состояния',
       tier: 'standard',

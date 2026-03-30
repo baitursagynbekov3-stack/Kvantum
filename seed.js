@@ -15,7 +15,7 @@ const services = [
     availability: true
   },
   {
-    title: 'Club Resources',
+    title: 'Diagnostic',
     description: 'State Enhancement — 4 weeks. 2 sessions with Altynai, 2 sessions with curator. Build confidence, self-worth, and inner freedom.',
     price: 5000,
     currency: 'KGS',

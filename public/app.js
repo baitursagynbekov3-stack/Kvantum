@@ -1288,7 +1288,7 @@ const translations = {
     'programs.bc.f5': 'Трансформация состояния',
     'programs.bc.f6': 'Изменения в жизни, отношениях и финансах',
     'programs.bc.btn': 'Начать',
-    'programs.rc.name': 'Клуб «Ресурсы»',
+    'programs.rc.name': 'Диагностика',
     'programs.rc.tagline': 'Усиление состояния',
     'programs.rc.currency': 'сом / месяц',
     'programs.rc.f1': 'Программа 4 недели',
@@ -1355,7 +1355,7 @@ const translations = {
     'contact.form.interest': 'Интересует',
     'contact.form.opt1': 'Бесплатная консультация',
     'contact.form.opt2': 'Зарядка мозга',
-    'contact.form.opt3': 'Клуб «Ресурсы»',
+    'contact.form.opt3': 'Диагностика',
     'contact.form.opt4': 'Интенсив «Папа, Мама»',
     'contact.form.opt6': 'Наставничество',
     'contact.form.message': 'Сообщение (необязательно)',
@@ -1381,7 +1381,7 @@ const translations = {
     'footer.quick': 'Быстрые ссылки',
     'footer.intensive': 'Интенсив',
     'footer.copy': '© 2026 КВАНТУМ Алтынай Эшинбекова. Все права защищены.',
-    'bonuses.b2.name': 'Клуб «Ресурсы»',
+    'bonuses.b2.name': 'Диагностика',
     'modal.login': 'Войти',
     'modal.register': 'Регистрация',
     'modal.welcome': 'С возвращением',
@@ -1518,7 +1518,7 @@ const translations = {
     'contact.form.interest': 'Interested In',
     'contact.form.opt1': 'Free Consultation',
     'contact.form.opt2': 'Brain Charge',
-    'contact.form.opt3': 'Club "Resources"',
+    'contact.form.opt3': 'Diagnostic',
     'contact.form.opt4': 'Intensive "Mom & Dad"',
     'contact.form.opt6': 'Mentorship',
     'contact.form.message': 'Message (optional)',
@@ -1544,7 +1544,7 @@ const translations = {
     'footer.quick': 'Quick Links',
     'footer.intensive': 'Intensive',
     'footer.copy': '© 2026 QUANTUM by Altynai Eshinbekova. All rights reserved.',
-    'bonuses.b2.name': 'Club "Resources"',
+    'bonuses.b2.name': 'Diagnostic',
     'modal.login': 'Login',
     'modal.register': 'Register',
     'modal.welcome': 'Welcome Back',
@@ -1792,10 +1792,10 @@ var faqLocalAnswers = [
   { keywords: ['новичок', 'опыт', 'начинающ', 'подойд'], answer: 'Да, программа подходит для начинающих. Всё объясняется простым языком и сразу применяется на практике.' },
   { keywords: ['теория', 'практика'], answer: 'Основной упор сделан на практику. Вы сразу применяете техники в реальной жизни.' },
   { keywords: ['когда', 'увижу', 'скоро', 'срок'], answer: 'Первые изменения заметны уже в процессе обучения, а устойчивый результат формируется при регулярной практике.' },
-  { keywords: ['цена', 'стоимость', 'сколько', 'прайс'], answer: 'Зарядка мозга — 1 000 сом, Клуб «Ресурсы» — 5 000 сом/мес, Интенсив «Папа, Мама» — $300, REBOOT — $1 000. Наставничество — уточняйте у менеджеров.' },
+  { keywords: ['цена', 'стоимость', 'сколько', 'прайс'], answer: 'Зарядка мозга — 1 000 сом, Диагностика — 5 000 сом/мес, Интенсив «Папа, Мама» — $300, REBOOT — $1 000. Наставничество — уточняйте у менеджеров.' },
   { keywords: ['консультац', 'бесплатн', 'записаться', 'запись'], answer: 'Первичная консультация бесплатная. Запишитесь через форму выше или напишите нам в WhatsApp/Telegram.' },
   { keywords: ['зарядка', 'мозг', 'brain'], answer: 'Зарядка мозга — 21-дневная программа. 15 минут в день, сессии в 6:00 утра (время КР). Стоимость: 1 000 сом.' },
-  { keywords: ['ресурс', 'клуб'], answer: 'Клуб «Ресурсы» — 4 недели, 2 сессии с Алтынай + 2 с куратором. Стоимость: 5 000 сом/месяц.' },
+  { keywords: ['диагностик', 'диагноз'], answer: 'Диагностика — 4 недели, 2 сессии с Алтынай + 2 с куратором. Стоимость: 5 000 сом/месяц.' },
   { keywords: ['интенсив', 'папа', 'мама', 'крыл'], answer: 'Интенсив «Папа, Мама — мои 2 крыла» — 1 месяц, работа с семейными паттернами. Стоимость: $300 / 26 300 сом.' },
   { keywords: ['reboot', 'ребут'], answer: 'REBOOT — 8-недельный курс по управлению реальностью. 24 сессии, 20 уроков и 20 практик. Стоимость: $1 000.' },
   { keywords: ['наставнич', 'менторс', 'университет'], answer: 'Наставничество (Университет Самопознания) — индивидуальная программа. Стоимость уточняйте у менеджеров.' },
@@ -3117,7 +3117,7 @@ function renderProfileBookings(bookings) {
   const serviceLabels = {
     consultation: currentLang === 'ru' ? 'Консультация' : 'Consultation',
     'brain-charge': 'Brain Charge',
-    'resources-club': currentLang === 'ru' ? 'Клуб «Ресурс»' : 'Club "Resources"',
+    'resources-club': currentLang === 'ru' ? 'Диагностика' : 'Diagnostic',
     intensive: currentLang === 'ru' ? 'Интенсив' : 'Intensive',
     reboot: 'REBOOT',
     mentorship: currentLang === 'ru' ? 'Менторство' : 'Mentorship'
@@ -4057,7 +4057,7 @@ async function handleContact(e) {
 
 // ===== Payment =====
 // Programs that should open consultation modal instead of direct checkout
-const CONSULT_PROGRAMS = new Set(['Club "Resources"']);
+const CONSULT_PROGRAMS = new Set(['Diagnostic']);
 
 async function handlePurchase(productId, productName, amount, currency) {
   // Lazy-load Stripe SDK on first purchase interaction

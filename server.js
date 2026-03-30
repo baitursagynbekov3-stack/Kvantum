@@ -136,7 +136,7 @@ const KVANTUM_SYSTEM_PROMPT_BASE = [
   '',
   'ПРОГРАММЫ И ЦЕНЫ:',
   '- Зарядка мозга: 1 000 сом — 21 день, 15 минут в день',
-  '- Клуб «Ресурсы»: 5 000 сом/месяц — 4 недели, сессии с Алтынай и кураторами',
+  '- Диагностика: 5 000 сом/месяц — 4 недели, сессии с Алтынай и кураторами',
   '- Интенсив «Папа, Мама — мои 2 крыла»: $300 / 26 300 сом — 1 месяц',
   '- REBOOT: $1 000 — 8 недель',
   '- Наставничество: стоимость уточняйте у менеджеров',
@@ -1195,8 +1195,8 @@ function getRuleBasedReply(message, useRu, knowledgeText) {
   // Pricing
   if (/(price|pricing|cost|how much|tariff|тариф|цен[аыу]|стоимост|сколько стоит|прайс|расценк)/i.test(lowerMsg)) {
     return useRu
-      ? 'Наши программы и цены:\n\n1. Зарядка мозга (вход) — 1,000 сом/руб\n2. Клуб «Ресурсы» — 5,000 сом/мес\n3. Интенсив «Папа, Мама» — $300 / 26,300 сом\n4. ПЕРЕЗАГРУЗКА (премиум) — $1,000\n5. Наставничество (элит) — уточняйте у менеджеров\n\nВсе программы включают личное сопровождение. Хотите подробнее о какой-то программе или записаться на бесплатную консультацию?'
-      : 'Our programs & pricing:\n\n1. Brain Charge (entry) — 1,000 KGS/RUB\n2. Club "Resources" — 5,000 KGS/month\n3. Intensive "Mom & Dad" — $300 / 26,300 KGS\n4. REBOOT (premium) — $1,000 USD\n5. Mentorship (elite) — contact us for pricing\n\nAll programs include personal support. Would you like details on any specific program, or shall I help you book a free consultation?';
+      ? 'Наши программы и цены:\n\n1. Зарядка мозга (вход) — 1,000 сом/руб\n2. Диагностика — 5,000 сом/мес\n3. Интенсив «Папа, Мама» — $300 / 26,300 сом\n4. ПЕРЕЗАГРУЗКА (премиум) — $1,000\n5. Наставничество (элит) — уточняйте у менеджеров\n\nВсе программы включают личное сопровождение. Хотите подробнее о какой-то программе или записаться на бесплатную консультацию?'
+      : 'Our programs & pricing:\n\n1. Brain Charge (entry) — 1,000 KGS/RUB\n2. Diagnostic — 5,000 KGS/month\n3. Intensive "Mom & Dad" — $300 / 26,300 KGS\n4. REBOOT (premium) — $1,000 USD\n5. Mentorship (elite) — contact us for pricing\n\nAll programs include personal support. Would you like details on any specific program, or shall I help you book a free consultation?';
   }
 
   // Brain Charge
@@ -1206,11 +1206,11 @@ function getRuleBasedReply(message, useRu, knowledgeText) {
       : 'Brain Charge — Reality Reprogramming:\n\n• Duration: 21 days\n• Format: 15 minutes per day, online\n• Schedule: 6:00 AM Kyrgyzstan time\n• Price: 1,000 KGS / 1,000 RUB\n\nWhat you get:\n— Work with thoughts & feelings\n— State transformation techniques\n— Shifts in life, relationships & finances\n\nThis is the perfect starting point for your transformation! Want to enroll?';
   }
 
-  // Resources Club
-  if (/(resource|club|клуб|ресурс)/i.test(lowerMsg)) {
+  // Diagnostic
+  if (/(diagnostic|диагностик|диагноз)/i.test(lowerMsg)) {
     return useRu
-      ? 'Клуб «Ресурсы» — Усиление состояния:\n\n• Длительность: 4 недели\n• 2 встречи с Алтынай лично\n• 2 встречи с куратором\n• Формат: онлайн групповые сессии\n• Цена: 5,000 сом/мес\n\nНаправления работы:\n— Защищённость и уверенность\n— Ценность и любовь к себе\n— Свобода и внутренняя опора\n\nГотовы усилить своё состояние?'
-      : 'Club "Resources" — State Enhancement:\n\n• Duration: 4 weeks\n• 2 sessions with Altynai personally\n• 2 sessions with a curator\n• Format: online group sessions\n• Price: 5,000 KGS/month\n\nFocus areas:\n— Building confidence & security\n— Self-worth & self-love\n— Freedom & inner foundation\n\nReady to strengthen your inner state?';
+      ? 'Диагностика — Усиление состояния:\n\n• Длительность: 4 недели\n• 2 встречи с Алтынай лично\n• 2 встречи с куратором\n• Формат: онлайн групповые сессии\n• Цена: 5,000 сом/мес\n\nНаправления работы:\n— Защищённость и уверенность\n— Ценность и любовь к себе\n— Свобода и внутренняя опора\n\nГотовы усилить своё состояние?'
+      : 'Diagnostic — State Enhancement:\n\n• Duration: 4 weeks\n• 2 sessions with Altynai personally\n• 2 sessions with a curator\n• Format: online group sessions\n• Price: 5,000 KGS/month\n\nFocus areas:\n— Building confidence & security\n— Self-worth & self-love\n— Freedom & inner foundation\n\nReady to strengthen your inner state?';
   }
 
   // Intensive
@@ -1265,8 +1265,8 @@ function getRuleBasedReply(message, useRu, knowledgeText) {
   // Schedule
   if (/(schedule|when|what time|timing|расписани|когда|во сколько|время|график|утр[оа]|вечер|session.*time|время.*сесси)/i.test(lowerMsg)) {
     return useRu
-      ? 'Расписание сессий:\n\n• Зарядка мозга: ежедневно в 6:00 утра (время КР, UTC+6)\n• Клуб «Ресурсы»: еженедельные сессии, расписание с группой\n• Интенсив и ПЕРЕЗАГРУЗКА: гибкий график, уроки доступны в любое время + живые Zoom по договорённости\n• Наставничество: индивидуальный график с Алтынай\n\nВсе живые сессии проходят онлайн через Zoom. Записи доступны, если пропустили.\n\nХотите узнать расписание конкретной программы?'
-      : 'Session schedule:\n\n• Brain Charge: daily at 6:00 AM (Kyrgyzstan time, UTC+6)\n• Club "Resources": weekly sessions, schedule set with your group\n• Intensive & REBOOT: flexible scheduling, lessons available anytime + live Zoom sessions by appointment\n• Mentorship: individual schedule agreed with Altynai\n\nAll live sessions are conducted online via Zoom. Recordings are available if you miss a session.\n\nWant to know the schedule for a specific program?';
+      ? 'Расписание сессий:\n\n• Зарядка мозга: ежедневно в 6:00 утра (время КР, UTC+6)\n• Диагностика: еженедельные сессии, расписание с группой\n• Интенсив и ПЕРЕЗАГРУЗКА: гибкий график, уроки доступны в любое время + живые Zoom по договорённости\n• Наставничество: индивидуальный график с Алтынай\n\nВсе живые сессии проходят онлайн через Zoom. Записи доступны, если пропустили.\n\nХотите узнать расписание конкретной программы?'
+      : 'Session schedule:\n\n• Brain Charge: daily at 6:00 AM (Kyrgyzstan time, UTC+6)\n• Diagnostic: weekly sessions, schedule set with your group\n• Intensive & REBOOT: flexible scheduling, lessons available anytime + live Zoom sessions by appointment\n• Mentorship: individual schedule agreed with Altynai\n\nAll live sessions are conducted online via Zoom. Recordings are available if you miss a session.\n\nWant to know the schedule for a specific program?';
   }
 
   // Format / How sessions work
@@ -1300,8 +1300,8 @@ function getRuleBasedReply(message, useRu, knowledgeText) {
   // Help choosing a program
   if (/(which|what.*program|recommend|suggest|какую|какой|подскаж|что.*выбрат|порекоменд|посовет|не\s*знаю.*выбрат|help\s*me\s*choose|best.*for\s*me|что\s*подойд[её]т)/i.test(lowerMsg)) {
     return useRu
-      ? 'Помогу выбрать!\n\n• Только начинаете? → Зарядка мозга (1,000 сом) — 21 день для сдвига мышления\n• Хотите поддержку? → Клуб «Ресурсы» (5,000 сом/мес) — ежемесячная групповая работа\n• Проблемы с родителями/семьёй? → Интенсив «Папа, Мама» ($300) — глубокая проработка корней\n• Готовы к полной трансформации? → ПЕРЕЗАГРУЗКА ($1,000) — 8 недель полного обновления\n• Хотите стать практиком? → Наставничество — профессиональное мастерство\n\nЛучший способ найти своё — бесплатная консультация. Алтынай лично оценит вашу ситуацию и порекомендует путь. Хотите записаться?'
-      : 'Let me help you choose!\n\n• Just starting out? → Brain Charge (1,000 KGS) — 21 days to shift your thinking\n• Want ongoing support? → Club "Resources" (5,000 KGS/mo) — monthly group work\n• Issues with parents/family? → Intensive "Mom & Dad" ($300) — deep root work\n• Ready for full transformation? → REBOOT ($1,000) — 8-week total overhaul\n• Want to become a practitioner? → Mentorship — professional mastery\n\nThe best way to find your fit is a free consultation. Altynai will personally assess your situation and recommend the right path. Want to book one?';
+      ? 'Помогу выбрать!\n\n• Только начинаете? → Зарядка мозга (1,000 сом) — 21 день для сдвига мышления\n• Хотите поддержку? → Диагностика (5,000 сом/мес) — ежемесячная групповая работа\n• Проблемы с родителями/семьёй? → Интенсив «Папа, Мама» ($300) — глубокая проработка корней\n• Готовы к полной трансформации? → ПЕРЕЗАГРУЗКА ($1,000) — 8 недель полного обновления\n• Хотите стать практиком? → Наставничество — профессиональное мастерство\n\nЛучший способ найти своё — бесплатная консультация. Алтынай лично оценит вашу ситуацию и порекомендует путь. Хотите записаться?'
+      : 'Let me help you choose!\n\n• Just starting out? → Brain Charge (1,000 KGS) — 21 days to shift your thinking\n• Want ongoing support? → Diagnostic (5,000 KGS/mo) — monthly group work\n• Issues with parents/family? → Intensive "Mom & Dad" ($300) — deep root work\n• Ready for full transformation? → REBOOT ($1,000) — 8-week total overhaul\n• Want to become a practitioner? → Mentorship — professional mastery\n\nThe best way to find your fit is a free consultation. Altynai will personally assess your situation and recommend the right path. Want to book one?';
   }
 
   // NLP / Methods
@@ -1990,7 +1990,7 @@ app.post('/api/book-consultation', bookingRateLimiter, async (req, res) => {
       const serviceLabels = {
         consultation: 'Free Consultation',
         'brain-charge': 'Brain Charge',
-        'resources-club': 'Club "Resources"',
+        'resources-club': 'Diagnostic',
         intensive: 'Intensive "Mom & Dad"',
         reboot: 'REBOOT',
         mentorship: 'Mentorship'
