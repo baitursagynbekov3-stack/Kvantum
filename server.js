@@ -11,6 +11,7 @@ const { PrismaClient } = require('@prisma/client');
 const { Resend } = require('resend');
 const Stripe = require('stripe');
 const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
+const QUANTUM_QUIZ = require('./data/quiz');
 
 const prisma = global.prisma || new PrismaClient();
 if (process.env.NODE_ENV !== 'production') {
@@ -2318,6 +2319,47 @@ app.get('/api/content/faq', async (req, res) => {
       orderBy: { sortOrder: 'asc' }
     });
     res.json(items.map(formatContentItem));
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Тест "Кто ты сейчас" — read-only, отдаёт вопросы теста без ключей c/t/a
+// (эти ключи нужны только для подсчёта результата на сервере и не должны быть
+// видны в DevTools, иначе тест легко угадать). Порядок вариантов ответа
+// перемешивается по детерминированной схеме permutations из data/quiz.js,
+// чтобы "правильный" (взрослый) ответ не был всегда в одной и той же позиции.
+function buildPublicQuiz() {
+  const quiz = QUANTUM_QUIZ;
+  const spheres = quiz.spheres.map((sphere, sphereIndex) => ({
+    key: sphere.key,
+    name: sphere.name,
+    color: sphere.color,
+    chakraNumber: sphere.chakraNumber,
+    chakraName: sphere.chakraName,
+    pointA: sphere.pointA,
+    pointB: sphere.pointB,
+    questions: sphere.questions.map((q, qIndexInSphere) => {
+      const questionNumber = qIndexInSphere + 1; // 1-based (1-3), как в комментарии permutations
+      const permIndex = (sphereIndex * 3 + questionNumber) % 6;
+      const order = quiz.permutations[permIndex];
+      const options = order.map((optionIndex) => ({
+        text: q.options[optionIndex].text
+      }));
+      return { question: q.question, options };
+    })
+  }));
+
+  return {
+    meta: quiz.meta,
+    disclaimer: quiz.disclaimer,
+    spheres
+  };
+}
+
+app.get('/api/quiz', (req, res) => {
+  try {
+    res.json(buildPublicQuiz());
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
