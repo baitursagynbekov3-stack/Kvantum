@@ -66,23 +66,30 @@
   </script>
 </head>
 <body>
+  <!-- Top Announcement Banner -->
+  <div class="top-banner" id="topBanner">
+    <div class="container top-banner-inner">
+      <span class="top-banner-text">Только в сентябре — бесплатные медитации по пятницам</span>
+      <button type="button" class="top-banner-btn" onclick="openTelegram()">В Telegram</button>
+    </div>
+  </div>
+
   <!-- Navigation -->
   <nav class="navbar" id="navbar">
     <div class="container nav-container">
-      <a href="#hero" class="logo">
-        <span class="logo-icon" data-i18n="logo.icon">К</span>
-        <span class="logo-text" data-i18n="logo.text">КВАНТУМ</span>
+      <a href="#hero" class="logo logo-quantum">
+        <span class="logo-main">QUANTUM</span>
+        <span class="logo-sub">by Altynai Ashimbekova</span>
       </a>
       <ul class="nav-links" id="navLinks">
-        <li><a href="#about" data-i18n="nav.about">О нас</a></li>
-        <li><a href="#services" data-i18n="nav.services">Услуги</a></li>
+        <li><a href="#about" data-i18n="nav.about">Обо мне</a></li>
+        <li><a href="#services" data-i18n="nav.services">Метод</a></li>
         <li><a href="#programs" data-i18n="nav.programs">Программы</a></li>
-        <li><a href="#testimonials" data-i18n="nav.testimonials">Отзывы</a></li>
-        <li><a href="#contact" data-i18n="nav.contact">Контакты</a></li>
+        <li><a href="#testimonials" data-i18n="nav.testimonials">Результаты</a></li>
         <li class="mobile-nav-buttons">
           <button class="btn btn-outline btn-sm" onclick="openModal('loginModal'); switchTab('login')" data-i18n="nav.login">Войти</button>
           <button class="btn btn-primary btn-sm" onclick="openModal('loginModal'); switchTab('register')" data-i18n="nav.register">Регистрация</button>
-          <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="nav.consult">Начать</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="nav.consult">Пройти диагностику</button>
         </li>
       </ul>
       <div class="nav-actions">
@@ -95,7 +102,7 @@
         </button>
         <button class="btn btn-outline btn-sm" id="loginBtn" onclick="openModal('loginModal'); switchTab('login')" data-i18n="nav.login">Войти</button>
         <button class="btn btn-primary btn-sm" id="registerBtn" onclick="openModal('loginModal'); switchTab('register')" data-i18n="nav.register">Регистрация</button>
-        <button class="btn btn-primary btn-sm nav-cta" onclick="openModal('consultModal')" data-i18n="nav.consult">Начать</button>
+        <button class="btn btn-sm nav-cta" onclick="openModal('consultModal')" data-i18n="nav.consult">Пройти диагностику</button>
         <div class="user-menu" id="userMenu" style="display:none">
           <button class="user-menu-toggle" onclick="toggleUserMenu()">
             <span id="userInitials">U</span>
@@ -122,18 +129,29 @@
       <div class="hero-gradient-orb hero-orb-1"></div>
       <div class="hero-gradient-orb hero-orb-2"></div>
       <div class="hero-grid-pattern"></div>
+      <div class="hero-constellation" aria-hidden="true"></div>
     </div>
-    <div class="container hero-content">
-      <div class="hero-badge anim-fade-up" data-i18n="hero.badge">Работа с подсознанием и квантовым полем</div>
-      <h1 class="hero-title anim-fade-up anim-delay-1">
-        <span data-i18n-html="hero.title">Трансформируйте<br><span class="text-gradient">Внутреннюю Реальность</span><br>Постройте Жизнь Мечты</span>
-      </h1>
-      <p class="hero-description anim-fade-up anim-delay-2" data-i18n="hero.description">
-        КВАНТУМ от Алтынай Эшинбековой &mdash; специалист по работе с подсознанием и квантовым полем. Мастер НЛП. Трансформируйте мысли, чувства и состояние &mdash; трансформируйте жизнь, отношения и финансы.
-      </p>
-      <div class="hero-buttons anim-fade-up anim-delay-3">
-        <button class="btn btn-primary btn-lg" onclick="openModal('consultModal')" data-i18n="hero.cta">Записаться на консультацию</button>
-        <a href="#programs" class="btn btn-ghost btn-lg" data-i18n="hero.programs">Смотреть программы</a>
+    <div class="container hero-content hero-content--split">
+      <div class="hero-text">
+        <div class="hero-eyebrow anim-fade-up" data-i18n="hero.eyebrow">Алтынай Ашимбекова</div>
+        <h1 class="hero-title anim-fade-up anim-delay-1">
+          <span data-i18n-html="hero.title">Ваша реальность<br><span class="hero-gold">начинается внутри</span></span>
+        </h1>
+        <p class="hero-description anim-fade-up anim-delay-2" data-i18n="hero.description">
+          Помогаю увидеть внутренние программы, которые управляют вашей жизнью, и изменить то, из чего создаётся ваша реальность.
+        </p>
+        <div class="hero-buttons anim-fade-up anim-delay-3">
+          <button class="btn btn-gold btn-lg" onclick="openModal('consultModal')" data-i18n="hero.cta">Записаться на диагностику</button>
+          <a href="#programs" class="btn btn-ghost btn-lg" data-i18n="hero.programs">Смотреть программы</a>
+        </div>
+      </div>
+      <div class="hero-photo-wrap anim-fade-left anim-delay-2">
+        <div class="hero-rings" aria-hidden="true">
+          <span class="hero-ring hero-ring-1"></span>
+          <span class="hero-ring hero-ring-2"></span>
+          <span class="hero-ring hero-ring-3"></span>
+        </div>
+        <img src="./images/altynai.png" alt="Altynai Ashimbekova" class="hero-photo" width="440" height="560" loading="eager">
       </div>
     </div>
     <div class="scroll-indicator anim-fade-up anim-delay-4">
