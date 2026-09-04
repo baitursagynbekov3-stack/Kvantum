@@ -83,9 +83,11 @@
       </a>
       <ul class="nav-links" id="navLinks">
         <li><a href="#about" data-i18n="nav.about">Обо мне</a></li>
+        <li><a href="/history" data-i18n="nav.history">Моя история</a></li>
         <li><a href="#services" data-i18n="nav.services">Метод</a></li>
         <li><a href="#programs" data-i18n="nav.programs">Программы</a></li>
         <li><a href="#testimonials" data-i18n="nav.testimonials">Результаты</a></li>
+        <li><a href="/articles" data-i18n="nav.articles">Статьи</a></li>
         <li class="mobile-nav-buttons">
           <button class="btn btn-outline btn-sm" onclick="openModal('loginModal'); switchTab('login')" data-i18n="nav.login">Войти</button>
           <button class="btn btn-primary btn-sm" onclick="openModal('loginModal'); switchTab('register')" data-i18n="nav.register">Регистрация</button>
@@ -152,6 +154,15 @@
           <span class="hero-ring hero-ring-3"></span>
         </div>
         <img src="./images/altynai.png" alt="Altynai Ashimbekova" class="hero-photo" width="440" height="560" loading="eager">
+        <div class="hero-promo-card anim-fade-up anim-delay-3">
+          <span class="hero-promo-badge">Только в сентябре</span>
+          <div class="hero-promo-title">Индивидуальная диагностика</div>
+          <div class="hero-promo-price">
+            <span class="hero-promo-price-old">$250</span>
+            <span class="hero-promo-price-new">$40</span>
+          </div>
+          <button type="button" class="btn btn-gold btn-sm hero-promo-btn" onclick="openModal('consultModal'); var s=document.querySelector('#consultForm select[name=service]'); if (s) s.value='resources-club';">Записаться</button>
+        </div>
       </div>
     </div>
     <div class="scroll-indicator anim-fade-up anim-delay-4">

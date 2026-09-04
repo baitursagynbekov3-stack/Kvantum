@@ -754,6 +754,58 @@ input[type="checkbox"]:focus {
   display: block;
   filter: drop-shadow(0 20px 60px rgba(0,0,0,0.55));
 }
+.hero-promo-card {
+  position: absolute;
+  right: -14px;
+  bottom: -8px;
+  z-index: 3;
+  width: 200px;
+  padding: 18px 18px 16px;
+  background: rgba(11,10,31,0.9);
+  border: 1px solid rgba(212,168,67,0.45);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+.hero-promo-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  background: var(--accent-gradient);
+  color: var(--space-900);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 50px;
+  margin-bottom: 10px;
+}
+.hero-promo-title {
+  color: var(--white);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+.hero-promo-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.hero-promo-price-old {
+  color: rgba(255,255,255,0.45);
+  font-size: 0.95rem;
+  text-decoration: line-through;
+}
+.hero-promo-price-new {
+  color: var(--accent);
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+}
+.hero-promo-btn { width: 100%; }
 .hero-eyebrow {
   display: inline-block;
   color: var(--accent);
@@ -2901,6 +2953,9 @@ body.dark-mode .phone-input-group .country-code-select {
   .hero-content.hero-content--split { flex-direction: column; align-items: center; gap: 44px; }
   .hero-content--split .hero-buttons { justify-content: center; }
   .hero-photo-wrap { width: min(320px, 70vw); }
+  .hero-promo-card { width: 172px; right: -6px; padding: 14px 14px 12px; }
+  .hero-promo-title { font-size: 0.82rem; }
+  .hero-promo-price-new { font-size: 1.4rem; }
   .about-layout { grid-template-columns: 1fr; gap: 48px; }
   .about-left { max-width: 400px; margin: 0 auto; }
   .about-right .section-label,
@@ -3013,6 +3068,13 @@ body.dark-mode .phone-input-group .country-code-select {
   .hero-buttons .btn { width: 100%; max-width: 320px; }
   .hero-eyebrow { margin-bottom: 14px; }
   .hero-photo-wrap { width: min(240px, 60vw); }
+  .hero-promo-card { width: 148px; right: -2px; bottom: -4px; padding: 12px 10px 10px; }
+  .hero-promo-badge { font-size: 0.58rem; padding: 4px 9px; margin-bottom: 8px; }
+  .hero-promo-title { font-size: 0.74rem; margin-bottom: 8px; }
+  .hero-promo-price { gap: 6px; margin-bottom: 9px; }
+  .hero-promo-price-old { font-size: 0.78rem; }
+  .hero-promo-price-new { font-size: 1.2rem; }
+  .hero-promo-btn { padding: 8px 10px; font-size: 0.72rem; }
   .stat-number { font-size: 2.2rem; }
   .stat-plus { font-size: 1.5rem; }
   .services-grid { grid-template-columns: 1fr; }

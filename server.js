@@ -2952,6 +2952,12 @@ if (SERVE_STATIC) {
   app.get('/refund', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'refund.html'));
   });
+  app.get('/history', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'history.html'));
+  });
+  app.get('/articles', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'articles.html'));
+  });
   app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
   });
