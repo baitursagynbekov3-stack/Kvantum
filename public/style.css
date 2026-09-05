@@ -3412,3 +3412,190 @@ body.dark-mode .booking-status--completed { background: #064e3b; color: #6ee7b7;
 body.dark-mode .booking-status--pending,
 body.dark-mode .booking-status--new { background: #78350f; color: #fcd34d; }
 body.dark-mode .booking-status--cancelled { background: #1f2937; color: #9ca3af; }
+
+/* ===================================================================
+   Space + Gold theme — extended to Services / Programs / Testimonials
+   / Footer sections (visual only, no structure/content/JS hooks touched).
+   Reuses tokens from the hero redesign: --space-900/800/700, --accent,
+   --accent-light, --font-display.
+   =================================================================== */
+
+/* ── Shared section backgrounds ── */
+.services {
+  background:
+    radial-gradient(circle at 88% 6%, rgba(212,168,67,0.10), transparent 50%),
+    radial-gradient(circle at 8% 92%, var(--space-glow-violet), transparent 55%),
+    linear-gradient(170deg, var(--space-900) 0%, var(--space-800) 100%);
+  color: rgba(255,255,255,0.72);
+}
+.programs {
+  background:
+    radial-gradient(circle at 10% 10%, var(--space-glow-violet), transparent 50%),
+    radial-gradient(circle at 92% 88%, rgba(212,168,67,0.10), transparent 55%),
+    linear-gradient(200deg, var(--space-800) 0%, var(--space-900) 60%, var(--space-700) 100%);
+  color: rgba(255,255,255,0.72);
+}
+.testimonials {
+  background:
+    radial-gradient(circle at 85% 0%, rgba(212,168,67,0.10), transparent 50%),
+    radial-gradient(circle at 12% 100%, var(--space-glow-violet), transparent 55%),
+    linear-gradient(170deg, var(--space-900) 0%, var(--space-800) 100%);
+  color: rgba(255,255,255,0.72);
+}
+
+/* ── Section headers on dark background ── */
+.services .section-label,
+.programs .section-label,
+.testimonials .section-label { color: var(--accent); }
+.services .section-title,
+.programs .section-title,
+.testimonials .section-title { color: var(--white); }
+.services .section-subtitle,
+.programs .section-subtitle,
+.testimonials .section-subtitle { color: rgba(255,255,255,0.6); }
+.services .subsection-title { color: var(--white); }
+
+/* ── Services cards ── */
+.services .service-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212,168,67,0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.services .service-card:hover {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+  border-color: rgba(212,168,67,0.4);
+}
+.services .service-number { color: rgba(255,255,255,0.16); }
+.services .service-card:hover .service-number { color: var(--accent); }
+.services .service-card h3 { color: var(--white); }
+.services .service-card p { color: rgba(255,255,255,0.65); }
+.services .service-arrow { color: var(--accent); }
+
+.services .individual-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212,168,67,0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.services .individual-card:hover {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+  border-color: rgba(212,168,67,0.4);
+}
+.services .individual-card-icon { background: rgba(212,168,67,0.14); color: var(--accent); }
+.services .individual-card h4 { color: var(--white); }
+.services .individual-card p { color: rgba(255,255,255,0.65); }
+
+/* ── Programs / pricing cards ── */
+.programs .currency-selector label { color: rgba(255,255,255,0.75); }
+.programs .currency-selector select {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border-color: rgba(212,168,67,0.35);
+}
+.programs .currency-selector select option { background: #1a1730; color: #fff; }
+
+.programs .pricing-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212,168,67,0.18);
+  color: rgba(255,255,255,0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.programs .pricing-card:hover {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+  border-color: rgba(212,168,67,0.4);
+}
+.programs .pricing-card.popular { border: 2px solid var(--accent); }
+.programs .pricing-card.premium {
+  background: linear-gradient(180deg, var(--space-800) 0%, var(--space-900) 100%);
+  border-color: rgba(124,58,237,0.35);
+}
+.programs .pricing-card.mentorship { border-color: rgba(212,168,67,0.3); }
+.programs .pricing-popular-badge { background: var(--accent); color: var(--space-900); }
+.programs .pricing-tier { color: var(--accent); }
+.programs .pricing-name { color: var(--white); }
+.programs .pricing-tagline { color: rgba(255,255,255,0.55); }
+.programs .pricing-price { border-bottom-color: rgba(255,255,255,0.12); }
+.programs .price-amount { color: var(--white); }
+.programs .price-currency { color: rgba(255,255,255,0.55); }
+.programs .pricing-features li { color: rgba(255,255,255,0.7); }
+.programs .pricing-features li::before { color: var(--accent); }
+.programs .pricing-secondary-btn {
+  border: 1px solid rgba(212,168,67,0.3);
+  background: linear-gradient(180deg, rgba(212,168,67,0.14) 0%, rgba(212,168,67,0.03) 100%);
+  color: var(--accent);
+}
+.programs .pricing-secondary-btn:hover,
+.programs .pricing-secondary-btn.active { color: var(--white); }
+.programs .pricing-details-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(212,168,67,0.18);
+  box-shadow: none;
+}
+.programs .pricing-details-label { color: var(--accent); }
+.programs .pricing-details-card > p { color: rgba(255,255,255,0.75); }
+.programs .program-detail-carousel { border-top-color: rgba(255,255,255,0.12); }
+.programs .program-detail-carousel-title { color: var(--white); }
+
+/* ── Testimonials ── */
+.testimonials-nav {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(212,168,67,0.25);
+  color: var(--white);
+}
+.testimonials .testimonials-nav:hover { background: rgba(255,255,255,0.16); }
+.testimonials .testimonials-dot { background: rgba(255,255,255,0.2); }
+.testimonials .testimonials-dot.active { background: var(--accent); }
+.testimonials .testimonial-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212,168,67,0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.testimonials .testimonial-card:hover {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+  border-color: rgba(212,168,67,0.4);
+}
+.testimonials .testimonial-quote { color: var(--accent); opacity: 0.35; }
+.testimonials .testimonial-card p { color: rgba(255,255,255,0.75); }
+.testimonials .author-avatar { background: var(--accent); color: var(--space-900); }
+.testimonials .author-info strong { color: var(--white); }
+.testimonials .author-info span { color: rgba(255,255,255,0.55); }
+
+/* ── Video reviews (inside Testimonials section) ── */
+.testimonials .video-reviews-title { color: var(--white); }
+.testimonials .video-review-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212,168,67,0.18);
+}
+.testimonials .video-review-card:hover {
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+  border-color: rgba(212,168,67,0.4);
+}
+.testimonials .video-review-info strong { color: var(--white); }
+.testimonials .video-review-info span { color: rgba(255,255,255,0.55); }
+.testimonials .play-circle { background: var(--accent); }
+
+/* ── Footer ── */
+.footer {
+  background: linear-gradient(180deg, var(--space-900) 0%, #06050f 100%);
+  border-top: 1px solid rgba(212,168,67,0.15);
+}
+.footer-links h4 { color: var(--accent); }
+
+/* ── Keep the redesigned sections consistent even if the separate
+   light/dark-mode toggle is switched on (that toggle predates this
+   redesign and otherwise re-styles cards to a plain neutral dark) ── */
+body.dark-mode .services,
+body.dark-mode .programs,
+body.dark-mode .testimonials { background: var(--space-900); color: rgba(255,255,255,0.72); }
+body.dark-mode .services .service-card,
+body.dark-mode .services .individual-card,
+body.dark-mode .programs .pricing-card,
+body.dark-mode .testimonials .testimonial-card,
+body.dark-mode .testimonials .video-review-card {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(212,168,67,0.18);
+}
+body.dark-mode .footer { background: linear-gradient(180deg, var(--space-900) 0%, #06050f 100%); }
