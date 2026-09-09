@@ -98,10 +98,11 @@ body.dark-mode input:focus,
 body.dark-mode select:focus,
 body.dark-mode textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(196,30,30,0.15); }
 body.dark-mode select { background: #222 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E") no-repeat right 16px center; }
-body.dark-mode .modal { background: #1a1a1a; }
-body.dark-mode .modal-close { background: #2a2a2a; }
-body.dark-mode .modal-tabs { border-bottom-color: #2a2a2a; }
-body.dark-mode .payment-summary { background: #222; }
+body.dark-mode .modal { background: linear-gradient(170deg, var(--space-900) 0%, var(--space-800) 100%); border-color: rgba(212,168,67,0.18); }
+body.dark-mode .modal-close { background: rgba(255,255,255,0.08); }
+body.dark-mode .modal-tabs { border-bottom-color: rgba(212,168,67,0.18); }
+body.dark-mode .payment-summary { background: rgba(255,255,255,0.05); }
+body.dark-mode .admin-modal { background: var(--white); }
 body.dark-mode .contact-note { background: #1a1a1a; }
 body.dark-mode .user-dropdown { background: #1a1a1a; }
 body.dark-mode .user-greeting { border-bottom-color: #2a2a2a; color: #dedede; }
@@ -162,7 +163,7 @@ body.dark-mode .program-details-modal-title { color: #fff; }
 body.dark-mode .program-details-modal-tagline { color: #999; }
 body.dark-mode .program-details-modal-price span { color: #dedede; }
 body.dark-mode .program-details-modal-price small { color: #999; }
-body.dark-mode .program-details-modal-card { background: #222; border-color: #333; }
+body.dark-mode .program-details-modal-card { background: transparent; border-color: rgba(212,168,67,0.18); }
 body.dark-mode .program-details-modal-card p { color: #bbb; }
 
 /* ── Testimonials ── */
@@ -1099,8 +1100,8 @@ input[type="checkbox"]:focus {
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.2em;
-  color: var(--primary);
-  opacity: 0.5;
+  color: var(--accent);
+  opacity: 0.85;
   margin-bottom: 14px;
   font-family: var(--font-display);
 }
@@ -1108,21 +1109,21 @@ input[type="checkbox"]:focus {
   font-family: var(--font-display);
   font-size: 1.55rem;
   font-weight: 800;
-  color: var(--gray-900);
+  color: var(--white);
   line-height: 1.25;
   margin-bottom: 20px;
 }
 .cred-modal-divider {
   width: 40px;
   height: 3px;
-  background: var(--primary);
+  background: var(--accent);
   border-radius: 2px;
   margin-bottom: 24px;
 }
 .cred-modal-body {
   font-size: 0.97rem;
   line-height: 1.85;
-  color: var(--gray-600);
+  color: rgba(255,255,255,0.7);
 }
 @media (max-width: 600px) {
   .cred-modal {
@@ -1136,9 +1137,9 @@ input[type="checkbox"]:focus {
 /* Service detail modal */
 .service-detail-modal { max-width: 520px; }
 .service-detail-cta { margin-top: 28px; }
-.dark-mode .cred-modal-tag { color: var(--primary); }
-.dark-mode .cred-modal-title { color: #dedede; }
-.dark-mode .cred-modal-body { color: #bbb; }
+.dark-mode .cred-modal-tag { color: var(--accent); }
+.dark-mode .cred-modal-title { color: var(--white); }
+.dark-mode .cred-modal-body { color: rgba(255,255,255,0.7); }
 
 .about-quote {
   font-family: var(--font-display);
@@ -1602,8 +1603,8 @@ input[type="checkbox"]:focus {
   margin-bottom: 14px;
   padding: 8px 14px;
   border-radius: 999px;
-  background: rgba(196, 30, 30, 0.1);
-  color: var(--primary);
+  background: rgba(212,168,67,0.14);
+  color: var(--accent);
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1614,11 +1615,12 @@ input[type="checkbox"]:focus {
   font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1.05;
+  color: var(--white);
 }
 .program-details-modal-tagline {
   margin: 14px auto 0;
   max-width: 520px;
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.6);
   font-size: 1.02rem;
   line-height: 1.7;
 }
@@ -1629,15 +1631,15 @@ input[type="checkbox"]:focus {
   margin-top: 22px;
   padding: 14px 20px;
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(196,30,30,0.09) 0%, rgba(196,30,30,0.03) 100%);
+  background: linear-gradient(180deg, rgba(212,168,67,0.14) 0%, rgba(212,168,67,0.03) 100%);
 }
 .program-details-modal-price span {
-  color: var(--dark);
+  color: var(--white);
   font-size: 1.5rem;
   font-weight: 800;
 }
 .program-details-modal-price small {
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.55);
   font-size: 0.92rem;
   font-weight: 600;
 }
@@ -1647,7 +1649,7 @@ input[type="checkbox"]:focus {
 .program-detail-videos-section {
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid rgba(17, 17, 17, 0.08);
+  border-top: 1px solid rgba(212,168,67,0.15);
 }
 .program-detail-section-head {
   margin-bottom: 16px;
@@ -1656,10 +1658,10 @@ input[type="checkbox"]:focus {
   margin: 6px 0 0;
   font-size: 1.2rem;
   font-weight: 800;
-  color: var(--dark);
+  color: var(--white);
 }
 .program-detail-section-kicker {
-  color: var(--primary);
+  color: var(--accent);
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -2426,7 +2428,10 @@ body.dark-mode .phone-input-group .country-code-select {
   pointer-events: none;
 }
 .modal {
-  background: var(--white);
+  background: linear-gradient(170deg, var(--space-900) 0%, var(--space-800) 100%);
+  border: 1px solid rgba(212,168,67,0.18);
+  color: rgba(255,255,255,0.75);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
   border-radius: var(--radius-xl);
   padding: 44px;
   max-width: 480px;
@@ -2459,50 +2464,75 @@ body.dark-mode .phone-input-group .country-code-select {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--gray-100);
+  background: rgba(255,255,255,0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
-  color: var(--gray-500);
+  color: var(--white);
   transition: var(--transition);
 }
-.modal-close:hover { background: var(--primary); color: var(--white); }
+.modal-close:hover { background: var(--accent); color: var(--space-900); }
 .modal-tabs {
   display: flex;
   gap: 0;
   margin-bottom: 28px;
-  border-bottom: 1.5px solid #f0f0f0;
+  border-bottom: 1.5px solid rgba(212,168,67,0.18);
 }
 .tab-btn {
   flex: 1;
   padding: 12px;
   background: none;
   font-weight: 600;
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.55);
   border-bottom: 2px solid transparent;
   margin-bottom: -1.5px;
   transition: var(--transition);
   font-size: 0.9rem;
 }
-.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 .modal-form h2 {
   font-family: var(--font-display);
   margin-bottom: 8px;
   font-size: 1.6rem;
   font-weight: 800;
+  color: var(--white);
 }
 .modal-description {
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.6);
   font-size: 0.9rem;
   margin-bottom: 28px;
   line-height: 1.7;
 }
-.form-note { text-align: center; font-size: 0.85rem; color: var(--gray-500); margin-top: 16px; }
-.form-note a { color: var(--primary); font-weight: 600; }
+.form-note { text-align: center; font-size: 0.85rem; color: rgba(255,255,255,0.55); margin-top: 16px; }
+.form-note a { color: var(--accent); font-weight: 600; }
 .remember-me-group { margin-top: 4px; margin-bottom: 0; }
-.remember-me-label { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--gray-500); cursor: pointer; }
-.remember-me-label input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--primary); }
+.remember-me-label { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: rgba(255,255,255,0.65); cursor: pointer; }
+.remember-me-label input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); }
+.modal .form-group label { color: rgba(255,255,255,0.75); }
+.modal input,
+.modal select,
+.modal textarea {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(212,168,67,0.25);
+  color: #fff;
+}
+.modal input::placeholder,
+.modal textarea::placeholder { color: rgba(255,255,255,0.35); }
+.modal select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23d4a843' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+.modal select option { background: #1a1730; color: #fff; }
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(212,168,67,0.15);
+}
+.modal input[type="radio"],
+.modal input[type="checkbox"] { accent-color: var(--accent); }
 /* Stripe Embedded Checkout */
 .stripe-checkout-modal { max-width: 600px; width: 100%; padding: 0; overflow: hidden; }
 .stripe-checkout-modal .modal-close { position: absolute; top: 12px; right: 12px; z-index: 10; }
@@ -2524,24 +2554,52 @@ body.dark-mode .phone-input-group .country-code-select {
   color: var(--white);
   margin: 0 auto 20px;
 }
-.modal-success h2 { margin-bottom: 12px; }
-.modal-success p { color: var(--gray-500); margin-bottom: 28px; }
+.modal-success h2 { margin-bottom: 12px; color: var(--white); }
+.modal-success p { color: rgba(255,255,255,0.65); margin-bottom: 28px; }
 .payment-summary {
-  background: var(--gray-100);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(212,168,67,0.18);
   padding: 20px;
   border-radius: var(--radius);
   margin-bottom: 24px;
 }
-.payment-summary h3 { font-size: 1rem; margin-bottom: 4px; }
-.payment-summary .payment-amount { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+.payment-summary h3 { font-size: 1rem; margin-bottom: 4px; color: var(--white); }
+.payment-summary .payment-amount { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
 .payment-secure {
   text-align: center;
   font-size: 0.8rem;
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.55);
   margin-top: 12px;
 }
 .notification-select { margin-bottom: 20px; }
 .notification-select > label { font-weight: 600; font-size: 0.85rem; }
+
+/* Admin quick-panel modal is an internal admin tool (like admin.html) —
+   intentionally kept on its original light styling, out of scope for the
+   client-facing space+gold unification. */
+.admin-modal {
+  background: var(--white);
+  color: var(--dark);
+}
+.admin-modal .modal-close { background: var(--gray-100); color: var(--gray-500); }
+.admin-modal .modal-close:hover { background: var(--primary); color: var(--white); }
+.admin-modal input,
+.admin-modal select,
+.admin-modal textarea {
+  background: var(--white);
+  border-color: #e2e2e2;
+  color: var(--dark);
+}
+.admin-modal select {
+  background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E") no-repeat right 16px center;
+}
+.admin-modal input:focus,
+.admin-modal select:focus,
+.admin-modal textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(196,30,30,0.08);
+}
+.admin-modal .form-group label { color: var(--gray-700); }
 
 .admin-modal {
   max-width: 980px;
@@ -3248,10 +3306,10 @@ body.dark-mode .phone-input-group .country-code-select {
   gap: 18px;
   margin-bottom: 28px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--gray-300);
+  border-bottom: 1px solid rgba(212,168,67,0.18);
 }
 
-body.dark-mode .profile-modal-header { border-color: #333; }
+body.dark-mode .profile-modal-header { border-color: rgba(212,168,67,0.18); }
 
 .profile-avatar-lg {
   width: 64px;
@@ -3271,7 +3329,7 @@ body.dark-mode .profile-modal-header { border-color: #333; }
 .profile-display-name {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--dark);
+  color: var(--white);
   margin-bottom: 4px;
 }
 
@@ -3279,26 +3337,26 @@ body.dark-mode .profile-modal-header { border-color: #333; }
 
 .profile-meta {
   font-size: 0.82rem;
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.55);
 }
 
 .profile-section-title {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 16px;
-  color: var(--dark);
+  color: var(--white);
 }
 
 /* dark-mode .profile-section-title handled in consolidated block below */
 
 .profile-password-note {
   font-size: 0.82rem;
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.55);
   margin-top: 12px;
   margin-bottom: 28px;
 }
 
-.profile-password-note a { color: var(--primary); text-decoration: underline; }
+.profile-password-note a { color: var(--accent); text-decoration: underline; }
 
 .profile-bookings-section { margin-top: 8px; }
 
@@ -3309,7 +3367,8 @@ body.dark-mode .profile-modal-header { border-color: #333; }
   align-items: center;
   justify-content: space-between;
   padding: 12px 14px;
-  background: var(--gray-100);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(212,168,67,0.15);
   border-radius: var(--radius);
   gap: 12px;
 }
@@ -3325,19 +3384,19 @@ body.dark-mode .profile-modal-header { border-color: #333; }
 .profile-booking-service {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--dark);
+  color: var(--white);
 }
 
 /* dark-mode .profile-booking-service handled in consolidated block below */
 
 .profile-booking-date {
   font-size: 0.78rem;
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.55);
 }
 
 .profile-no-bookings {
   font-size: 0.88rem;
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.55);
   text-align: center;
   padding: 20px 0;
 }
@@ -3361,7 +3420,8 @@ body.dark-mode .profile-modal-header { border-color: #333; }
 /* ===== Purchases card (showPurchases modal) ===== */
 .profile-booking-card {
   padding: 14px 16px;
-  background: var(--gray-100);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(212,168,67,0.15);
   border-radius: var(--radius);
 }
 .booking-card-header {
@@ -3373,7 +3433,7 @@ body.dark-mode .profile-modal-header { border-color: #333; }
 }
 .booking-card-header strong {
   font-size: 0.9rem;
-  color: var(--dark);
+  color: var(--white);
 }
 .booking-card-details {
   display: flex;
@@ -3381,7 +3441,7 @@ body.dark-mode .profile-modal-header { border-color: #333; }
   justify-content: space-between;
   gap: 10px;
   font-size: 0.8rem;
-  color: var(--gray-500);
+  color: rgba(255,255,255,0.55);
 }
 .status-completed { background: #d1fae5; color: #065f46; }
 .status-pending { background: #fef3c7; color: #92400e; }
