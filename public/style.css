@@ -39,7 +39,7 @@
   --space-900: #0b0a1f;
   --space-800: #151030;
   --space-700: #201a47;
-  --space-glow-violet: rgba(124, 58, 237, 0.22);
+  --space-glow-violet: rgba(58, 48, 110, 0.22);
   --gold-deep: #a9791c;
   --banner-height: 40px;
 }
@@ -671,7 +671,7 @@ input[type="checkbox"]:focus {
 .hero-orb-1 {
   width: 600px;
   height: 600px;
-  background: rgba(124,58,237,0.18);
+  background: rgba(58,48,110,0.18);
   top: -200px;
   right: -100px;
   animation: orbFloat 12s ease-in-out infinite;
@@ -3569,7 +3569,7 @@ body.dark-mode .booking-status--cancelled { background: #1f2937; color: #9ca3af;
 .programs .pricing-card.popular { border: 2px solid var(--accent); }
 .programs .pricing-card.premium {
   background: linear-gradient(180deg, var(--space-800) 0%, var(--space-900) 100%);
-  border-color: rgba(124,58,237,0.35);
+  border-color: rgba(58,48,110,0.35);
 }
 .programs .pricing-card.mentorship { border-color: rgba(212,168,67,0.3); }
 .programs .pricing-popular-badge { background: var(--accent); color: var(--space-900); }
