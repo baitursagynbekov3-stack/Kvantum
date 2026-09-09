@@ -2469,7 +2469,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Trigger hero animations immediately
   setTimeout(() => {
-    document.querySelectorAll('.hero .anim-fade-up').forEach(el => {
+    document.querySelectorAll('.hero .anim-fade-up, .hero .anim-fade-left, .hero .anim-fade-right').forEach(el => {
       el.classList.add('anim-visible');
     });
   }, 100);
