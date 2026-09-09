@@ -36,9 +36,9 @@
   --container-gutter: 24px;
 
   /* Space + gold theme tokens — used only by header/hero/top-banner */
-  --space-900: #0b0a1f;
-  --space-800: #151030;
-  --space-700: #201a47;
+  --space-900: #08071a;
+  --space-800: #100c26;
+  --space-700: #171236;
   --space-glow-violet: rgba(58, 48, 110, 0.22);
   --gold-deep: #a9791c;
   --banner-height: 40px;
