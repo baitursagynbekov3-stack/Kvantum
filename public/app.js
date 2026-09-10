@@ -2450,6 +2450,28 @@ function initDarkMode() {
 }
 
 // ===== Init =====
+// Открывает модалку записи на консультацию, если пришли по ссылке
+// "/?openConsult=1" — используется как переход "тест → продажа" со страницы
+// /test (см. public/test.js), которая не грузит app.js и не может вызвать
+// openModal() напрямую.
+function openConsultModalFromQuery() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('openConsult') !== '1') return;
+
+    openModal('consultModal');
+
+    // Убираем параметр из URL, чтобы модалка не открывалась повторно
+    // при обновлении страницы.
+    params.delete('openConsult');
+    var newSearch = params.toString();
+    var newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + window.location.hash;
+    window.history.replaceState({}, '', newUrl);
+  } catch (err) {
+    // ignore — не критичная функциональность
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initAttribution();
   initAnalytics();
@@ -2467,6 +2489,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSiteContent();
   initTurnstileWidgets();
   initTestimonialsCarousel();
+  openConsultModalFromQuery();
 
   // Trigger hero animations immediately
   setTimeout(() => {

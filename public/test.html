@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Тест «Кто ты сейчас» — КВАНТУМ</title>
+  <meta name="description" content="Пройди тест «Кто ты сейчас» от Алтынай Ашимбековой: узнай свой уровень сознания в 6 сферах жизни — деньги, отношения, здоровье, реализация, мышление, духовность.">
+  <link rel="canonical" href="https://kvantum.us/test">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background:
+        radial-gradient(circle at 88% 0%, rgba(212,168,67,0.10), transparent 50%),
+        radial-gradient(circle at 6% 100%, var(--space-glow-violet), transparent 55%),
+        linear-gradient(170deg, var(--space-900) 0%, var(--space-800) 100%);
+      background-attachment: fixed;
+      color: rgba(255,255,255,0.75);
+    }
+    .quiz-wrap { min-height: 100vh; padding: 40px 0 64px; }
+    .quiz-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+    .quiz-container { max-width: 760px; }
+    .quiz-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(212,168,67,0.18);
+      border-radius: 20px;
+      padding: 32px 28px;
+      box-shadow: 0 20px 48px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .quiz-state { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.55); }
+
+    /* Intro */
+    #quizIntro h1 { font-family: var(--font-display); font-size: 2rem; color: var(--white); margin-bottom: 14px; }
+    .quiz-intro-text { font-size: 1rem; line-height: 1.7; margin-bottom: 18px; }
+    .quiz-disclaimer-short { font-size: 0.85rem; color: rgba(255,255,255,0.5); font-style: italic; margin-bottom: 26px; }
+
+    /* Progress */
+    .quiz-progress { margin-bottom: 28px; }
+    .quiz-progress-track { background: rgba(255,255,255,0.1); border-radius: 999px; height: 8px; overflow: hidden; }
+    .quiz-progress-fill { background: var(--accent-gradient); height: 100%; width: 0%; transition: width 0.3s ease; }
+    .quiz-progress-label { margin-top: 10px; font-size: 0.85rem; color: rgba(255,255,255,0.55); text-align: right; }
+
+    /* Question */
+    .quiz-question-text { font-family: var(--font-display); font-size: 1.35rem; line-height: 1.5; color: var(--white); margin-bottom: 24px; }
+    .quiz-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+    .quiz-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.14);
+      border-radius: 14px;
+      padding: 16px 18px;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .quiz-option:hover { border-color: rgba(212,168,67,0.5); background: rgba(212,168,67,0.06); }
+    .quiz-option.is-selected { border-color: var(--accent); background: rgba(212,168,67,0.14); color: var(--white); }
+    .quiz-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .quiz-nav .btn-outline { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.25); }
+    .quiz-nav .btn-outline:hover { border-color: var(--accent); color: var(--white); }
+
+    /* Contact form */
+    #quizContactScreen h2 { font-family: var(--font-display); font-size: 1.5rem; color: var(--white); margin-bottom: 20px; }
+    .quiz-consent-group { margin-top: 4px; }
+    .quiz-checkbox-label { display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; line-height: 1.5; color: rgba(255,255,255,0.65); cursor: pointer; }
+    .quiz-checkbox-label input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; }
+    .quiz-checkbox-label a { color: var(--accent-light); font-weight: 600; }
+
+    /* Result */
+    .quiz-result-header { text-align: center; margin-bottom: 20px; }
+    .quiz-result-badge {
+      display: inline-block;
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--level-color, var(--accent));
+      border: 1px solid var(--level-color, var(--accent));
+      border-radius: 999px;
+      padding: 5px 14px;
+      margin-bottom: 12px;
+    }
+    .quiz-result-header h1 { font-family: var(--font-display); font-size: 2rem; color: var(--white); margin-bottom: 8px; }
+    .quiz-result-devuiz { font-family: var(--font-display); font-style: italic; font-size: 1.15rem; color: var(--level-color, var(--accent-light)); }
+    .quiz-result-text, .quiz-result-growth, .quiz-result-task { font-size: 0.98rem; line-height: 1.75; margin-bottom: 16px; }
+    .quiz-result-growth strong, .quiz-result-task strong { color: var(--white); }
+    .quiz-spheres-title { font-family: var(--font-display); font-size: 1.2rem; color: var(--white); margin: 30px 0 16px; }
+    .quiz-spheres-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+    .quiz-sphere-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-left: 3px solid var(--sphere-color, var(--accent));
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .quiz-sphere-name { font-weight: 700; font-size: 0.9rem; color: var(--white); margin-bottom: 4px; }
+    .quiz-sphere-level { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+    .quiz-trajectory summary {
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--accent-light);
+      font-weight: 600;
+      list-style: none;
+    }
+    .quiz-trajectory summary::-webkit-details-marker { display: none; }
+    .quiz-trajectory summary::before { content: '+ '; }
+    .quiz-trajectory[open] summary::before { content: '– '; }
+    .quiz-trajectory-body { margin-top: 10px; font-size: 0.82rem; line-height: 1.6; color: rgba(255,255,255,0.7); }
+    .quiz-trajectory-body p { margin-bottom: 6px; }
+    .quiz-adult-phrase { font-style: italic; color: var(--accent-light); text-align: center; margin: 20px 0; }
+    .quiz-disclaimer-full { font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.6; border-top: 1px solid rgba(212,168,67,0.18); padding-top: 18px; margin: 26px 0 24px; }
+
+    @media (max-width: 768px) {
+      .quiz-wrap { padding-top: 22px; }
+      .quiz-card { padding: 22px 18px; border-radius: 16px; }
+      .quiz-top { flex-direction: column; align-items: flex-start; }
+      #quizIntro h1 { font-size: 1.6rem; }
+      .quiz-result-header h1 { font-size: 1.6rem; }
+    }
+    @media (max-width: 600px) {
+      .quiz-spheres-grid { grid-template-columns: 1fr; }
+      .quiz-question-text { font-size: 1.15rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="quiz-wrap">
+    <div class="container quiz-container">
+      <div class="quiz-top">
+        <a href="/" class="logo">
+          <span class="logo-icon">К</span>
+          <span class="logo-text">КВАНТУМ</span>
+        </a>
+        <a href="/" class="btn btn-outline btn-sm">На главную</a>
+      </div>
+
+      <div id="quizLoading" class="quiz-state">
+        <p>Загружаем тест&hellip;</p>
+      </div>
+
+      <div id="quizError" class="quiz-state" hidden>
+        <p>Не удалось загрузить тест. Попробуйте обновить страницу.</p>
+      </div>
+
+      <section id="quizIntro" class="quiz-card" hidden>
+        <h1>Тест «Кто ты сейчас»</h1>
+        <p class="quiz-intro-text" id="quizIntroText"></p>
+        <p class="quiz-disclaimer-short" id="quizDisclaimerShort"></p>
+        <button type="button" class="btn btn-gold btn-lg" id="quizStartBtn">Начать тест</button>
+      </section>
+
+      <section id="quizQuestionScreen" class="quiz-card" hidden>
+        <div class="quiz-progress">
+          <div class="quiz-progress-track"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
+          <div class="quiz-progress-label" id="quizProgressLabel">Вопрос 1 из 18</div>
+        </div>
+        <h2 class="quiz-question-text" id="quizQuestionText"></h2>
+        <div class="quiz-options" id="quizOptions"></div>
+        <div class="quiz-nav">
+          <button type="button" class="btn btn-outline btn-sm" id="quizBackBtn">Назад</button>
+          <button type="button" class="btn btn-primary" id="quizNextBtn" disabled>Далее</button>
+        </div>
+      </section>
+
+      <section id="quizContactScreen" class="quiz-card" hidden>
+        <h2>Осталось узнать, кому показать результат</h2>
+        <form id="quizContactForm" novalidate>
+          <div class="form-group">
+            <label for="quizName">Имя</label>
+            <input type="text" id="quizName" name="name" placeholder="Ваше имя" required>
+          </div>
+          <div class="form-group">
+            <label for="quizContact">Телефон или email</label>
+            <input type="text" id="quizContact" name="contact" placeholder="Телефон (WhatsApp) или email" required>
+          </div>
+          <div class="form-group quiz-consent-group">
+            <label class="quiz-checkbox-label">
+              <input type="checkbox" id="quizConsent" required>
+              <span>Согласен(на) на обработку персональных данных согласно <a href="/privacy" target="_blank" rel="noopener">политике конфиденциальности</a></span>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-gold btn-lg btn-block" id="quizShowResultBtn" disabled>Показать результат</button>
+        </form>
+      </section>
+
+      <section id="quizResultScreen" class="quiz-card" hidden></section>
+    </div>
+  </main>
+  <script src="./config.js"></script>
+  <script src="./test.js"></script>
+</body>
+</html>

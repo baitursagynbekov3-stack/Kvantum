@@ -12,6 +12,7 @@ const { Resend } = require('resend');
 const Stripe = require('stripe');
 const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const QUANTUM_QUIZ = require('./data/quiz');
+const { scoreQuiz } = require('./lib/quizScoring');
 
 const prisma = global.prisma || new PrismaClient();
 if (process.env.NODE_ENV !== 'production') {
@@ -2365,6 +2366,103 @@ app.get('/api/quiz', (req, res) => {
   }
 });
 
+// Подсчёт результата теста — анонимно, без авторизации, БЕЗ записи в БД
+// (сохранение результата в базу — отдельный следующий шаг с отдельным
+// подтверждением). Клиент присылает не ключи c/t/a, а позиции (0-2) выбранных
+// вариантов в том порядке, в котором они были показаны (после перемешивания
+// в buildPublicQuiz) — сервер восстанавливает исходный ключ через ту же схему
+// permutations, чтобы ключи никогда не оказывались в теле запроса от клиента.
+//
+// Тело запроса: { answers: { <sphereKey>: [posQ1, posQ2, posQ3], ... } }
+// для всех 6 сфер из data/quiz.js, pos — целое число 0, 1 или 2.
+app.post('/api/quiz/submit', (req, res) => {
+  try {
+    const quiz = QUANTUM_QUIZ;
+    const answersInput = req.body && req.body.answers;
+
+    if (!answersInput || typeof answersInput !== 'object') {
+      return res.status(400).json({ error: 'Missing or invalid "answers"' });
+    }
+
+    const answersBySphere = {};
+
+    for (let sphereIndex = 0; sphereIndex < quiz.spheres.length; sphereIndex += 1) {
+      const sphere = quiz.spheres[sphereIndex];
+      const positions = answersInput[sphere.key];
+
+      if (!Array.isArray(positions) || positions.length !== sphere.questions.length) {
+        return res.status(400).json({ error: `Invalid answers for sphere "${sphere.key}"` });
+      }
+
+      const keys = [];
+      for (let qIndexInSphere = 0; qIndexInSphere < sphere.questions.length; qIndexInSphere += 1) {
+        const pos = positions[qIndexInSphere];
+        if (!Number.isInteger(pos) || pos < 0 || pos > 2) {
+          return res.status(400).json({ error: `Invalid answer position for sphere "${sphere.key}"` });
+        }
+
+        const questionNumber = qIndexInSphere + 1; // 1-based, как в buildPublicQuiz
+        const permIndex = (sphereIndex * 3 + questionNumber) % 6;
+        const order = quiz.permutations[permIndex];
+        const originalOptionIndex = order[pos];
+        const option = sphere.questions[qIndexInSphere].options[originalOptionIndex];
+
+        if (!option) {
+          return res.status(400).json({ error: `Invalid answer for sphere "${sphere.key}"` });
+        }
+
+        keys.push(option.key);
+      }
+
+      answersBySphere[sphere.key] = keys;
+    }
+
+    const result = scoreQuiz(answersBySphere);
+
+    const levelByNumber = {};
+    quiz.levels.forEach((lvl) => { levelByNumber[lvl.level] = lvl; });
+    const overallLevelInfo = levelByNumber[result.overallLevel];
+
+    const spheresResult = quiz.spheres.map((sphere) => {
+      const level = result.sphereLevels[sphere.key];
+      const trajectory = level < 3
+        ? quiz.trajectories.find((t) => t.sphereKey === sphere.key && t.level === level) || null
+        : null;
+
+      return {
+        key: sphere.key,
+        name: sphere.name,
+        color: sphere.color,
+        level,
+        levelTitle: levelByNumber[level].title,
+        trajectory: trajectory ? {
+          thinking: trajectory.thinking,
+          reaction: trajectory.reaction,
+          action: trajectory.action
+        } : null
+      };
+    });
+
+    res.json({
+      overall: {
+        level: overallLevelInfo.level,
+        title: overallLevelInfo.title,
+        devuiz: overallLevelInfo.devuiz,
+        hex: overallLevelInfo.hex,
+        text: overallLevelInfo.text,
+        growth: overallLevelInfo.growth,
+        task: overallLevelInfo.task
+      },
+      spheres: spheresResult,
+      adultSpheres: result.adultSpheres,
+      allSpheresAdultPhrase: result.adultSpheres === 6 ? quiz.allSpheresAdultPhrase : null,
+      disclaimer: quiz.disclaimer.full
+    });
+  } catch (err) {
+    res.status(400).json({ error: 'Invalid quiz submission' });
+  }
+});
+
 // Admin check
 app.get('/api/admin/check', authenticateAdmin, (req, res) => {
   res.json({ isAdmin: true });
@@ -2999,6 +3097,9 @@ if (SERVE_STATIC) {
   });
   app.get('/articles', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'articles.html'));
+  });
+  app.get('/test', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'test.html'));
   });
   app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
