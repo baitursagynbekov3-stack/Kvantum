@@ -857,6 +857,12 @@ input[type="checkbox"]:focus {
   flex-wrap: wrap;
 }
 .hero-content--split .hero-buttons { justify-content: flex-start; }
+.hero-test-caption {
+  margin-top: 14px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.hero-content--split .hero-test-caption { text-align: left; }
 .btn-gold {
   background: var(--accent-gradient);
   color: var(--space-900);
