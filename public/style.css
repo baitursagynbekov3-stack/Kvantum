@@ -648,9 +648,7 @@ input[type="checkbox"]:focus {
   min-height: 100vh;
   background:
     url('./images/hero-waves-reference.jpg') bottom center / 100% auto no-repeat,
-    radial-gradient(circle at 15% 20%, var(--space-glow-violet), transparent 55%),
-    radial-gradient(circle at 82% 50%, rgba(212,168,67,0.32), transparent 60%),
-    linear-gradient(160deg, var(--space-900) 0%, var(--space-800) 45%, var(--space-700) 100%);
+    linear-gradient(180deg, #070917 0%, #04051a 60%, #010010 100%);
   display: flex;
   align-items: center;
   justify-content: center;
