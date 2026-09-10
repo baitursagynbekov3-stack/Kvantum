@@ -672,7 +672,7 @@ input[type="checkbox"]:focus {
 .hero-orb-1 {
   width: 600px;
   height: 600px;
-  background: rgba(58,48,110,0.18);
+  background: rgba(58,48,110,0.10);
   top: -200px;
   right: -100px;
   animation: orbFloat 12s ease-in-out infinite;
@@ -680,7 +680,7 @@ input[type="checkbox"]:focus {
 .hero-orb-2 {
   width: 500px;
   height: 500px;
-  background: rgba(212,168,67,0.07);
+  background: rgba(212,168,67,0.04);
   bottom: -200px;
   left: -100px;
   animation: orbFloat 10s ease-in-out infinite reverse;
@@ -741,12 +741,12 @@ input[type="checkbox"]:focus {
   top: 50%;
   left: 50%;
   border-radius: 50%;
-  border: 1px solid rgba(212,168,67,0.38);
+  border: 1px solid rgba(212,168,67,0.20);
   transform: translate(-50%, -50%);
 }
 .hero-ring-1 { width: 100%; height: 100%; }
-.hero-ring-2 { width: 76%; height: 76%; border-style: dashed; border-color: rgba(212,168,67,0.30); }
-.hero-ring-3 { width: 54%; height: 54%; border-color: rgba(240,215,140,0.42); }
+.hero-ring-2 { width: 76%; height: 76%; border-style: dashed; border-color: rgba(212,168,67,0.16); }
+.hero-ring-3 { width: 54%; height: 54%; border-color: rgba(240,215,140,0.22); }
 .hero-photo {
   position: relative;
   z-index: 1;
