@@ -703,9 +703,10 @@ input[type="checkbox"]:focus {
 .hero-photo-wrap {
   position: relative;
   flex: 0 0 auto;
-  width: min(480px, 42vw);
+  align-self: flex-end;
+  width: min(520px, 46vw);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
 }
 .hero-rings { position: absolute; inset: -12%; pointer-events: none; }
@@ -724,7 +725,7 @@ input[type="checkbox"]:focus {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   height: auto;
   display: block;
   filter: drop-shadow(0 20px 60px rgba(0,0,0,0.55)) drop-shadow(0 0 80px rgba(212,168,67,0.25));
@@ -2996,7 +2997,7 @@ body.dark-mode .phone-input-group .country-code-select {
   .hero-buttons .btn { padding: 14px 28px; font-size: 0.9rem; }
   .hero-content.hero-content--split { flex-direction: column; align-items: center; gap: 44px; }
   .hero-content--split .hero-buttons { justify-content: center; }
-  .hero-photo-wrap { width: min(320px, 70vw); }
+  .hero-photo-wrap { width: min(320px, 70vw); align-self: center; }
   .hero-promo-card { width: 172px; right: -6px; padding: 14px 14px 12px; }
   .hero-promo-title { font-size: 0.82rem; }
   .hero-promo-price-new { font-size: 1.4rem; }
