@@ -704,7 +704,7 @@ input[type="checkbox"]:focus {
   position: relative;
   flex: 0 0 auto;
   align-self: flex-end;
-  width: min(520px, 46vw);
+  width: min(500px, 44vw);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -725,7 +725,7 @@ input[type="checkbox"]:focus {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 520px;
+  max-width: 500px;
   height: auto;
   display: block;
   filter: drop-shadow(0 20px 60px rgba(0,0,0,0.55)) drop-shadow(0 0 80px rgba(212,168,67,0.25));
@@ -3238,7 +3238,7 @@ body.dark-mode .phone-input-group .country-code-select {
   .logo { font-size: 1.1rem; gap: 8px; }
   .logo-icon { width: 34px; height: 34px; font-size: 1rem; }
   .nav-actions { gap: 8px; }
-  .hero { min-height: auto; padding: 108px 0 64px; }
+  .hero { min-height: auto; padding: calc(120px + var(--banner-height)) 0 64px; }
   .hero-badge { font-size: 0.68rem; padding: 7px 14px; margin-bottom: 20px; }
   .hero-title { font-size: clamp(1.8rem, 8vw, 2.4rem); margin-bottom: 20px; }
   .hero-description { font-size: 0.95rem; margin-bottom: 28px; }
