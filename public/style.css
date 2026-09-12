@@ -704,7 +704,7 @@ input[type="checkbox"]:focus {
   position: relative;
   flex: 0 0 auto;
   align-self: flex-end;
-  width: min(500px, 44vw);
+  width: min(575px, 50.6vw);
   margin-bottom: -100px;
   display: flex;
   align-items: flex-end;
@@ -726,7 +726,7 @@ input[type="checkbox"]:focus {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 500px;
+  max-width: 575px;
   height: auto;
   display: block;
   filter: drop-shadow(0 20px 60px rgba(0,0,0,0.55)) drop-shadow(0 0 80px rgba(212,168,67,0.25));
