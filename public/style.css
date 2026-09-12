@@ -649,7 +649,7 @@ input[type="checkbox"]:focus {
     url('./images/hero-bg-sacred.jpg') right bottom / cover no-repeat,
     linear-gradient(160deg, #070711 0%, #10132A 55%, #24113D 100%);
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   position: relative;
   overflow: hidden;
@@ -699,13 +699,13 @@ input[type="checkbox"]:focus {
   text-align: left;
   max-width: 1180px;
 }
-.hero-text { flex: 1 1 480px; max-width: 520px; }
+.hero-text { flex: 1 1 480px; max-width: 520px; align-self: flex-start; }
 .hero-photo-wrap {
   position: relative;
   flex: 0 0 auto;
   align-self: flex-end;
   width: min(500px, 44vw);
-  margin-bottom: -76px;
+  margin-bottom: -100px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -734,7 +734,7 @@ input[type="checkbox"]:focus {
 .hero-promo-card {
   position: absolute;
   right: -14px;
-  bottom: -8px;
+  bottom: 48px;
   z-index: 3;
   width: 200px;
   padding: 18px 18px 16px;
@@ -2996,9 +2996,11 @@ body.dark-mode .phone-input-group .country-code-select {
   .lang-flag { font-size: 0.65rem; }
   .hero-buttons { gap: 12px; }
   .hero-buttons .btn { padding: 14px 28px; font-size: 0.9rem; }
+  .hero { align-items: center; }
   .hero-content.hero-content--split { flex-direction: column; align-items: center; gap: 44px; }
   .hero-content--split .hero-buttons { justify-content: center; }
-  .hero-photo-wrap { width: min(320px, 70vw); align-self: center; }
+  .hero-text { align-self: center; }
+  .hero-photo-wrap { width: min(320px, 70vw); align-self: center; margin-bottom: 0; }
   .hero-promo-card { width: 172px; right: -6px; padding: 14px 14px 12px; }
   .hero-promo-title { font-size: 0.82rem; }
   .hero-promo-price-new { font-size: 1.4rem; }
@@ -3204,6 +3206,7 @@ body.dark-mode .phone-input-group .country-code-select {
   body { font-size: 18px; }
   .hero { padding: calc(170px + var(--banner-height)) 0 120px; }
   .hero-content { max-width: 1080px; }
+  .hero-photo-wrap { margin-bottom: -120px; }
   .chatbot-window { width: 440px; height: 580px; }
 }
 
