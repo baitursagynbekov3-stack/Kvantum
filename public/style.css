@@ -705,6 +705,7 @@ input[type="checkbox"]:focus {
   flex: 0 0 auto;
   align-self: flex-end;
   width: min(500px, 44vw);
+  margin-bottom: -76px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
