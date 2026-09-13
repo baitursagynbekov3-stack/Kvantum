@@ -3001,7 +3001,7 @@ body.dark-mode .phone-input-group .country-code-select {
   .hero-content--split .hero-buttons { justify-content: center; }
   .hero-text { align-self: center; }
   .hero-photo-wrap { width: min(320px, 70vw); align-self: center; margin-bottom: 0; }
-  .hero-promo-card { width: 172px; right: -6px; padding: 14px 14px 12px; }
+  .hero-promo-card { width: 172px; right: -6px; bottom: -8px; padding: 14px 14px 12px; }
   .hero-promo-title { font-size: 0.82rem; }
   .hero-promo-price-new { font-size: 1.4rem; }
   .about-layout { grid-template-columns: 1fr; gap: 48px; }
