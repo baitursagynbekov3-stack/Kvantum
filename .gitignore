@@ -8,3 +8,4 @@ node_modules/
 
 # Backup originals from video compression
 *-original.*
+.env*
