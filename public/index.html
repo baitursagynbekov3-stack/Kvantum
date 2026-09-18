@@ -83,7 +83,6 @@
       </a>
       <ul class="nav-links" id="navLinks">
         <li><a href="#about" data-i18n="nav.about">Обо мне</a></li>
-        <li><a href="/history" data-i18n="nav.history">Моя история</a></li>
         <li><a href="#services" data-i18n="nav.services">Метод</a></li>
         <li><a href="#programs" data-i18n="nav.programs">Программы</a></li>
         <li><a href="#testimonials" data-i18n="nav.testimonials">Результаты</a></li>
@@ -91,7 +90,6 @@
         <li class="mobile-nav-buttons">
           <button class="btn btn-outline btn-sm" onclick="openModal('loginModal'); switchTab('login')" data-i18n="nav.login">Войти</button>
           <button class="btn btn-primary btn-sm" onclick="openModal('loginModal'); switchTab('register')" data-i18n="nav.register">Регистрация</button>
-          <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="nav.consult">Пройти диагностику</button>
         </li>
       </ul>
       <div class="nav-actions">
@@ -104,7 +102,6 @@
         </button>
         <button class="btn btn-outline btn-sm" id="loginBtn" onclick="openModal('loginModal'); switchTab('login')" data-i18n="nav.login">Войти</button>
         <button class="btn btn-primary btn-sm" id="registerBtn" onclick="openModal('loginModal'); switchTab('register')" data-i18n="nav.register">Регистрация</button>
-        <button class="btn btn-sm nav-cta" onclick="openModal('consultModal')" data-i18n="nav.consult">Пройти диагностику</button>
         <div class="user-menu" id="userMenu" style="display:none">
           <button class="user-menu-toggle" onclick="toggleUserMenu()">
             <span id="userInitials">U</span>
@@ -135,19 +132,17 @@
     </div>
     <div class="container hero-content hero-content--split">
       <div class="hero-text">
-        <div class="hero-eyebrow anim-fade-up" data-i18n="hero.eyebrow">Алтынай Ашимбекова</div>
+        <div class="hero-eyebrow anim-fade-up" data-i18n="hero.eyebrow">Алтынай Ашимбекова — Корректор реальности</div>
         <h1 class="hero-title anim-fade-up anim-delay-1">
-          <span data-i18n-html="hero.title">Ваша реальность<br><span class="hero-gold">начинается внутри</span></span>
+          <span data-i18n-html="hero.title">Реальность<br><span class="hero-gold">начинается изнутри</span></span>
         </h1>
         <p class="hero-description anim-fade-up anim-delay-2" data-i18n="hero.description">
-          Помогаю увидеть внутренние программы, которые управляют вашей жизнью, и изменить то, из чего создаётся ваша реальность.
+          Пойми, куда утекает твоя энергия и почему реальность не меняется.
         </p>
         <div class="hero-buttons anim-fade-up anim-delay-3">
           <a href="/test" class="btn btn-gold btn-lg" data-i18n="hero.test">Пройти тест</a>
-          <button class="btn btn-ghost btn-lg" onclick="openModal('consultModal')" data-i18n="hero.cta">Записаться на диагностику</button>
-          <a href="#programs" class="btn btn-ghost btn-lg" data-i18n="hero.programs">Смотреть программы</a>
         </div>
-        <p class="hero-test-caption anim-fade-up anim-delay-3" data-i18n="hero.testCaption">18 вопросов · 6 сфер жизни · персональная расшифровка</p>
+        <p class="hero-test-caption anim-fade-up anim-delay-3" data-i18n="hero.testCaption">18 вопросов. Персональная расшифровка.</p>
       </div>
       <div class="hero-photo-wrap anim-fade-left anim-delay-2">
         <div class="hero-rings" aria-hidden="true">
@@ -155,16 +150,7 @@
           <span class="hero-ring hero-ring-2"></span>
           <span class="hero-ring hero-ring-3"></span>
         </div>
-        <img src="./images/hero-portrait.png" alt="Altynai Ashimbekova" class="hero-photo" width="420" height="503" loading="eager">
-        <div class="hero-promo-card anim-fade-up anim-delay-3">
-          <span class="hero-promo-badge">Только в сентябре</span>
-          <div class="hero-promo-title">Индивидуальная диагностика</div>
-          <div class="hero-promo-price">
-            <span class="hero-promo-price-old">$250</span>
-            <span class="hero-promo-price-new">$40</span>
-          </div>
-          <button type="button" class="btn btn-gold btn-sm hero-promo-btn" onclick="openModal('consultModal'); var s=document.querySelector('#consultForm select[name=service]'); if (s) s.value='resources-club';">Записаться</button>
-        </div>
+        <img src="./images/hero-portrait-ivory-trim.png" alt="Altynai Ashimbekova" class="hero-photo" width="217" height="640" loading="eager">
       </div>
     </div>
     <div class="scroll-indicator anim-fade-up anim-delay-4">
@@ -179,17 +165,17 @@
       <div class="stats-grid">
         <div class="stat-item anim-fade-up">
           <span class="stat-number" data-count="6000">0</span><span class="stat-plus">+</span>
-          <span class="stat-label" data-i18n="stats.clients">разборов</span>
+          <span class="stat-label" data-i18n="stats.clients">проведённых разборов</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item anim-fade-up anim-delay-1">
-          <span class="stat-number" data-count="99">0</span><span class="stat-plus">%</span>
-          <span class="stat-label" data-i18n="stats.satisfaction">Удовлетворённость клиентов</span>
+          <span class="stat-number" data-count="1000">0</span><span class="stat-plus">+</span>
+          <span class="stat-label" data-i18n="stats.satisfaction">клиентов прошли мои программы</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item anim-fade-up anim-delay-2">
-          <span class="stat-number" data-count="8">0</span><span class="stat-plus">+</span>
-          <span class="stat-label" data-i18n="stats.years">Лет опыта</span>
+          <span class="stat-number" data-count="8">0</span><span class="stat-plus"></span>
+          <span class="stat-label" data-i18n="stats.years">лет практики</span>
         </div>
       </div>
     </div>
@@ -198,38 +184,15 @@
   <!-- About Section -->
   <section class="section about" id="about">
     <div class="container">
-      <div class="about-layout">
-        <div class="about-left anim-fade-right">
-          <div class="about-image-wrapper">
-            <div class="about-avatar">
-              <img src="./images/altynai.png" alt="Altynai Eshinbekova" class="about-photo" loading="lazy" width="400" height="400">
-            </div>
-            <div class="about-image-accent"></div>
-          </div>
-        </div>
+      <div class="about-layout about-layout--bg-photo">
         <div class="about-right anim-fade-left">
-          <div class="section-label" data-i18n="about.label">Об основателе</div>
-          <h2 class="section-title" data-i18n-html="about.title">Алтынай Эшинбекова &mdash; <span class="text-gradient">Ваш проводник к трансформации</span></h2>
-          <p class="about-text" data-i18n="about.text">Я помогаю увидеть внутренние программы, которые влияют на ваши деньги, отношения, состояние и реализацию — и выявить то, из чего создаётся ваша реальность.</p>
-          <p class="about-text" data-i18n="about.text2">8 лет практики и 6000 разборов помогают мне точно видеть причину и находить первопричину происходящего.</p>
-          <div class="about-credentials">
-            <button class="credential credential-btn" onclick="openCredModal(1)">
-              <div class="credential-check">&#10003;</div>
-              <span data-i18n="about.cred1.title">Специалист по подсознанию и квантовому полю</span>
-              <span class="credential-arrow">&#8594;</span>
-            </button>
-            <button class="credential credential-btn" onclick="openCredModal(2)">
-              <div class="credential-check">&#10003;</div>
-              <span data-i18n="about.cred2.title">Мастер НЛП</span>
-              <span class="credential-arrow">&#8594;</span>
-            </button>
-            <button class="credential credential-btn" onclick="openCredModal(3)">
-              <div class="credential-check">&#10003;</div>
-              <span data-i18n="about.cred3.title">Мастер глубинных разборов</span>
-              <span class="credential-arrow">&#8594;</span>
-            </button>
-          </div>
-          <blockquote class="about-quote" data-i18n="about.quote">«Когда выявляется истинная причина, изменения становятся неизбежным следствием.»</blockquote>
+          <div class="section-label" data-i18n="about.label">Обо мне</div>
+          <h2 class="section-title" data-i18n="about.name">Алтынай Ашимбекова</h2>
+          <div class="about-role" data-i18n="about.role">Корректор реальности · мастер разборов · специалист по работе с подсознанием</div>
+          <h3 class="about-subtitle" data-i18n="about.methodTitle">Метод работы</h3>
+          <p class="about-text" data-i18n="about.text1">Точечно выявляю, меняю деструктивные программы и внутренние сценарии, влияющие на вашу реальность.</p>
+          <p class="about-modalities" data-i18n="about.modalities">НЛП · Расстановки · Гипнотерапия · Гештальт-терапия</p>
+          <p class="about-text" data-i18n="about.text2">Сопровождаю от хаоса к по-настоящему удовлетворённой жизни — через раскрытие внутреннего потенциала и расширение сознания.</p>
         </div>
       </div>
     </div>
@@ -239,68 +202,71 @@
   <section class="section services" id="services">
     <div class="container">
       <div class="section-header anim-fade-up">
-        <div class="section-label" data-i18n="work.label">Что мы делаем</div>
-        <h2 class="section-title" data-i18n-html="work.title">Как мы <span class="text-gradient">работаем</span></h2>
-        <p class="section-subtitle" data-i18n="work.subtitle">Работаем индивидуально и в группе &mdash; глубоко, экологично, с реальным результатом</p>
+        <h2 class="section-title" data-i18n-html="work.title">Этапы <span class="text-gradient">работы</span></h2>
+        <p class="section-subtitle" data-i18n="work.subtitle">У меня есть групповые и индивидуальные сессии.</p>
       </div>
       <div class="services-grid">
         <div class="service-card anim-fade-up" onclick="openServiceDetail(1)">
           <div class="service-number">01</div>
-          <h3 data-i18n="work.card1.title">Подсознание</h3>
-          <p data-i18n="work.card1.desc">Глубокая работа с паттернами подсознания, убеждениями и ментальными блоками</p>
+          <h3 data-i18n="work.card1.title">Помогу сформировать настоящий запрос</h3>
+          <p data-i18n="work.card1.desc">Я разбираю ситуацию, с которой вы пришли, и помогаю сформировать точный запрос. Потому что за желанием больше зарабатывать, построить отношения или изменить жизнь часто стоит более глубокое желание &mdash; чувствовать свободу, безопасность, признание, любовь, уверенность или внутреннюю опору.</p>
           <div class="service-arrow">&rarr;</div>
         </div>
         <div class="service-card anim-fade-up anim-delay-1" onclick="openServiceDetail(2)">
           <div class="service-number">02</div>
-          <h3 data-i18n="work.card2.title">Энергетическое поле</h3>
-          <p data-i18n="work.card2.desc">Выравнивание и усиление вашего энергетического поля для привлечения желаемого</p>
+          <h3 data-i18n="work.card2.title">Провожу глубокую диагностику</h3>
+          <p data-i18n="work.card2.desc">Я исследую, как формировалась ваша сегодняшняя реальность: какие чувства, страхи, убеждения, автоматические программы и повторяющиеся сценарии продолжают влиять на ваши решения и состояние.</p>
           <div class="service-arrow">&rarr;</div>
         </div>
         <div class="service-card anim-fade-up anim-delay-2" onclick="openServiceDetail(3)">
           <div class="service-number">03</div>
-          <h3 data-i18n="work.card3.title">Состояние лидера</h3>
-          <p data-i18n="work.card3.desc">Развитие внутреннего состояния лидера для роста бизнеса и личного мастерства</p>
+          <h3 data-i18n="work.card3.title">Нахожу первопричину и утечки энергии</h3>
+          <p data-i18n="work.card3.desc">Я дохожу до того, что лежит в основе повторяющегося сценария. Определяю, где остаётся ваша энергия, каких внутренних ресурсов сегодня не хватает и что необходимо восстановить для движения к вашему запросу.</p>
           <div class="service-arrow">&rarr;</div>
         </div>
         <div class="service-card anim-fade-up anim-delay-3" onclick="openServiceDetail(4)">
           <div class="service-number">04</div>
-          <h3 data-i18n="work.card4.title">Сопровождаем до результата</h3>
-          <p data-i18n="work.card4.desc">Личное сопровождение до достижения ваших целей &mdash; мы не просто учим, мы идём с вами</p>
+          <h3 data-i18n="work.card4.title">Определяю точку трансформации</h3>
+          <p data-i18n="work.card4.desc">После диагностики становится понятно, куда именно нужно идти в работу. Я не пытаюсь разобрать всю жизнь человека &mdash; нахожу конкретную точку, связанную с сегодняшним запросом.</p>
+          <div class="service-arrow">&rarr;</div>
+        </div>
+        <div class="service-card anim-fade-up anim-delay-4" onclick="openServiceDetail(5)">
+          <div class="service-number">05</div>
+          <h3 data-i18n="work.card5.title">Точечная психологическая работа</h3>
+          <p data-i18n="work.card5.desc">Работаю точечно, как хирург: нахожу конкретный участок, который требует внимания, не поднимая всю вашу историю. Трансформирую то, что связано с вашим запросом, и возвращаю освободившийся ресурс в настоящее.</p>
           <div class="service-arrow">&rarr;</div>
         </div>
       </div>
+      <p class="services-formula" data-i18n="work.formula">Запрос &rarr; истинное желание &rarr; диагностика &rarr; первопричина &rarr; точечная трансформация &rarr; новая реальность</p>
 
       <!-- Individual Services -->
       <div class="individual-services">
         <div class="section-header anim-fade-up">
-          <h3 class="subsection-title" data-i18n="services.title">Индивидуальная работа</h3>
+          <h3 class="subsection-title" data-i18n="services.title">Индивидуальные форматы работы со мной</h3>
         </div>
         <div class="individual-grid">
           <div class="individual-card anim-fade-up">
-            <div class="individual-card-icon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            </div>
-            <h4 data-i18n="services.s1.title">Консультации</h4>
-            <p data-i18n="services.s1.desc">Индивидуальные сессии для диагностики текущего состояния и определения пути вперёд</p>
+            <div class="service-number">01</div>
+            <h4 data-i18n="services.s1.title">Индивидуальная диагностика подсознания и внутреннего состояния</h4>
+            <p data-i18n="services.s1.desc">Сначала мы вместе спокойно разбираемся, что у вас болит и чего вам на самом деле хочется: выясняем, что стоит за вашими целями, и находим причины, которые не дают получить желаемое. Смотрим, где внутри застряла энергия &mdash; усталость, страх или старые обиды, которые мешают двигаться. И находим, куда уходит ваша энергия, чтобы вернуть её себе.</p>
             <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Записаться</button>
           </div>
           <div class="individual-card anim-fade-up anim-delay-1">
-            <div class="individual-card-icon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            </div>
-            <h4 data-i18n="services.s2.title">Трансформационные сессии</h4>
-            <p data-i18n="services.s2.desc">Глубокая трансформационная работа с мыслями, чувствами и внутренними состояниями</p>
+            <div class="service-number">02</div>
+            <h4 data-i18n="services.s2.title">Трансформационная сессия</h4>
+            <p data-i18n="services.s2.desc">Трансформационная сессия &mdash; это точечная работа на уровне подсознания. Мы аккуратно находим и меняем старые программы и автоматические реакции, которые больше вам не помогают.</p>
+            <p class="individual-card-meta" data-i18n="services.s2.duration">Длительность: 2&ndash;3 часа.</p>
+            <p class="individual-card-meta" data-i18n="services.s2.price">Стоимость фиксирована, уточняйте у менеджеров.</p>
             <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Записаться</button>
           </div>
           <div class="individual-card anim-fade-up anim-delay-2">
-            <div class="individual-card-icon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            </div>
+            <div class="service-number">03</div>
             <h4 data-i18n="services.s3.title">Сопровождение к цели</h4>
-            <p data-i18n="services.s3.desc">Индивидуальная поддержка на пути к вашим личным или бизнес-целям</p>
+            <p data-i18n="services.s3.desc">Сопровождение к цели &mdash; это работа на один, два или шесть месяцев. Раз в неделю мы встречаемся на полтора часа и точечно прорабатываем программы и реакции, которые мешают двигаться дальше. Параллельно я сопровождаю вас между сессиями, чтобы изменения закреплялись в реальных ситуациях и вы шли к своей цели с поддержкой.</p>
             <button class="btn btn-primary btn-sm" onclick="openModal('consultModal')" data-i18n="services.book">Записаться</button>
           </div>
         </div>
+        <p class="services-formula" data-i18n="services.formula">Диагностика &rarr; трансформация &rarr; сопровождение к цели</p>
       </div>
     </div>
   </section>
@@ -309,19 +275,8 @@
   <section class="section programs" id="programs">
     <div class="container">
       <div class="section-header anim-fade-up">
-        <div class="section-label" data-i18n="programs.label">Наши программы</div>
-        <h2 class="section-title" data-i18n-html="programs.title">Выберите путь к <span class="text-gradient">трансформации</span></h2>
-        <p class="section-subtitle" data-i18n="programs.subtitle">От начального уровня до элитного наставничества &mdash; найдите свою программу</p>
-        <div class="currency-selector">
-          <label for="displayCurrency" data-i18n="programs.currency">Валюта:</label>
-          <select id="displayCurrency">
-            <option value="USD" selected>USD ($)</option>
-            <option value="KGS">KGS (сом)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="UAH">UAH (₴)</option>
-            <option value="RUB">RUB (₽)</option>
-          </select>
-        </div>
+        <!-- Скрыто по просьбе Алтынай: этот заголовок пойдёт вниз, когда будет отдельный оффер. Текст/перевод не удалены. -->
+        <h2 class="section-title" data-i18n-html="programs.title" style="display:none">Выберите путь к <span class="text-gradient">трансформации</span></h2>
       </div>
       <div class="pricing-grid">
         <!-- Live programs are rendered from /api/content/programs (Admin Panel) -->
