@@ -2148,7 +2148,7 @@ function openProgramDetailsModal(programId) {
 
   let actionButtonHtml = '';
   if (program.actionType === 'consult') {
-    actionButtonHtml = `<button class="btn btn-primary btn-lg" type="button" data-action="consult" data-close-modal="programDetailsModal">${escapeHtml(lang === 'ru' ? 'Записаться' : 'Contact us')}</button>`;
+    actionButtonHtml = `<button class="btn btn-primary btn-lg" type="button" data-action="consult" data-close-modal="programDetailsModal">${escapeHtml(btnText || (lang === 'ru' ? 'Записаться' : 'Contact us'))}</button>`;
   } else if (program.priceNumeric > 0) {
     actionButtonHtml = `<button class="btn btn-primary btn-lg" type="button" data-action="purchase" data-close-modal="programDetailsModal" data-product-id="${escapeHtml(String(program._id || program.id || ''))}" data-product-name="${escapeHtml(String(program.name || ''))}" data-product-price="${program.priceNumeric || 0}" data-product-currency="${escapeHtml(String(program.purchaseCurrency || 'KGS'))}">${escapeHtml(lang === 'ru' ? 'Купить программу' : 'Buy program')}</button>`;
   }
