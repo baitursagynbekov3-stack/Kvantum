@@ -9,3 +9,6 @@ node_modules/
 # Backup originals from video compression
 *-original.*
 .env*
+
+# Raw source screenshots (private, not for web-serving) — safe redacted copies live in public/images/testimonials-gallery/
+/testimonial-screenshots-raw/

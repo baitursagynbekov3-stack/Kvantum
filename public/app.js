@@ -1354,7 +1354,7 @@ const translations = {
     'testimonials.t4.role': 'Маркетолог',
     'cta.title': 'Готовы трансформировать реальность?',
     'cta.desc': 'Запишитесь на бесплатную консультацию и найдите свой путь к трансформации.',
-    'cta.btn': 'Бесплатная консультация',
+    'cta.btn': 'Начни с групповой диагностики',
     'contact.label': 'Контакты',
     'contact.title': 'Свяжитесь <span class="text-gradient">с нами</span>',
     'contact.subtitle': 'Готовы начать трансформацию? Запишитесь на бесплатную консультацию.',
@@ -3805,6 +3805,10 @@ var serviceDetails = {
     }
   }
 };
+
+function openMethodDetail() {
+  openModal('methodDetailModal');
+}
 
 function openServiceDetail(num) {
   var lang = (typeof currentLang !== 'undefined' && currentLang === 'en') ? 'en' : 'ru';
