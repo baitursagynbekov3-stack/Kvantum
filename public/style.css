@@ -3870,20 +3870,24 @@ body.dark-mode .booking-status--cancelled { background: #1f2937; color: #9ca3af;
 
 /* ── Services cards ── */
 .services .service-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(212,168,67,0.18);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Непрозрачная тёмная подложка (не полупрозрачно-белая) — так текст
+     остаётся читаемым независимо от того, что именно на фоновом фото
+     оказалось под конкретной карточкой (2026-09-25, фикс контраста). */
+  background: rgba(8, 10, 22, 0.62);
+  border: 1px solid rgba(212,168,67,0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .services .service-card:hover {
+  background: rgba(8, 10, 22, 0.72);
   box-shadow: 0 16px 48px rgba(0,0,0,0.45);
-  border-color: rgba(212,168,67,0.4);
+  border-color: rgba(212,168,67,0.5);
 }
-.services .service-number { color: rgba(255,255,255,0.16); }
+.services .service-number { color: rgba(255,255,255,0.22); }
 .services .service-card:hover .service-number { color: var(--accent); }
 .services .individual-card:hover .service-number { color: var(--accent); }
 .services .service-card h3 { color: var(--white); }
-.services .service-card p { color: rgba(255,255,255,0.65); }
+.services .service-card p { color: rgba(255,255,255,0.82); }
 .services .service-arrow { color: var(--accent); }
 
 .services .individual-card {
