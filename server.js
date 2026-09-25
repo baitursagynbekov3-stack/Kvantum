@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const crypto = require('crypto');
 const { PrismaClient } = require('@prisma/client');
+const { Pool: PgPool } = require('pg');
 const { Resend } = require('resend');
 const Stripe = require('stripe');
 const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -1539,6 +1540,38 @@ async function sendLeadToGoogleSheets(booking, source, extras) {
   }
 }
 
+// Best-effort sync of newly registered users into the separate CRM Postgres database (Neon project
+// altynay-crm-personal, role crm_site). Never blocks or fails registration if the CRM is unreachable.
+let crmPool = null;
+function getCrmPool() {
+  const crmUrl = (process.env.CRM_DATABASE_URL || '').trim();
+  if (!crmUrl) return null;
+  if (!crmPool) {
+    crmPool = new PgPool({ connectionString: crmUrl, max: 3 });
+  }
+  return crmPool;
+}
+
+async function syncUserToCrm(user) {
+  const pool = getCrmPool();
+  if (!pool) return; // CRM_DATABASE_URL not set (e.g. local dev) - silently skip
+
+  try {
+    await pool.query(
+      `INSERT INTO contacts (full_name, email, phone, source, source_detail, external_id)
+       VALUES ($1, $2, $3, 'site', 'registration', $4)
+       ON CONFLICT (source, external_id) DO UPDATE
+       SET full_name = EXCLUDED.full_name,
+           email = EXCLUDED.email,
+           phone = EXCLUDED.phone,
+           updated_at = now()`,
+      [user.name || null, user.email || null, user.phone || null, String(user.id)]
+    );
+  } catch (err) {
+    console.error('[crm sync] failed to upsert contact:', err && err.message ? err.message : err);
+  }
+}
+
 function buildAuthToken(user, role, rememberMe = false) {
   return jwt.sign(
     { id: user.id, email: user.email, name: user.name, role },
@@ -1628,6 +1661,9 @@ app.post('/api/register', authRateLimiter, async (req, res) => {
     });
 
     const token = buildAuthToken(user, role);
+
+    // Sync new contact to CRM (best-effort, awaited so Vercel doesn't kill it before it fires)
+    await syncUserToCrm(user);
 
     // Notify n8n of new registration (awaited so Vercel doesn't kill it before it fires)
     if (process.env.N8N_REGISTRATION_WEBHOOK_URL) {
