@@ -1423,21 +1423,29 @@ async function sendTelegramText(text) {
   }
 
   const endpoint = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
-      text: String(text || '').slice(0, 4000)
-    })
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), GOOGLE_SHEETS_WEBHOOK_TIMEOUT_MS);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Telegram error ${response.status}: ${errorText}`);
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: String(text || '').slice(0, 4000)
+      }),
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Telegram error ${response.status}: ${errorText}`);
+    }
+
+    return { ok: true };
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return { ok: true };
 }
 
 async function notifyLeadCreated(booking, source) {
@@ -1629,6 +1637,8 @@ app.post('/api/register', authRateLimiter, async (req, res) => {
 
     // Notify n8n of new registration (awaited so Vercel doesn't kill it before it fires)
     if (process.env.N8N_REGISTRATION_WEBHOOK_URL) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), GOOGLE_SHEETS_WEBHOOK_TIMEOUT_MS);
       try {
         await fetch(process.env.N8N_REGISTRATION_WEBHOOK_URL, {
           method: 'POST',
@@ -1639,10 +1649,13 @@ app.post('/api/register', authRateLimiter, async (req, res) => {
             phone: user.phone,
             userRole: 'customer',
             timestamp: new Date().toISOString()
-          })
+          }),
+          signal: controller.signal
         });
       } catch (err) {
         console.error('[n8n registration webhook] failed:', err.message);
+      } finally {
+        clearTimeout(timeoutId);
       }
     }
 
@@ -1963,6 +1976,8 @@ app.post('/api/book-consultation', bookingRateLimiter, async (req, res) => {
 
     // Fire n8n consultation workflow (skip if Google Sheets webhook falls back to the same URL)
     if (N8N_CONSULTATION_WEBHOOK_URL && N8N_CONSULTATION_WEBHOOK_URL !== GOOGLE_SHEETS_WEBHOOK_URL) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), GOOGLE_SHEETS_WEBHOOK_TIMEOUT_MS);
       try {
         await fetch(N8N_CONSULTATION_WEBHOOK_URL, {
           method: 'POST',
@@ -1978,10 +1993,13 @@ app.post('/api/book-consultation', bookingRateLimiter, async (req, res) => {
             source: 'website-form',
             timestamp: new Date().toISOString(),
             ...attribution
-          })
+          }),
+          signal: controller.signal
         });
       } catch (err) {
         console.error('[n8n consultation webhook] failed:', err.message);
+      } finally {
+        clearTimeout(timeoutId);
       }
     }
 
