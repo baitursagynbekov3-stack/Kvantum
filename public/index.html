@@ -28,7 +28,7 @@
   <link rel="dns-prefetch" href="https://js.stripe.com">
   <link rel="dns-prefetch" href="https://kompot.ai">
   <link rel="dns-prefetch" href="https://challenges.cloudflare.com">
-  <link rel="stylesheet" href="./style.css?v=20260923">
+  <link rel="stylesheet" href="./style.css?v=20260924b">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@700;800;900&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'">
@@ -150,7 +150,7 @@
           <span class="hero-ring hero-ring-2"></span>
           <span class="hero-ring hero-ring-3"></span>
         </div>
-        <img src="./images/hero-portrait-ivory-trim.png" alt="Altynai Ashimbekova" class="hero-photo" width="217" height="640" loading="eager">
+        <img src="./images/hero-portrait-ivory-trim.png?v=20260925" alt="Altynai Ashimbekova" class="hero-photo" width="217" height="640" loading="eager">
       </div>
     </div>
     <div class="scroll-indicator anim-fade-up anim-delay-4">
@@ -471,34 +471,41 @@
       </div>
       <div class="testimonials-dots" aria-label="Testimonials slider dots"></div>
 
-      <!-- Screenshot testimonials gallery -->
-      <div class="testimonials-screens-grid anim-fade-up" style="margin-top:64px;">
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-01.jpg" alt="Отзыв клиента" loading="lazy"></div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-02.jpg" alt="Отзыв клиента" loading="lazy"></div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-03.jpg" alt="Отзыв клиента" loading="lazy"></div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-04.jpg" alt="Отзыв клиента" loading="lazy"></div>
-        <div class="testimonial-screen">
-          <img src="/images/testimonials-gallery/testimonial-05.jpg" alt="Отзыв клиента Gulgaakl" loading="lazy">
-          <span class="testimonial-screen-caption">Gulgaakl</span>
+      <!-- Screenshot testimonials gallery (carousel) -->
+      <div class="screens-carousel anim-fade-up" style="margin-top:64px;" id="screensCarouselGeneral">
+        <button class="screens-carousel-nav prev" type="button" aria-label="Previous screenshots">&#8592;</button>
+        <div class="screens-carousel-viewport">
+          <div class="screens-carousel-grid">
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-01.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-02.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-03.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-04.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-05.jpg" alt="Отзыв клиента Gulgaakl" loading="lazy">
+              <span class="testimonial-screen-caption">Gulgaakl</span>
+            </div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-06.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-07.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-08.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-10.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-11.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-19.png" alt="Отзыв клиента Гулай Токторова" loading="lazy">
+              <span class="testimonial-screen-caption">Гулай Токторова</span>
+            </div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-20.jpg" alt="Отзыв клиента bella_stella___" loading="lazy">
+              <span class="testimonial-screen-caption">bella_stella___</span>
+            </div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-21.jpg" alt="Отзыв клиента Галина Демидова" loading="lazy">
+              <span class="testimonial-screen-caption">Галина Демидова</span>
+            </div>
+          </div>
         </div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-06.jpg" alt="Отзыв клиента" loading="lazy"></div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-07.jpg" alt="Отзыв клиента" loading="lazy"></div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-08.jpg" alt="Отзыв клиента" loading="lazy"></div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-10.jpg" alt="Отзыв клиента" loading="lazy"></div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-11.jpg" alt="Отзыв клиента" loading="lazy"></div>
-        <div class="testimonial-screen">
-          <img src="/images/testimonials-gallery/testimonial-19.png" alt="Отзыв клиента Гулай Токторова" loading="lazy">
-          <span class="testimonial-screen-caption">Гулай Токторова</span>
-        </div>
-        <div class="testimonial-screen">
-          <img src="/images/testimonials-gallery/testimonial-20.jpg" alt="Отзыв клиента bella_stella___" loading="lazy">
-          <span class="testimonial-screen-caption">bella_stella___</span>
-        </div>
-        <div class="testimonial-screen">
-          <img src="/images/testimonials-gallery/testimonial-21.jpg" alt="Отзыв клиента Галина Демидова" loading="lazy">
-          <span class="testimonial-screen-caption">Галина Демидова</span>
-        </div>
+        <button class="screens-carousel-nav next" type="button" aria-label="Next screenshots">&#8594;</button>
       </div>
+      <div class="screens-carousel-dots" aria-label="Screenshots slider dots" data-for="screensCarouselGeneral"></div>
 
       <!-- Video Reviews -->
       <div class="video-reviews-wrap anim-fade-up">
@@ -643,37 +650,44 @@
         <div class="section-label">Отзывы</div>
         <h2 class="section-title">Диагностический разбор</h2>
       </div>
-      <div class="testimonials-screens-grid anim-fade-up">
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-09.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
-        <div class="testimonial-screen">
-          <img src="/images/testimonials-gallery/testimonial-12.jpg" alt="Отзыв о диагностическом разборе Бахыт" loading="lazy">
-          <span class="testimonial-screen-caption">Бахыт</span>
+      <div class="screens-carousel anim-fade-up" id="screensCarouselDiagnostic">
+        <button class="screens-carousel-nav prev" type="button" aria-label="Previous screenshots">&#8592;</button>
+        <div class="screens-carousel-viewport">
+          <div class="screens-carousel-grid">
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-09.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-12.jpg" alt="Отзыв о диагностическом разборе Бахыт" loading="lazy">
+              <span class="testimonial-screen-caption">Бахыт</span>
+            </div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-13.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-14.jpg" alt="Отзыв о диагностическом разборе Татьяна Лукьянченко" loading="lazy">
+              <span class="testimonial-screen-caption">Татьяна Лукьянченко</span>
+            </div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-15.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-16.jpg" alt="Отзыв о диагностическом разборе Gulnara MP" loading="lazy">
+              <span class="testimonial-screen-caption">Gulnara MP</span>
+            </div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-17.jpg" alt="Отзыв о диагностическом разборе Zhanna" loading="lazy">
+              <span class="testimonial-screen-caption">Zhanna</span>
+            </div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-18.jpg" alt="Отзыв о диагностическом разборе elenkanogti888" loading="lazy">
+              <span class="testimonial-screen-caption">elenkanogti888</span>
+            </div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-22.jpg" alt="Отзыв о диагностическом разборе Ainura Zhumagulova" loading="lazy">
+              <span class="testimonial-screen-caption">Ainura Zhumagulova</span>
+            </div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-23.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-24.jpg" alt="Отзывы о диагностическом разборе" loading="lazy"></div>
+          </div>
         </div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-13.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
-        <div class="testimonial-screen">
-          <img src="/images/testimonials-gallery/testimonial-14.jpg" alt="Отзыв о диагностическом разборе Татьяна Лукьянченко" loading="lazy">
-          <span class="testimonial-screen-caption">Татьяна Лукьянченко</span>
-        </div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-15.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
-        <div class="testimonial-screen">
-          <img src="/images/testimonials-gallery/testimonial-16.jpg" alt="Отзыв о диагностическом разборе Gulnara MP" loading="lazy">
-          <span class="testimonial-screen-caption">Gulnara MP</span>
-        </div>
-        <div class="testimonial-screen">
-          <img src="/images/testimonials-gallery/testimonial-17.jpg" alt="Отзыв о диагностическом разборе Zhanna" loading="lazy">
-          <span class="testimonial-screen-caption">Zhanna</span>
-        </div>
-        <div class="testimonial-screen">
-          <img src="/images/testimonials-gallery/testimonial-18.jpg" alt="Отзыв о диагностическом разборе elenkanogti888" loading="lazy">
-          <span class="testimonial-screen-caption">elenkanogti888</span>
-        </div>
-        <div class="testimonial-screen">
-          <img src="/images/testimonials-gallery/testimonial-22.jpg" alt="Отзыв о диагностическом разборе Ainura Zhumagulova" loading="lazy">
-          <span class="testimonial-screen-caption">Ainura Zhumagulova</span>
-        </div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-23.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
-        <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-24.jpg" alt="Отзывы о диагностическом разборе" loading="lazy"></div>
+        <button class="screens-carousel-nav next" type="button" aria-label="Next screenshots">&#8594;</button>
       </div>
+      <div class="screens-carousel-dots" aria-label="Screenshots slider dots" data-for="screensCarouselDiagnostic"></div>
     </div>
   </section>
 
@@ -1305,7 +1319,7 @@
 
   <script src="./config.js?v=20260324" defer></script>
   <script src="./program-defaults.js?v=20260324" defer></script>
-  <script src="./app.js?v=20260923" defer></script>
+  <script src="./app.js?v=20260924b" defer></script>
 
   <script>
     // Video Reviews Modal

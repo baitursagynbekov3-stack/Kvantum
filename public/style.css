@@ -1996,6 +1996,28 @@ input[type="checkbox"]:focus {
   cursor: not-allowed;
   pointer-events: none;
 }
+.screens-carousel-nav {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  background: var(--white);
+  color: var(--dark);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+.screens-carousel-nav:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.screens-carousel-nav:disabled,
+.screens-carousel.is-static .screens-carousel-nav {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .testimonials-dots {
   display: flex;
   justify-content: center;
@@ -2016,10 +2038,33 @@ input[type="checkbox"]:focus {
   border-radius: 999px;
   background: var(--primary);
 }
-.testimonials-screens-grid {
+.screens-carousel {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 20px;
+  align-items: center;
+}
+.screens-carousel-viewport {
+  overflow: hidden;
+  max-width: 380px;
+  margin: 0 auto;
+}
+.screens-carousel-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  gap: 28px;
+  transition: transform 0.45s ease;
+  will-change: transform;
+}
+.screens-carousel.is-static .screens-carousel-grid {
+  transform: translateX(0) !important;
+}
+.screens-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
 }
 .testimonial-screen {
   position: relative;
@@ -3457,6 +3502,11 @@ body.dark-mode .phone-input-group .country-code-select {
     display: none;
   }
   .testimonials-grid { grid-auto-columns: 100%; }
+  .screens-carousel { grid-template-columns: 1fr; }
+  .screens-carousel-nav {
+    display: none;
+  }
+  .screens-carousel-grid { grid-auto-columns: 100%; }
   .social-links { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; gap: 32px; }
   .modal { padding: 28px 20px; border-radius: var(--radius-lg); }

@@ -1968,6 +1968,67 @@ function goToTestimonialsSlide(index) {
   updateTestimonialsCarousel();
 }
 
+// Generic screenshot-gallery carousels (reuses the same visible-count
+// breakpoints/markup pattern as the text testimonials carousel above, but
+// supports multiple independent instances on one page).
+function getScreensCarouselVisibleCount() {
+  // Always one screenshot at a time — она попросила именно листалку "один за
+  // другим", а не несколько карточек рядом (в отличие от карусели с текстом).
+  return 1;
+}
+
+function initScreensCarousels() {
+  document.querySelectorAll('.screens-carousel').forEach((root) => {
+    const viewport = root.querySelector('.screens-carousel-viewport');
+    const grid = root.querySelector('.screens-carousel-grid');
+    const prevBtn = root.querySelector('.screens-carousel-nav.prev');
+    const nextBtn = root.querySelector('.screens-carousel-nav.next');
+    const dotsRoot = root.id
+      ? document.querySelector(`.screens-carousel-dots[data-for="${root.id}"]`)
+      : null;
+
+    if (!viewport || !grid) return;
+
+    let index = 0;
+
+    function update() {
+      const cards = Array.from(grid.children);
+      if (!cards.length) return;
+
+      const visibleCount = Math.min(getScreensCarouselVisibleCount(), cards.length);
+      const maxIndex = Math.max(0, cards.length - visibleCount);
+      index = Math.min(Math.max(index, 0), maxIndex);
+
+      const gapValue = parseFloat(getComputedStyle(grid).columnGap || getComputedStyle(grid).gap || '0') || 0;
+      const cardWidth = cards[0].getBoundingClientRect().width;
+      grid.style.transform = `translateX(-${index * (cardWidth + gapValue)}px)`;
+      root.classList.toggle('is-static', maxIndex === 0);
+
+      if (prevBtn) prevBtn.disabled = index === 0;
+      if (nextBtn) nextBtn.disabled = index >= maxIndex;
+
+      if (dotsRoot) {
+        if (maxIndex <= 0) {
+          dotsRoot.innerHTML = '';
+        } else {
+          dotsRoot.innerHTML = Array.from({ length: maxIndex + 1 }, (_, i) => (
+            `<button class="testimonials-dot${i === index ? ' active' : ''}" type="button" aria-label="Go to slide ${i + 1}"></button>`
+          )).join('');
+          Array.from(dotsRoot.children).forEach((dot, i) => {
+            dot.addEventListener('click', () => { index = i; update(); });
+          });
+        }
+      }
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => { index -= 1; update(); });
+    if (nextBtn) nextBtn.addEventListener('click', () => { index += 1; update(); });
+    window.addEventListener('resize', update);
+
+    update();
+  });
+}
+
 const programDetailsCarouselState = {};
 
 function renderProgramDetailsDots(detailsId, totalSlides) {
@@ -2496,6 +2557,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSiteContent();
   initTurnstileWidgets();
   initTestimonialsCarousel();
+  initScreensCarousels();
   openConsultModalFromQuery();
 
   // Trigger hero animations immediately
