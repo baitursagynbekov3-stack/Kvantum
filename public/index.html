@@ -198,6 +198,44 @@
     </div>
   </section>
 
+  <!-- Quantum Method Section -->
+  <section class="section quantum-method" id="method">
+    <div class="container">
+      <div class="section-header anim-fade-up">
+        <div class="section-label">Метод</div>
+        <h2 class="section-title">Quantum by Altynai</h2>
+        <p class="section-subtitle">Осознанное создание той реальности, которая будет вас удовлетворять, через саморегуляцию (управление своим состоянием).</p>
+      </div>
+
+      <p class="method-mission anim-fade-up">Главная задача метода — помочь вам создать и проживать ту реальность, которая будет вас удовлетворять.</p>
+
+      <p class="services-formula anim-fade-up">Состояние &rarr; восприятие &rarr; решение &rarr; действие &rarr; результат</p>
+
+      <div class="method-levels-short anim-fade-up">
+        <div class="method-level-chip">
+          <span class="method-level-chip-name">Детское восприятие</span>
+          <span class="method-level-motto">Состояние сознания «Со мной происходит»</span>
+        </div>
+        <div class="method-level-chip">
+          <span class="method-level-chip-name">Подростковое восприятие</span>
+          <span class="method-level-motto">Состояние сознания «Я докажу»</span>
+        </div>
+        <div class="method-level-chip">
+          <span class="method-level-chip-name">Взрослое восприятие</span>
+          <span class="method-level-motto">Состояние сознания «Я выбираю»</span>
+        </div>
+      </div>
+
+      <p class="method-closing-phrase anim-fade-up">Меняется состояние &rarr; меняется восприятие &rarr; меняются решения и действия &rarr; меняются результаты жизни.</p>
+
+      <div class="method-cta anim-fade-up">
+        <button class="btn btn-outline btn-lg" onclick="openMethodDetail()">Подробнее о методе</button>
+        <a href="/test" class="btn btn-gold btn-lg">Пройти тест уровня сознания</a>
+        <button class="btn btn-outline btn-lg" onclick="openModal('consultModal')">Записаться на диагностику</button>
+      </div>
+    </div>
+  </section>
+
   <!-- Services Section -->
   <section class="section services" id="services">
     <div class="container">
@@ -433,27 +471,41 @@
       </div>
       <div class="testimonials-dots" aria-label="Testimonials slider dots"></div>
 
-      <!-- Diagnostic-specific testimonials -->
-      <div class="section-header anim-fade-up" style="margin-top:64px;">
-        <h3 class="video-reviews-title">Отзывы о диагностике</h3>
-      </div>
-      <div class="testimonials-carousel">
-        <div class="testimonials-viewport">
-          <div class="testimonials-grid">
-            <div class="testimonial-card anim-fade-up">
-              <div class="testimonial-quote">&ldquo;</div>
-              <p>«Хочу поделиться чудом, с которого начался мой день сегодня. Я обратилась к Алтынай по поводу остаточных болей и дискомфорта, связанных с ушибом безымянного пальца правой руки, случившегося более месяца назад. Алтынай провела диагностику и трансформацию, в ходе которой, вы не поверите, боль начала сходить на нет. Я так благодарна, что у меня есть такой Мастер 🙏❤️»</p>
-              <div class="testimonial-author">
-                <div class="author-avatar">A</div>
-                <div class="author-info">
-                  <strong>Aida M.</strong>
-                  <span>Диагностика</span>
-                </div>
-              </div>
+      <!-- Screenshot testimonials -->
+      <div class="testimonials-screens-carousel anim-fade-up" style="margin-top:64px;">
+        <button class="testimonials-nav prev" type="button" onclick="shiftScreensCarousel(-1)" aria-label="Previous testimonial screenshots">&#8592;</button>
+        <div class="testimonials-screens-viewport">
+          <div class="testimonials-screens-grid">
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-01.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-02.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-03.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-04.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-05.jpg" alt="Отзыв клиента Gulgaakl" loading="lazy">
+              <span class="testimonial-screen-caption">Gulgaakl</span>
+            </div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-06.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-07.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-08.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-10.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-11.jpg" alt="Отзыв клиента" loading="lazy"></div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-19.png" alt="Отзыв клиента Гулай Токторова" loading="lazy">
+              <span class="testimonial-screen-caption">Гулай Токторова</span>
+            </div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-20.jpg" alt="Отзыв клиента bella_stella___" loading="lazy">
+              <span class="testimonial-screen-caption">bella_stella___</span>
+            </div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-21.jpg" alt="Отзыв клиента Галина Демидова" loading="lazy">
+              <span class="testimonial-screen-caption">Галина Демидова</span>
             </div>
           </div>
         </div>
+        <button class="testimonials-nav next" type="button" onclick="shiftScreensCarousel(1)" aria-label="Next testimonial screenshots">&#8594;</button>
       </div>
+      <div class="testimonials-screens-dots" aria-label="Testimonial screenshots slider dots"></div>
 
       <!-- Video Reviews -->
       <div class="video-reviews-wrap anim-fade-up">
@@ -563,8 +615,79 @@
       <div class="cta-content anim-fade-up">
         <h2 data-i18n="cta.title">Готовы трансформировать реальность?</h2>
         <p data-i18n="cta.desc">Запишитесь на бесплатную консультацию и найдите свой путь к трансформации.</p>
-        <button class="btn btn-white btn-lg" onclick="openModal('consultModal')" data-i18n="cta.btn">Бесплатная консультация</button>
+
+        <p class="cta-price">Групповая диагностика — 1000 сом / 6 000 ₸ / 1 000 ₽ / $15</p>
+        <p class="cta-schedule">Групповые диагностики по субботам: 21:00 по КР &middot; 10:00 по Чикаго &middot; 18:00 по МСК</p>
+
+        <ul class="cta-includes">
+          <li>Разберём, что вас беспокоит и чего вы на самом деле хотите</li>
+          <li>Найдём причину, которая не даёт получить желаемое</li>
+          <li>Посмотрим, где застряла энергия &mdash; усталость, страх или старые обиды</li>
+          <li>Поймёте, куда уходит ваша энергия, чтобы вернуть её себе</li>
+        </ul>
+
+        <div class="cta-testimonial">
+          <div class="testimonial-quote">&ldquo;</div>
+          <p>«Хочу поделиться чудом, с которого начался мой день сегодня. Я обратилась к Алтынай по поводу остаточных болей и дискомфорта, связанных с ушибом безымянного пальца правой руки, случившегося более месяца назад. Алтынай провела диагностику и трансформацию, в ходе которой, вы не поверите, боль начала сходить на нет. Я так благодарна, что у меня есть такой Мастер 🙏❤️»</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">A</div>
+            <div class="author-info">
+              <strong>Aida Munn</strong>
+              <span>Диагностика</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-white btn-lg" onclick="openModal('consultModal')" data-i18n="cta.btn">Начни с групповой диагностики</button>
       </div>
+    </div>
+  </section>
+
+  <!-- Diagnostic-specific screenshot testimonials -->
+  <section class="section diagnostic-reviews">
+    <div class="container">
+      <div class="section-header anim-fade-up">
+        <div class="section-label">Отзывы</div>
+        <h2 class="section-title">Диагностический разбор</h2>
+      </div>
+      <div class="testimonials-screens-carousel anim-fade-up">
+        <button class="testimonials-nav prev" type="button" onclick="shiftDiagnosticScreensCarousel(-1)" aria-label="Previous diagnostic screenshots">&#8592;</button>
+        <div class="testimonials-screens-viewport">
+          <div class="testimonials-screens-grid diagnostic-screens-grid">
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-09.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-12.jpg" alt="Отзыв о диагностическом разборе Бахыт" loading="lazy">
+              <span class="testimonial-screen-caption">Бахыт</span>
+            </div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-13.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-14.jpg" alt="Отзыв о диагностическом разборе Татьяна Лукьянченко" loading="lazy">
+              <span class="testimonial-screen-caption">Татьяна Лукьянченко</span>
+            </div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-15.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-16.jpg" alt="Отзыв о диагностическом разборе Gulnara MP" loading="lazy">
+              <span class="testimonial-screen-caption">Gulnara MP</span>
+            </div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-17.jpg" alt="Отзыв о диагностическом разборе Zhanna" loading="lazy">
+              <span class="testimonial-screen-caption">Zhanna</span>
+            </div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-18.jpg" alt="Отзыв о диагностическом разборе elenkanogti888" loading="lazy">
+              <span class="testimonial-screen-caption">elenkanogti888</span>
+            </div>
+            <div class="testimonial-screen">
+              <img src="/images/testimonials-gallery/testimonial-22.jpg" alt="Отзыв о диагностическом разборе Ainura Zhumagulova" loading="lazy">
+              <span class="testimonial-screen-caption">Ainura Zhumagulova</span>
+            </div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-23.jpg" alt="Отзыв о диагностическом разборе" loading="lazy"></div>
+            <div class="testimonial-screen"><img src="/images/testimonials-gallery/testimonial-24.jpg" alt="Отзывы о диагностическом разборе" loading="lazy"></div>
+          </div>
+        </div>
+        <button class="testimonials-nav next" type="button" onclick="shiftDiagnosticScreensCarousel(1)" aria-label="Next diagnostic screenshots">&#8594;</button>
+      </div>
+      <div class="testimonials-screens-dots diagnostic-screens-dots" aria-label="Diagnostic screenshots slider dots"></div>
     </div>
   </section>
 
@@ -888,6 +1011,64 @@
       <h2 class="cred-modal-title" id="credModalTitle3">Мастер глубинных разборов</h2>
       <div class="cred-modal-divider"></div>
       <p class="cred-modal-body" id="credModalBody3">Глубинные разборы Алтынай — её самый мощный формат индивидуальной работы. Это не стандартные коучинговые беседы, а точные, структурированные погружения в первопричины застревания человека. Опираясь на экспертизу в области подсознания, работы с квантовым полем и НЛП, она быстро определяет, откуда берутся внутренние блоки клиента — будь то детское программирование, динамика семейной системы или унаследованные родовые сценарии. Её интенсивы работают напрямую с отделением от родительских паттернов, освобождением от чужих жизненных сценариев, восстановлением здоровой иерархии и снятием детских блоков. Клиенты уходят не просто с осознанием — они выходят с принципиально другим внутренним состоянием и чётким путём вперёд. Она работает только с предпринимателями и только после бесплатной консультации, чтобы убедиться в правильном подборе.</p>
+    </div>
+  </div>
+
+  <!-- Method Detail Modal -->
+  <div class="modal-overlay" id="methodDetailModal">
+    <div class="modal cred-modal method-detail-modal">
+      <button class="modal-close" onclick="closeModal('methodDetailModal')">&times;</button>
+      <h2 class="cred-modal-title">Quantum by Altynai — метод подробно</h2>
+      <div class="cred-modal-divider"></div>
+      <div class="cred-modal-body">
+        <p>Главная задача метода — помочь вам создать и проживать ту реальность, которая будет вас удовлетворять, через саморегуляцию (управление своим состоянием).</p>
+        <p>Если сегодня в вашей жизни есть то, что вас не устраивает, мы исследуем не только саму проблему, а находим её внутренний источник: какое состояние, чувства, убеждения и автоматические реакции продолжают влиять на ваши решения и действия.</p>
+        <p>Через расширение сознания вы начинаете видеть то, чего раньше не замечали, понимать причины своих реакций и получать возможность выбирать по-новому. Именно этот процесс я называю трансформацией сознания.</p>
+
+        <p class="services-formula" style="margin-top:24px;">Состояние &rarr; восприятие &rarr; решение &rarr; действие &rarr; результат</p>
+
+        <h3 class="method-modal-subtitle">Три уровня сознания</h3>
+        <p>Это не диагноз и не лестница уровней, а процессы — внутренние процессы расширения сознания. Один и тот же человек может быть взрослым в делах и автоматически реагировать по-детски в отношениях с близкими.</p>
+        <div class="method-modal-levels">
+          <div class="method-modal-level">
+            <h4>01. Детское восприятие — состояние сознания «Со мной происходит»</h4>
+            <p>Много автоматических эмоциональных реакций. Страх, боль, обида, вина, зависимость от одобрения и потребность в безопасности. Человек чаще реагирует на происходящее, чем осознанно выбирает свою реакцию.</p>
+          </div>
+          <div class="method-modal-level">
+            <h4>02. Подростковое восприятие — состояние сознания «Я докажу»</h4>
+            <p>Этап отделения и поиска себя. Протест, сопротивление, борьба, защита границ, желание доказать свою силу и независимость. Энергия уже появляется, но значительная её часть может уходить на борьбу.</p>
+          </div>
+          <div class="method-modal-level">
+            <h4>03. Взрослое восприятие — состояние сознания «Я выбираю»</h4>
+            <p>Появляется больше внутренней опоры и осознанного выбора. Человек способен замечать свои чувства и реакции, регулировать состояние, учитывать реальность и выбирать действия в соответствии со своими ценностями и целями.</p>
+          </div>
+        </div>
+        <p class="method-note">Расширение сознания — это не стремление навсегда остаться в одном «правильном» состоянии. Это способность замечать, из какого состояния я сейчас воспринимаю происходящее, возвращать себе выбор и создавать свою жизнь более осознанно.</p>
+
+        <h3 class="method-modal-subtitle">Как это выглядит в жизни</h3>
+        <div class="method-modal-levels">
+          <div class="method-modal-level">
+            <h4>Финансы</h4>
+            <p>Вы можете сознательно хотеть увеличить доход, но в момент переговоров или называния цены включается страх, вина или желание что-то доказать — и решение принимается не из цели, а из активного внутреннего состояния.</p>
+          </div>
+          <div class="method-modal-level">
+            <h4>Отношения</h4>
+            <p>Вы можете понимать, что хотите близости и уважения, но в конфликте автоматически уходить в обиду, зависимость, нападение или защиту.</p>
+          </div>
+          <div class="method-modal-level">
+            <h4>Самореализация</h4>
+            <p>Вы можете знать, чего хотите, но откладывать действия, бояться проявляться или постоянно бороться с собой.</p>
+          </div>
+        </div>
+
+        <p class="method-positioning">«Я помогаю вам исследовать пять измерений своего опыта, увидеть, из какого уровня сознания вы принимаете решения, и через саморегуляцию возвращать себе больше осознанного выбора — чтобы менять не только внутреннее состояние, но и реальные действия и результаты».</p>
+
+        <p class="method-closing-phrase">Меняется состояние &rarr; меняется восприятие &rarr; меняются решения и действия &rarr; меняются результаты жизни.</p>
+      </div>
+      <div class="method-cta" style="margin-top:28px;">
+        <a href="/test" class="btn btn-gold btn-lg">Пройти тест уровня сознания</a>
+        <button class="btn btn-outline btn-lg" onclick="closeModal('methodDetailModal'); openModal('consultModal')">Записаться на диагностику</button>
+      </div>
     </div>
   </div>
 

@@ -1182,6 +1182,121 @@ input[type="checkbox"]:focus {
   line-height: 1.6;
 }
 
+/* ===== Quantum Method ===== */
+.method-mission {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+  font-size: 1.1rem;
+  line-height: 1.75;
+  color: var(--gray-700, #333);
+}
+.method-level-motto {
+  font-family: var(--font-display);
+  color: var(--accent, #d4a843);
+  font-size: 1.05rem;
+  margin-bottom: 10px !important;
+}
+.method-closing-phrase {
+  max-width: 760px;
+  margin: 40px auto 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--accent, #d4a843);
+  background: rgba(10,8,20,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: var(--radius-lg);
+  padding: 18px 24px;
+}
+.method-cta {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 36px;
+}
+@media (max-width: 560px) {
+  .method-cta { flex-direction: column; align-items: stretch; }
+}
+.method-levels-short {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin: 36px 0;
+}
+.method-level-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(10,8,20,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: var(--radius-lg);
+  padding: 14px 20px;
+}
+.method-level-chip-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+.method-note {
+  max-width: 680px;
+  margin: 28px auto 0;
+  text-align: center;
+  font-style: italic;
+  color: var(--gray-500);
+  line-height: 1.7;
+}
+.method-positioning {
+  max-width: 720px;
+  margin: 48px auto 0;
+  text-align: center;
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--gray-700, #333);
+}
+.method-detail-modal { max-width: 760px; text-align: left; }
+.method-detail-modal .cred-modal-body { text-align: left; }
+.method-modal-subtitle {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin: 32px 0 12px;
+  color: var(--white);
+}
+.method-modal-levels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin: 16px 0;
+}
+.method-modal-level {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212,168,67,0.15);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+.method-modal-level h4 { font-size: 0.95rem; margin-bottom: 8px; }
+.method-modal-level p { font-size: 0.85rem; line-height: 1.6; color: rgba(255,255,255,0.65); }
+@media (max-width: 700px) {
+  .method-modal-levels { grid-template-columns: 1fr; }
+}
+
+/* ── Quantum Method: background image (предоставлено Алтынай) ── */
+.quantum-method {
+  background: url('/images/method-bg.png') center/cover no-repeat;
+}
+.quantum-method .section-label { color: var(--accent); }
+.quantum-method .section-title { color: var(--white); text-shadow: 0 1px 3px rgba(0,0,0,0.8), 0 2px 12px rgba(0,0,0,0.6); }
+.quantum-method .section-subtitle { color: rgba(255,255,255,0.6); text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
+.quantum-method .services-formula { color: rgba(255,255,255,0.55); text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
+.quantum-method .method-mission { color: rgba(255,255,255,0.75); text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
+
 /* ===== Services ===== */
 .services { background: var(--gray-100); }
 .services-grid {
@@ -1891,6 +2006,63 @@ input[type="checkbox"]:focus {
   border-radius: 999px;
   background: var(--primary);
 }
+.testimonials-screens-carousel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+}
+.testimonials-screens-viewport {
+  overflow: hidden;
+}
+.testimonials-screens-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 4 * 20px) / 5);
+  gap: 20px;
+  transition: transform 0.45s ease;
+  will-change: transform;
+}
+.testimonials-screens-carousel.is-static .testimonials-screens-grid {
+  transform: translateX(0) !important;
+}
+.testimonials-screens-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+.testimonial-screen {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+  background: var(--white);
+  transition: var(--transition);
+  aspect-ratio: 3 / 4;
+}
+.testimonial-screen:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-xl);
+}
+.testimonial-screen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #f7f6f3;
+}
+.testimonial-screen-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 12px;
+  background: rgba(17, 17, 17, 0.65);
+  color: var(--white);
+  font-size: 0.8rem;
+  text-align: center;
+}
 .testimonial-card {
   background: var(--white);
   padding: 40px 32px;
@@ -2142,6 +2314,70 @@ body.dark-mode .video-reviews-title {
   margin-left: auto;
   margin-right: auto;
 }
+.cta-content .cta-price {
+  font-family: var(--font-display);
+  color: var(--accent, #d4a843);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  max-width: 600px;
+}
+.cta-content .cta-schedule {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.9rem;
+  margin-bottom: 32px;
+  max-width: 600px;
+}
+.cta-includes {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto 36px;
+  max-width: 520px;
+  text-align: left;
+}
+.cta-includes li {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  padding-left: 28px;
+  position: relative;
+  margin-bottom: 12px;
+}
+.cta-includes li::before {
+  content: '\2713';
+  position: absolute;
+  left: 0;
+  color: var(--accent, #d4a843);
+  font-weight: 700;
+}
+.cta-testimonial {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  max-width: 600px;
+  margin: 0 auto 36px;
+  text-align: left;
+}
+.cta-testimonial .testimonial-quote {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: var(--accent, #d4a843);
+  opacity: 0.5;
+  line-height: 1;
+  margin-bottom: -10px;
+}
+.cta-testimonial p {
+  color: rgba(255,255,255,0.85);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  font-style: italic;
+  margin-bottom: 20px;
+  max-width: none;
+}
+.cta-testimonial .testimonial-author { display: flex; align-items: center; gap: 14px; }
+.cta-testimonial .author-info strong { color: var(--white); }
+.cta-testimonial .author-info span { color: rgba(255,255,255,0.5); font-size: 0.85rem; }
 
 /* ===== Contact ===== */
 .contact { background: var(--white); }
@@ -3085,6 +3321,7 @@ body.dark-mode .phone-input-group .country-code-select {
   .pricing-grid > .pricing-card:nth-child(4):nth-last-child(2),
   .pricing-grid > .pricing-card:nth-child(5):last-child { grid-column: auto; }
   .testimonials-grid { grid-auto-columns: calc((100% - 28px) / 2); }
+  .testimonials-screens-grid { grid-auto-columns: calc((100% - 3 * 20px) / 4); }
   .video-reviews-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
   .contact-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
@@ -3232,6 +3469,7 @@ body.dark-mode .phone-input-group .country-code-select {
     display: none;
   }
   .testimonials-grid { grid-auto-columns: 100%; }
+  .testimonials-screens-grid { grid-auto-columns: calc((100% - 2 * 20px) / 3); }
   .social-links { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; gap: 32px; }
   .modal { padding: 28px 20px; border-radius: var(--radius-lg); }
@@ -3249,6 +3487,9 @@ body.dark-mode .phone-input-group .country-code-select {
   .stat-label { font-size: 0.75rem; }
   .pricing-card { padding: 28px 20px; }
   .individual-card { padding: 28px 20px; }
+  .testimonials-screens-grid { grid-auto-columns: calc((100% - 20px) / 2); }
+  .testimonials-screens-carousel { gap: 10px; }
+  .testimonials-nav { width: 40px; height: 40px; font-size: 1rem; }
 }
 
 
@@ -3689,6 +3930,20 @@ body.dark-mode .booking-status--cancelled { background: #1f2937; color: #9ca3af;
 .testimonials .author-avatar { background: var(--accent); color: var(--space-900); }
 .testimonials .author-info strong { color: var(--white); }
 .testimonials .author-info span { color: rgba(255,255,255,0.55); }
+
+.testimonials .testimonial-screen {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212,168,67,0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.testimonials .testimonial-screen:hover {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+  border-color: rgba(212,168,67,0.4);
+}
+.testimonials .testimonial-screen img { background: rgba(255,255,255,0.02); }
+.testimonials .testimonials-screens-dots .testimonials-dot { background: rgba(255,255,255,0.2); }
+.testimonials .testimonials-screens-dots .testimonials-dot.active { background: var(--accent); }
 
 /* ── Video reviews (inside Testimonials section) ── */
 .testimonials .video-reviews-title { color: var(--white); }
