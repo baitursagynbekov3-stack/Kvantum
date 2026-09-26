@@ -2031,6 +2031,69 @@ function goToScreensSlide(index) {
   updateScreensCarousel();
 }
 
+let diagnosticScreensCarouselIndex = 0;
+
+function getDiagnosticScreensVisibleCount() {
+  const width = window.innerWidth || document.documentElement.clientWidth || 1280;
+  if (width <= 480) return 2;
+  if (width <= 768) return 3;
+  if (width <= 1024) return 4;
+  return 5;
+}
+
+function renderDiagnosticScreensDots(totalSlides) {
+  const dotsRoot = document.querySelector('.diagnostic-screens-dots');
+  if (!dotsRoot) return;
+
+  if (totalSlides <= 1) {
+    dotsRoot.innerHTML = '';
+    return;
+  }
+
+  dotsRoot.innerHTML = Array.from({ length: totalSlides }, (_, index) => (
+    `<button class="testimonials-dot${index === diagnosticScreensCarouselIndex ? ' active' : ''}" type="button" aria-label="Go to diagnostic screenshots slide ${index + 1}" onclick="goToDiagnosticScreensSlide(${index})"></button>`
+  )).join('');
+}
+
+function updateDiagnosticScreensCarousel() {
+  const grid = document.querySelector('.diagnostic-screens-grid');
+  const carousel = grid ? grid.closest('.testimonials-screens-carousel') : null;
+  const cards = grid ? Array.from(grid.querySelectorAll('.testimonial-screen')) : [];
+  const prevBtn = carousel ? carousel.querySelector('.testimonials-nav.prev') : null;
+  const nextBtn = carousel ? carousel.querySelector('.testimonials-nav.next') : null;
+
+  if (!carousel || !grid || !cards.length) return;
+
+  const visibleCount = Math.min(getDiagnosticScreensVisibleCount(), cards.length);
+  const maxIndex = Math.max(0, cards.length - visibleCount);
+  const gapValue = parseFloat(getComputedStyle(grid).gap || getComputedStyle(grid).columnGap || '0') || 0;
+  const cardWidth = cards[0].getBoundingClientRect().width;
+
+  diagnosticScreensCarouselIndex = Math.min(Math.max(diagnosticScreensCarouselIndex, 0), maxIndex);
+  grid.style.transform = `translateX(-${diagnosticScreensCarouselIndex * (cardWidth + gapValue)}px)`;
+  carousel.classList.toggle('is-static', maxIndex === 0);
+
+  if (prevBtn) prevBtn.disabled = diagnosticScreensCarouselIndex === 0;
+  if (nextBtn) nextBtn.disabled = diagnosticScreensCarouselIndex >= maxIndex;
+
+  renderDiagnosticScreensDots(maxIndex + 1);
+}
+
+function initDiagnosticScreensCarousel() {
+  diagnosticScreensCarouselIndex = 0;
+  updateDiagnosticScreensCarousel();
+}
+
+function shiftDiagnosticScreensCarousel(step) {
+  diagnosticScreensCarouselIndex += step;
+  updateDiagnosticScreensCarousel();
+}
+
+function goToDiagnosticScreensSlide(index) {
+  diagnosticScreensCarouselIndex = Number(index) || 0;
+  updateDiagnosticScreensCarousel();
+}
+
 const programDetailsCarouselState = {};
 
 function renderProgramDetailsDots(detailsId, totalSlides) {
@@ -2560,6 +2623,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTurnstileWidgets();
   initTestimonialsCarousel();
   initScreensCarousel();
+  initDiagnosticScreensCarousel();
   openConsultModalFromQuery();
 
   // Trigger hero animations immediately
@@ -2573,6 +2637,7 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('resize', () => {
   updateTestimonialsCarousel();
   updateScreensCarousel();
+  updateDiagnosticScreensCarousel();
   initializeProgramDetailCarousels();
 });
 
@@ -3870,6 +3935,10 @@ var serviceDetails = {
     }
   }
 };
+
+function openMethodDetail() {
+  openModal('methodDetailModal');
+}
 
 function openServiceDetail(num) {
   var lang = (typeof currentLang !== 'undefined' && currentLang === 'en') ? 'en' : 'ru';
