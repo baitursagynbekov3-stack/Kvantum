@@ -1968,6 +1968,69 @@ function goToTestimonialsSlide(index) {
   updateTestimonialsCarousel();
 }
 
+let screensCarouselIndex = 0;
+
+function getScreensVisibleCount() {
+  const width = window.innerWidth || document.documentElement.clientWidth || 1280;
+  if (width <= 480) return 2;
+  if (width <= 768) return 3;
+  if (width <= 1024) return 4;
+  return 5;
+}
+
+function renderScreensDots(totalSlides) {
+  const dotsRoot = document.querySelector('.testimonials-screens-dots');
+  if (!dotsRoot) return;
+
+  if (totalSlides <= 1) {
+    dotsRoot.innerHTML = '';
+    return;
+  }
+
+  dotsRoot.innerHTML = Array.from({ length: totalSlides }, (_, index) => (
+    `<button class="testimonials-dot${index === screensCarouselIndex ? ' active' : ''}" type="button" aria-label="Go to testimonial screenshots slide ${index + 1}" onclick="goToScreensSlide(${index})"></button>`
+  )).join('');
+}
+
+function updateScreensCarousel() {
+  const carousel = document.querySelector('.testimonials-screens-carousel');
+  const grid = document.querySelector('.testimonials-screens-grid');
+  const cards = grid ? Array.from(grid.querySelectorAll('.testimonial-screen')) : [];
+  const prevBtn = carousel ? carousel.querySelector('.testimonials-nav.prev') : null;
+  const nextBtn = carousel ? carousel.querySelector('.testimonials-nav.next') : null;
+
+  if (!carousel || !grid || !cards.length) return;
+
+  const visibleCount = Math.min(getScreensVisibleCount(), cards.length);
+  const maxIndex = Math.max(0, cards.length - visibleCount);
+  const gapValue = parseFloat(getComputedStyle(grid).gap || getComputedStyle(grid).columnGap || '0') || 0;
+  const cardWidth = cards[0].getBoundingClientRect().width;
+
+  screensCarouselIndex = Math.min(Math.max(screensCarouselIndex, 0), maxIndex);
+  grid.style.transform = `translateX(-${screensCarouselIndex * (cardWidth + gapValue)}px)`;
+  carousel.classList.toggle('is-static', maxIndex === 0);
+
+  if (prevBtn) prevBtn.disabled = screensCarouselIndex === 0;
+  if (nextBtn) nextBtn.disabled = screensCarouselIndex >= maxIndex;
+
+  renderScreensDots(maxIndex + 1);
+}
+
+function initScreensCarousel() {
+  screensCarouselIndex = 0;
+  updateScreensCarousel();
+}
+
+function shiftScreensCarousel(step) {
+  screensCarouselIndex += step;
+  updateScreensCarousel();
+}
+
+function goToScreensSlide(index) {
+  screensCarouselIndex = Number(index) || 0;
+  updateScreensCarousel();
+}
+
 const programDetailsCarouselState = {};
 
 function renderProgramDetailsDots(detailsId, totalSlides) {
@@ -2496,6 +2559,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSiteContent();
   initTurnstileWidgets();
   initTestimonialsCarousel();
+  initScreensCarousel();
   openConsultModalFromQuery();
 
   // Trigger hero animations immediately
@@ -2508,6 +2572,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.addEventListener('resize', () => {
   updateTestimonialsCarousel();
+  updateScreensCarousel();
   initializeProgramDetailCarousels();
 });
 
