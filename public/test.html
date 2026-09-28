@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Тест «Кто ты сейчас» — КВАНТУМ</title>
   <meta name="description" content="Пройди тест «Кто ты сейчас» от Алтынай Ашимбековой: узнай свой паттерн подсознательного реагирования в 6 сферах жизни — деньги, отношения, здоровье, реализация, мышление, духовность.">
-  <link rel="canonical" href="https://kvantum.us/test">
+  <link rel="canonical" href="https://quantumbyaltynai.com/test">
   <meta name="robots" content="index,follow">
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./style.css">
@@ -47,6 +47,7 @@
 
     /* Question */
     .quiz-question-text { font-family: var(--font-display); font-size: 1.35rem; line-height: 1.5; color: var(--white); margin-bottom: 24px; }
+    .quiz-first-hint { font-size: 0.85rem; color: var(--accent-light); font-style: italic; margin: -14px 0 18px; }
     .quiz-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
     .quiz-option {
       display: block;
@@ -163,6 +164,7 @@
           <div class="quiz-progress-label" id="quizProgressLabel">Вопрос 1 из 18</div>
         </div>
         <h2 class="quiz-question-text" id="quizQuestionText"></h2>
+        <p class="quiz-first-hint" id="quizFirstHint" hidden>Выберите один из вариантов.</p>
         <div class="quiz-options" id="quizOptions"></div>
         <div class="quiz-nav">
           <button type="button" class="btn btn-outline btn-sm" id="quizBackBtn">Назад</button>

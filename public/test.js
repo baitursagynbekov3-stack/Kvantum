@@ -37,6 +37,7 @@
     els.progressFill = q('quizProgressFill');
     els.progressLabel = q('quizProgressLabel');
     els.questionText = q('quizQuestionText');
+    els.firstHint = q('quizFirstHint');
     els.options = q('quizOptions');
     els.backBtn = q('quizBackBtn');
     els.nextBtn = q('quizNextBtn');
@@ -142,6 +143,7 @@
     els.progressFill.style.width = Math.round((currentIndex / total) * 100) + '%';
     els.progressLabel.textContent = 'Вопрос ' + (currentIndex + 1) + ' из ' + total;
     els.questionText.textContent = item.question;
+    if (els.firstHint) els.firstHint.hidden = currentIndex !== 0;
 
     els.options.innerHTML = '';
     item.options.forEach(function (opt, optIndex) {
