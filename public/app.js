@@ -1230,7 +1230,7 @@ const translations = {
     'nav.testimonials': 'Результаты',
     'nav.contact': 'Контакты',
     'nav.login': 'Войти',
-    'nav.register': 'Регистрация',
+    'nav.register': 'Зарегистрироваться',
     'nav.consult': 'Пройти диагностику',
     'hero.badge': 'Работа с подсознанием и квантовым полем',
     'hero.eyebrow': 'Алтынай Ашимбекова — Корректор реальности',

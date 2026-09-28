@@ -3137,6 +3137,9 @@ if (SERVE_STATIC) {
   app.get('/test', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'test.html'));
   });
+  app.get('/three-levels', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'three-levels.html'));
+  });
   app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
   });
